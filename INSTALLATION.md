@@ -75,7 +75,8 @@ User settings/maps are stored separately from the application. Check Start-up,
 mode, output endpoints and installed map sources before connecting equipment.
 For an isolated receiver test, start in Sensor mode with one UDP output to
 127.0.0.1 and no provider credentials. Output Monitor Freeze pauses only its
-display, not transmission.
+display, not transmission. Follow the [first-start walkthrough](docs/FIRST_START.md)
+for a local simulation and receiver check without Internet or provider keys.
 
 For KVM/autostart use, wait for the graphical desktop session. Window geometry
 recovery helps when a display appears later but cannot repair a graphics-driver

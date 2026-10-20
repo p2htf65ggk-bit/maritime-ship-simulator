@@ -23,10 +23,20 @@ First-party license choices do not replace rights or obligations for Qt,
 QtWebEngine/Chromium, GDAL, GEOS, Python, chart data and other dependencies.
 Complete notices and any required corresponding-source access or library
 replacement instructions must accompany the relevant binary distribution.
+The native build now collects installed runtime-package notices, verifies the
+matching upstream Qt/PySide notice archives, and bundles a platform-specific
+dependency inventory under `THIRD_PARTY_LICENSES`. Missing notices or changed
+Qt/GEOS versions stop the build before a distributable is finalized.
+See [library replacement and source access](LIBRARY_REPLACEMENT.md).
 Unused Qt families are excluded and checked by the build, but that does not
 certify the remaining bundled components. An upstream link alone is not a
 completed compliance review. See
 `THIRD_PARTY_NOTICES.md` and the version-specific publication audit.
+
+The release's separate upstream-source downloads must remain available with
+the native downloads. Verify each platform's inventory against these sources;
+one platform's notice collection is not evidence about another platform's wheels.
+Build-time checks support this review; they are not a legal certification.
 
 ## Support and safety
 

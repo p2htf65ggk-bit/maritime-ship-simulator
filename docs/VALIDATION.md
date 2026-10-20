@@ -51,8 +51,33 @@ target OS. Test startup, relocation, dialogs, offline maps/ENCs, controller loss
 recovery, real serial/network output and provider/GPU interaction. Review the
 exact bundled dependencies, full notices, corresponding-source access and
 library replacement information. Excluding unused Qt modules is not a complete
-binary compliance audit. No new native installer is qualified by this source
-preparation, and no GitHub upload has been performed.
+binary compliance audit. The repository is now prepared privately and a draft
+2.3.0 release exists. Source/docs and library-source assets have been uploaded
+privately; this is not a public release. See the current
+[release handoff](RELEASE_HANDOFF_2.3.0.md) for remaining platform acceptance.
+
+## Packaging follow-up on 20 October 2026
+
+Native builds now collect and checksum full installed dependency notices,
+including transitive frozen Python modules, version-verified Qt/PySide archives
+and Chromium notices. The Qt notice archive is checked against the official
+6.11.0 source hash; referenced attribution license files are retained. Matching
+upstream source archives and library-replacement instructions accompany binaries.
+Unused pytest/Pygments/IPython runtime collection is excluded.
+
+The macOS arm64 unsigned build was rebuilt with these packaging changes. Its
+full deterministic gate, native/offscreen startup, dialogs, S57 fixture import,
+ZIP relocation, ad-hoc bundle integrity and DMG verification pass. It uses the
+existing pinned Python 3.13.7/PySide6 6.11.0 environment. This is not an Intel Mac,
+Windows or Ubuntu qualification or a fresh-dependency-installation claim.
+The final packaging gate passed 954 V2 tests and all 60 Track baseline cases;
+the focused license/handoff/tooling checks passed 46 tests. Upstream Qt/PySide
+notices contain 3,576/33 files with all declared LicenseFile references resolved.
+
+Windows and both supported Ubuntu build groups still need their native build,
+installation and brief operator acceptance. The source/API test suite and Mac
+checks do not establish long-duration, low-RAM or physical-device performance on
+those systems. No independent legal certification is claimed.
 
 Release labels do not certify navigation fitness. S57 portrayal remains
 experimental. Maintenance is best effort, without promised response times.

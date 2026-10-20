@@ -1,6 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 # SPDX-License-Identifier: MPL-2.0
 
+import os
 import sys
 from pathlib import Path
 
@@ -19,7 +20,7 @@ APP_BUNDLE_ID = "de.pascalgollnitz.shipsimulator.v2"
 BUNDLE_VERSION = __version__.split("-", 1)[0].split(".dev", 1)[0]
 
 
-def data_tree(source, target):
+def data_tree(source, target, excluded=()):
     source_path = ROOT / source
     return [
         (str(path), str(Path(target) / path.relative_to(source_path).parent))
@@ -31,6 +32,7 @@ def data_tree(source, target):
             and path.suffix != ".pyc"
             and "__pycache__" not in path.parts
             and ".git" not in path.parts
+            and not any(part in path.relative_to(source_path).parts for part in excluded)
         )
     ]
 
@@ -38,7 +40,8 @@ def data_tree(source, target):
 datas = (
     data_tree("assets", "assets")
     + [(str(ROOT / name), ".") for name in ("LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md", "FREEWARE_LICENSE.txt")]
-    + data_tree("LICENSES", "LICENSES")
+    + data_tree("LICENSES", "LICENSES", excluded=("upstream",))
+    + data_tree(os.environ["MARITIME_SIMULATOR_DEPENDENCY_NOTICES"], "THIRD_PARTY_LICENSES")
     + data_tree("ui/web", "ui/web")
     + data_tree("routes", "routes")
     + data_tree("scenarios", "scenarios")
@@ -75,7 +78,7 @@ a = Analysis(
     hookspath=[str(ROOT / "scripts/pyinstaller-hooks")],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=["PySide6." + module for module in (
+    excludes=["pytest", "_pytest", "pygments", "IPython"] + ["PySide6." + module for module in (
         "QtCharts", "QtDataVisualization", "QtGraphs", "QtGraphsWidgets", "QtQuick3D", "QtVirtualKeyboard",
         "QtQml", "QtQuick", "QtQuickWidgets", "QtWebEngineQuick",
     )],
@@ -86,6 +89,15 @@ a = Analysis(
 from scripts.audit_qt_bundle import filter_build_entries
 a.binaries = filter_build_entries(a.binaries)
 a.datas = filter_build_entries(a.datas)
+from scripts.collect_release_licenses import collect as collect_notices
+notices_path = Path(os.environ["MARITIME_SIMULATOR_DEPENDENCY_NOTICES"])
+collect_notices(ROOT, notices_path, modules=[entry[0] for entry in a.pure])
+known_data = {entry[0] for entry in a.datas}
+for path in notices_path.rglob("*"):
+    if path.is_file():
+        destination = (Path("THIRD_PARTY_LICENSES") / path.relative_to(notices_path)).as_posix()
+        if destination not in known_data:
+            a.datas.append((destination, str(path), "DATA"))
 pyz = PYZ(a.pure)
 
 exe = EXE(

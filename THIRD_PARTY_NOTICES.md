@@ -5,7 +5,9 @@
 The project's original Python/JavaScript/CSS, documentation and other original
 source material are offered under the root MPL 2.0 license by Pascal Göllnitz.
 The exceptions below retain their upstream terms. The source archive does not
-vendor installed Python/Qt/GDAL environments or Google imagery.
+vendor installed Python/Qt/GDAL environments or Google tile datasets. UI
+screenshots in the documentation contain attributed Google/OSM/OpenSeaMap/NOAA
+imagery or chart data, which is not relicensed under MPL.
 
 `FREEWARE_LICENSE.txt` is an exact copy of the root MPL 2.0 license, retained only
 because the existing PyInstaller scripts and application resources use that
@@ -46,7 +48,17 @@ continue to apply. Important upstream references include:
 - [PyInstaller](https://pyinstaller.org/en/stable/license.html), including its
   bootloader exception; [pytest](https://github.com/pytest-dev/pytest/blob/main/LICENSE).
 
-Before distributing compiled packages, include the complete notices required by
+Native builds include `THIRD_PARTY_LICENSES`, with full installed-package
+license files, Python's license, version-verified Qt/PySide upstream license and
+attribution archives (including Chromium), and a platform-specific inventory.
+The build rejects missing notices and mismatched Qt/GEOS versions. Separate
+upstream-source release assets and [library replacement instructions](docs/LIBRARY_REPLACEMENT.md)
+accompany the application. `LICENSES/upstream-sources.json` records their hashes.
+The PMTiles 3.8.1 wheel omits its BSD license file; its official upstream text
+is retained under `LICENSES/python-packages`. The Python PSF fallback is the
+unmodified CPython v3.13.7 `LICENSE`, used only if the build installation omits it.
+
+Before distributing compiled packages, review the complete notices required by
 the exact libraries/frameworks shipped for that OS, including Qt's own bundled
 third-party code. This source inventory is not a binary-license compliance audit
 or a substitute for those full license texts.

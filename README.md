@@ -3,6 +3,7 @@
 [User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.pdf) |
 [User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.docx) |
 [Installation](INSTALLATION.md) |
+[First start](docs/FIRST_START.md) |
 [Releases](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases) |
 [Report a bug](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/issues/new/choose)
 
@@ -35,12 +36,28 @@ Local simulation and local protocol output do not require Internet or a Google
 API key. Download/import detailed charts before going offline. See the
 [offline workflow](docs/v2_user_guide.md) and [provider privacy notes](PRIVACY.md).
 
-<details>
-<summary>Ship Control panel in 2.3.0</summary>
+## In use
 
-![Ship Control with engine telegraph, rudder and bow-thruster demand/response](docs/images/ship-controls.png)
+### Google 3D harbour view
 
-</details>
+![Manhattan harbour in Google 3D with own ship, synthetic AIS and navigation overlays](docs/images/google-3d-harbour.png)
+
+### Track Control with OpenSeaMap
+
+![Track Control with the planned route, own ship and synthetic traffic on OpenSeaMap](docs/images/track-openseamap.png)
+
+### Navigation and propulsion instruments
+
+![Heading, course, speed, engine, bow thruster, rudder, wind, depth and AIS instruments](docs/images/instruments.png)
+
+### Editable synthetic traffic
+
+![Synthetic AIS targets and encounter controls beside an experimental S57 chart](docs/images/synthetic-traffic.png)
+
+These are actual application captures with synthetic demonstration targets,
+not a live traffic picture. Map imagery/data belongs to its indicated providers
+(Google Maps; OpenStreetMap/OpenSeaMap contributors; NOAA), not to the project.
+Provider attribution is retained in the images. S57 portrayal is experimental.
 
 ## Releases and support
 
@@ -142,7 +159,9 @@ Operator settings do not belong in this source tree. Defaults are stored under:
 
 `MARITIME_SIMULATOR_V2_CONFIG_DIR` overrides that location, which is useful for
 an isolated development profile. The source contains no Google/AIS/provider keys,
-saved operator settings, downloaded chart library or Google imagery.
+saved operator settings or downloaded chart library. Documentation screenshots
+show attributed provider imagery; no Google tile dataset or offline imagery
+cache is included.
 
 Local simulation and local output work without Internet. The bundled schematic
 coastline is available offline. Detailed map areas and ENC cells must first be
@@ -159,9 +178,10 @@ tools are included. Repository history begins with the clean 2.3.0 snapshot;
 earlier private development history has not been imported. Application binaries,
 virtual environments and installation-specific integration guides are not part
 of this repository.
-`DEVELOPER_SOURCE_MANIFEST.json` records the exported scope and reviewed
-export-only adjustments; `SOURCE_SHA256SUMS` covers that original archive's
-files at the initial commit. Later documentation changes are recorded in Git.
+`DEVELOPER_SOURCE_MANIFEST.json` records the original exported scope and reviewed
+export-only adjustments. `SOURCE_SHA256SUMS` at the initial commit covers that
+import; the final release archive regenerates the file manifest for its exact
+snapshot. Later source, packaging and documentation changes are recorded in Git.
 See [source provenance](docs/SOURCE_PROVENANCE.md) to verify the baseline.
 
 The MPL 2.0 license is in `LICENSE`. `FREEWARE_LICENSE.txt` contains the same MPL

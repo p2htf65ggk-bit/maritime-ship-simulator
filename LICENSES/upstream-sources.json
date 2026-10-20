@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "release": "2.3.0",
+  "release_url": "https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0",
+  "sources": [
+    {
+      "component": "Qt including WebEngine/Chromium",
+      "version": "6.11.0",
+      "filename": "qt-everywhere-src-6.11.0.tar.xz",
+      "sha256": "acf3b3db04c9e5d0820e8324b097320388954c297cee83d2bd698789234f68a4",
+      "url": "https://download.qt.io/official_releases/qt/6.11/6.11.0/single/qt-everywhere-src-6.11.0.tar.xz"
+    },
+    {
+      "component": "PySide/shiboken",
+      "version": "6.11.0",
+      "filename": "pyside-setup-everywhere-src-6.11.0.tar.xz",
+      "sha256": "48d5c44d7c3ed861055d5491486e6a220ef5006573cae01a5fae3fb69d786336",
+      "url": "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.11.0-src/pyside-setup-everywhere-src-6.11.0.tar.xz"
+    },
+    {
+      "component": "GEOS",
+      "version": "3.14.1",
+      "filename": "geos-3.14.1.tar.bz2",
+      "sha256": "3c20919cda9a505db07b5216baa980bacdaa0702da715b43f176fb07eff7e716",
+      "url": "https://download.osgeo.org/geos/geos-3.14.1.tar.bz2"
+    },
+    {
+      "component": "certifi",
+      "version": "2026.7.22",
+      "filename": "certifi-2026.7.22.tar.gz",
+      "sha256": "741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55",
+      "url": "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz"
+    }
+  ],
+  "notice_origins": {
+    "LICENSES/python-packages/pmtiles-3.8.1.txt": {
+      "url": "https://github.com/protomaps/PMTiles/blob/main/LICENSE",
+      "git_blob_sha1": "ec3d69a55220793cb4b2074ebe202df25f9cb417",
+      "reason": "The 3.8.1 Python wheel and sdist omit the BSD-3-Clause license text."
+    },
+    "LICENSES/Python-PSF.txt": {
+      "url": "https://github.com/python/cpython/blob/v3.13.7/LICENSE",
+      "reason": "Fallback when the build's Python installation does not include its license file."
+    }
+  }
+}

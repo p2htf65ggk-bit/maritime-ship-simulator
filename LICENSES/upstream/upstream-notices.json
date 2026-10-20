@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "sources": {
+    "qt": {
+      "version": "6.11.0",
+      "filename": "qt-everywhere-src-6.11.0.tar.xz",
+      "sha256": "acf3b3db04c9e5d0820e8324b097320388954c297cee83d2bd698789234f68a4",
+      "url": "https://download.qt.io/official_releases/qt/6.11/6.11.0/single/qt-everywhere-src-6.11.0.tar.xz"
+    },
+    "pyside": {
+      "version": "6.11.0",
+      "filename": "pyside-setup-everywhere-src-6.11.0.tar.xz",
+      "sha256": "48d5c44d7c3ed861055d5491486e6a220ef5006573cae01a5fae3fb69d786336",
+      "url": "https://download.qt.io/official_releases/QtForPython/pyside6/PySide6-6.11.0-src/pyside-setup-everywhere-src-6.11.0.tar.xz"
+    }
+  },
+  "archives": {
+    "qt": {
+      "filename": "qt-6.11.0-notices.zip",
+      "sha256": "d1c6f3f07b450a5ee2073882749efcc9d6f7d291e2b73b80cf99102ffbfa80f6",
+      "entries": 3576
+    },
+    "pyside": {
+      "filename": "pyside-6.11.0-notices.zip",
+      "sha256": "56d0747aad3922a5196feab13f12530ceea2143da4eab9aaa3154a8b852e38f5",
+      "entries": 33
+    }
+  }
+}

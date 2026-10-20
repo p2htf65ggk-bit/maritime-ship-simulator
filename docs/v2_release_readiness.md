@@ -1,8 +1,9 @@
 # Source snapshot qualification - 2.3.0
 
-This is an MPL 2.0 developer-source snapshot, not a newly qualified set of binary
-installers. No GitHub upload or repository history is included. Extracted-source
-validation is recorded in the accompanying validation report after it is run.
+This is the MPL 2.0 public-source baseline, with fresh Git history and a private
+draft release. macOS native packaging is prepared; Windows and both Ubuntu
+build groups are still pending. Nothing is public yet. See
+[validation](VALIDATION.md) and the [release handoff](RELEASE_HANDOFF_2.3.0.md).
 
 Required source checks are the credential/hygiene audit, compile/UI smoke, full
 V2 test suite, 60 Track fixture comparisons and performance/retained-memory gates.

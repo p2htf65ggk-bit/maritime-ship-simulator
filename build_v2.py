@@ -283,6 +283,7 @@ def _finalize_macos_bundle() -> None:
 
 def _validate() -> None:
     from scripts.audit_qt_bundle import audit_bundle
+    from scripts.collect_release_licenses import validate as validate_notices
 
     app, resources = _resource_root()
     try:
@@ -298,6 +299,7 @@ def _validate() -> None:
     missing = [str(path) for path in expected if not path.exists()]
     if missing:
         raise SystemExit("V2 build validation failed; missing:\n" + "\n".join(missing))
+    validate_notices(resources / "THIRD_PARTY_LICENSES")
     unwanted = [
         str(path)
         for path in app.rglob("*")
@@ -329,7 +331,11 @@ def main() -> int:
     _prepare_macos_resources()
     for path in (DIST, BUILD):
         _remove_tree(path)
+    from scripts.collect_release_licenses import collect
+    notices = BUILD / "notices"
+    collect(ROOT, notices)
     environment = os.environ.copy()
+    environment["MARITIME_SIMULATOR_DEPENDENCY_NOTICES"] = str(notices.resolve())
     environment.setdefault("PYTHONUTF8", "1")
     environment.setdefault("PYINSTALLER_CONFIG_DIR", str(ROOT / ".pyinstaller-v2"))
     subprocess.run(
@@ -349,8 +355,8 @@ def main() -> int:
         env=environment,
         check=True,
     )
-    _finalize_macos_bundle()
     _validate()
+    _finalize_macos_bundle()
     print(f"Validated {APP_NAME} build in {DIST}")
     return 0
 
