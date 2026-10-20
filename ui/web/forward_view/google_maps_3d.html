@@ -1,0 +1,73 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Maritime Ship Simulator V2.1 - Google 3D Maps</title>
+  <link rel="stylesheet" href="forward_view.css">
+  <link rel="stylesheet" href="cesium_simple_view.css">
+  <link rel="stylesheet" href="google_maps_3d.css">
+</head>
+<body>
+  <div id="skyBackdrop" aria-hidden="true"></div>
+  <div id="cesiumContainer" aria-label="Google 3D navigation view"></div>
+  <canvas id="navigationOverlay" aria-hidden="true"></canvas>
+
+  <nav id="viewBar" class="glass-panel" aria-label="View controls">
+    <button id="forwardButton" class="active" title="Reset to the defined forward view">FWD</button>
+    <button id="orbitButton" title="Open the oblique 3D overview">3D</button>
+    <button id="topButton" title="Open the vertical satellite view">TOP</button>
+    <span class="bar-separator"></span>
+    <button id="hudButton" class="active" title="Show or hide navigation data">HUD</button>
+    <button id="namesButton" class="active" title="Show or hide AIS names on the map">NAMES</button>
+    <button id="controlsButton" class="active" title="Show or hide camera sliders">CAM</button>
+  </nav>
+
+  <section id="hud" class="glass-panel">
+    <div class="hud-title">OWN SHIP</div>
+    <div class="readout-grid">
+      <span>HDG</span><strong id="hdgValue">000.0°</strong>
+      <span>COG</span><strong id="cogValue">000.0°</strong>
+      <span>SOG</span><strong id="sogValue">+0.0 kn</strong>
+      <span>ROT</span><strong id="rotValue">+0.0°/min</strong>
+      <span>POS</span><strong id="positionValue">--</strong>
+    </div>
+  </section>
+
+  <section id="compass" class="glass-panel" aria-label="Heading tape">
+    <div id="compassTape"></div>
+    <div class="lubber-line"></div>
+  </section>
+
+  <section id="targets" class="glass-panel">
+    <div class="hud-title"><span>AIS TARGETS</span><strong id="targetCount">0</strong></div>
+    <div id="targetRows"></div>
+  </section>
+
+  <section id="cameraControls" class="glass-panel" aria-label="Camera sliders">
+    <label><span>BEARING</span><output id="bearingValue">+000°</output>
+      <input id="bearingControl" type="range" min="-180" max="180" step="1" value="0">
+    </label>
+    <label><span>ELEVATION</span><output id="elevationValue">12°</output>
+      <input id="elevationControl" type="range" min="5" max="88" step="1" value="12">
+    </label>
+    <label><span>RANGE</span><output id="rangeValue">--</output>
+      <input id="rangeControl" type="range" min="0" max="1000" step="1" value="350">
+    </label>
+  </section>
+
+  <div id="gestureHint" class="glass-panel">
+    Drag: look · Right/Shift-drag or two-finger swipe: pan · Wheel, pinch or both mouse buttons + vertical drag: zoom · Double-click: reset
+  </div>
+  <div id="tileLoadIndicator" class="glass-panel hidden" role="status" aria-live="polite">Loading 3D scenery…</div>
+  <div id="geoStatus" class="glass-panel" role="status" aria-live="polite">
+    <button id="apiSettingsButton" type="button" title="Set the Google API key and 3D provider">API KEY</button>
+    <span id="statusText">Waiting for Google 3D Maps</span>
+  </div>
+  <div id="fatalError" class="hidden"></div>
+
+  <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <script src="google_maps_3d.js"></script>
+</body>
+</html>

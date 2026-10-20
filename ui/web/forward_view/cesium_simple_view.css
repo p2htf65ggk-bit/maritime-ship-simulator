@@ -1,0 +1,321 @@
+/* SPDX-License-Identifier: MPL-2.0 */
+:root {
+  color-scheme: dark;
+  font-family: Arial, "DejaVu Sans", sans-serif;
+  font-size: 13px;
+  color: #e7f1f5;
+  background: #09131a;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #09131a;
+}
+
+.glass-panel {
+  position: absolute;
+  z-index: 5;
+  border: 1px solid #496976;
+  border-radius: 5px;
+  color: #e7f1f5;
+}
+
+.hidden { display: none !important; }
+
+button {
+  height: 28px;
+  min-width: 38px;
+  border: 1px solid #4a6571;
+  border-radius: 4px;
+  background: #17262f;
+  color: #d8e8ee;
+  font: 700 11px Arial, sans-serif;
+  cursor: pointer;
+}
+
+button:hover { border-color: #69b5d0; }
+button.active { background: #176a86; border-color: #7cd8f2; color: #fff; }
+
+.hud-title {
+  margin-bottom: 7px;
+  color: #8fabb7;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.readout-grid {
+  display: grid;
+  gap: 4px 8px;
+  align-items: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout-grid span { color: #94aeb9; font-size: 10px; }
+.readout-grid strong { text-align: right; font-weight: 600; white-space: nowrap; }
+
+#compassTape {
+  position: relative;
+  height: 100%;
+  color: #dcecf2;
+  font-variant-numeric: tabular-nums;
+}
+
+#compassTape span {
+  position: absolute;
+  bottom: 4px;
+  width: 1px;
+  height: 8px;
+  border-left: 1px solid rgba(220, 236, 242, 0.54);
+}
+
+#compassTape span.medium { height: 12px; }
+#compassTape span.major {
+  width: 30px;
+  height: 17px;
+  padding-top: 0;
+  border-left-color: #f0f7f9;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 10px;
+  text-align: center;
+  text-indent: -15px;
+}
+#compassTape span.major::before { content: attr(data-label); }
+.lubber-line { position: absolute; left: 50%; bottom: 0; height: 12px; border-left: 2px solid #ffcf55; }
+
+.target-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 48px;
+  gap: 6px;
+  padding: 3px 0;
+  border-top: 1px solid rgba(147, 189, 205, 0.16);
+  font-variant-numeric: tabular-nums;
+}
+.target-row:first-child { border-top: 0; }
+.target-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.target-row .range, .target-row .bearing { text-align: right; color: #acd2df; }
+
+#fatalError {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  padding: 15vh 10vw;
+  background: #111a20;
+  color: #ffb0a7;
+  font: 16px/1.5 Arial, sans-serif;
+  white-space: pre-wrap;
+}
+
+#skyBackdrop {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #5da6c7 0%, #8cc9df 45%, #d4e9ec 78%, #edf4f2 100%);
+}
+
+#skyCloudCanvas {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+#cesiumContainer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+  background: #75bfdc;
+}
+
+#cesiumContainer.dragging { cursor: grabbing; }
+
+#navigationOverlay {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.glass-panel {
+  background: #0b1c25;
+  border-color: #496976;
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+#viewBar {
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+}
+
+#viewBar button { min-width: 42px; }
+.bar-separator { width: 1px; height: 20px; margin: 0 2px; background: rgba(150, 190, 204, 0.35); }
+
+#hud { top: 58px; left: 10px; width: 205px; padding: 9px 10px; }
+#hud .readout-grid { grid-template-columns: 38px minmax(0, 1fr); }
+#positionValue { font-size: 11px; }
+
+#compass {
+  top: 58px;
+  left: 50%;
+  width: min(520px, 48vw);
+  height: 42px;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+#targets {
+  top: 58px;
+  right: 10px;
+  width: 248px;
+  max-height: 230px;
+  padding: 9px 10px;
+  overflow: hidden;
+}
+
+#targets .hud-title { display: flex; justify-content: space-between; }
+#targetCount { color: #8ed9ac; font-variant-numeric: tabular-nums; }
+
+#cameraControls {
+  left: 50%;
+  bottom: 42px;
+  width: min(560px, calc(100vw - 32px));
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 8px 10px;
+  transform: translateX(-50%);
+}
+
+#cameraControls label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px;
+  gap: 3px 6px;
+  color: #9bb4be;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+#cameraControls input {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0;
+  accent-color: #4bc6e4;
+}
+
+#cameraControls output {
+  color: #e4f1f5;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#gestureHint {
+  right: 10px;
+  bottom: 10px;
+  max-width: calc(100vw - 430px);
+  padding: 5px 8px;
+  color: #9eb5be;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#geoStatus {
+  /* Provider settings must remain reachable above the fatal-error screen. */
+  z-index: 31;
+  left: 10px;
+  top: 10px;
+  bottom: auto;
+  display: flex;
+  align-items: center;
+  width: auto;
+  padding: 4px;
+  color: #adc4cd;
+  font-size: 9px;
+}
+
+#apiSettingsButton {
+  flex: 0 0 auto;
+  min-width: 0;
+  padding: 2px 5px;
+  border-color: rgba(100, 202, 229, 0.6);
+  color: #c7eaf3;
+  font-size: 8px;
+  letter-spacing: 0;
+}
+
+#statusText {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+#tileLoadIndicator {
+  left: 50%;
+  top: 112px;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  color: #d7eaf0;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+#tileLoadIndicator::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #53c8e8;
+}
+
+.cesium-viewer-bottom { left: auto; right: 8px; bottom: 82px; max-width: min(55vw, 760px); }
+.cesium-credit-logoContainer,
+.cesium-credit-textContainer { padding: 2px 4px; border-radius: 3px; background: #0b1c25; }
+
+@media (max-width: 980px) {
+  #targets { width: 210px; }
+  #compass { width: 42vw; }
+  #gestureHint { display: none; }
+}
+
+@media (max-width: 720px) {
+  #targets { display: none; }
+  #hud { width: 180px; }
+  #compass { top: 220px; left: 10px; width: 180px; transform: none; }
+  #cameraControls { grid-template-columns: repeat(3, minmax(115px, 1fr)); }
+  #geoStatus {
+    top: 58px;
+    right: 10px;
+    left: auto;
+    width: auto;
+  }
+}

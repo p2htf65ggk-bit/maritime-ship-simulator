@@ -1,0 +1,39 @@
+name: Bug report
+description: Report a reproducible simulator problem without secrets.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Best-effort maintenance. Never upload credentials, configuration exports or private captures."
+  - type: input
+    id: version
+    attributes:
+      label: Application version and package filename
+      placeholder: "2.2.1, Ubuntu 22.04 DEB"
+    validations:
+      required: true
+  - type: textarea
+    id: system
+    attributes:
+      label: System and setup
+      description: "OS, CPU architecture, RAM, display scaling, mode/map source, 3D/VM and transport."
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction, expected and observed result
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted evidence
+      description: "Short log/screenshot; for performance include running time and monitor readings."
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: "I have removed credentials and private configuration from this report and its attachments."
+          required: true

@@ -1,0 +1,2689 @@
+{
+  "AAM": {
+    "fields": [
+      {
+        "description": "Arrival circle entered",
+        "name": "arrival_circle",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Perpendicular passed at waypoint",
+        "name": "perpendicular",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Arrival circle radius",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "radius",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Waypoint identifier",
+        "name": "waypoint",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Waypoint Arrival Alarm"
+  },
+  "ACK": {
+    "fields": [
+      {
+        "description": "Alarm identifier",
+        "maximum": 999999,
+        "minimum": 0,
+        "name": "alarm_id",
+        "type": "int"
+      }
+    ],
+    "name": "Acknowledge Alarm"
+  },
+  "ALR": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Alarm identifier",
+        "maximum": 999999,
+        "minimum": 0,
+        "name": "alarm_id",
+        "type": "int"
+      },
+      {
+        "description": "Alarm condition active/inactive",
+        "name": "condition",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Alarm acknowledged state",
+        "name": "ack_state",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Alarm description",
+        "name": "description",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Set Alarm State"
+  },
+  "APB": {
+    "fields": [
+      {
+        "description": "Warning status",
+        "name": "status1",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Cycle lock status",
+        "name": "status2",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Magnitude of cross-track error",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "xte",
+        "type": "float"
+      },
+      {
+        "description": "Direction to steer",
+        "name": "steer",
+        "type": "choice:L,R"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "xte_unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Arrival circle entered",
+        "name": "arrival",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Perpendicular passed",
+        "name": "perpendicular",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Bearing origin to destination",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing_origin",
+        "type": "float"
+      },
+      {
+        "description": "Bearing reference",
+        "name": "bearing_origin_ref",
+        "type": "choice:T,M"
+      },
+      {
+        "description": "Destination waypoint ID",
+        "name": "dest",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Bearing present position to destination",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing_present",
+        "type": "float"
+      },
+      {
+        "description": "Bearing reference",
+        "name": "bearing_present_ref",
+        "type": "choice:T,M"
+      },
+      {
+        "description": "Heading to steer",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading_to_steer",
+        "type": "float"
+      },
+      {
+        "description": "Heading reference",
+        "name": "heading_ref",
+        "type": "choice:T,M"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,M,S,N"
+      }
+    ],
+    "name": "Autopilot Sentence B"
+  },
+  "BOD": {
+    "fields": [
+      {
+        "description": "Bearing from origin to destination true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing_true",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "true_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Bearing magnetic, optional",
+        "name": "bearing_mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "mag_ref",
+        "type": "choice:M"
+      },
+      {
+        "description": "Destination waypoint ID",
+        "name": "dest",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Origin waypoint ID",
+        "name": "origin",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Bearing Origin to Destination"
+  },
+  "BWC": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Waypoint latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Waypoint longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Bearing true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing_true",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "true_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Bearing magnetic, optional",
+        "name": "bearing_mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "mag_ref",
+        "type": "choice:M"
+      },
+      {
+        "description": "Distance to waypoint",
+        "maximum": 9999.9,
+        "minimum": 0,
+        "name": "distance",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Waypoint ID",
+        "name": "waypoint",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,N"
+      }
+    ],
+    "name": "Bearing and Distance to Waypoint"
+  },
+  "BWR": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Waypoint latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Waypoint longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Bearing true rhumb line",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing_true",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "true_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Bearing magnetic, optional",
+        "name": "bearing_mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "mag_ref",
+        "type": "choice:M"
+      },
+      {
+        "description": "Distance to waypoint",
+        "maximum": 9999.9,
+        "minimum": 0,
+        "name": "distance",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Waypoint ID",
+        "name": "waypoint",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,N"
+      }
+    ],
+    "name": "Bearing and Distance to Waypoint Rhumb Line"
+  },
+  "DBT": {
+    "fields": [
+      {
+        "description": "Depth below transducer feet",
+        "maximum": 1200,
+        "minimum": 0,
+        "name": "feet",
+        "type": "float"
+      },
+      {
+        "description": "Feet",
+        "name": "f",
+        "type": "choice:f"
+      },
+      {
+        "description": "Depth below transducer metres",
+        "maximum": 400,
+        "minimum": 0,
+        "name": "meters",
+        "type": "float"
+      },
+      {
+        "description": "Metres",
+        "name": "m",
+        "type": "choice:M"
+      },
+      {
+        "description": "Depth fathoms",
+        "maximum": 220,
+        "minimum": 0,
+        "name": "fathoms",
+        "type": "float"
+      },
+      {
+        "description": "Fathoms",
+        "name": "fa",
+        "type": "choice:F"
+      }
+    ],
+    "name": "Depth Below Transducer"
+  },
+  "DPT": {
+    "fields": [
+      {
+        "description": "Depth below transducer metres",
+        "maximum": 400,
+        "minimum": 0,
+        "name": "depth",
+        "type": "float"
+      },
+      {
+        "description": "Offset from transducer metres",
+        "maximum": 20,
+        "minimum": -20,
+        "name": "offset",
+        "type": "float"
+      }
+    ],
+    "name": "Depth"
+  },
+  "GBS": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Expected latitude error (m)",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "err_lat",
+        "type": "float"
+      },
+      {
+        "description": "Expected longitude error (m)",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "err_lon",
+        "type": "float"
+      },
+      {
+        "description": "Expected altitude error (m)",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "err_alt",
+        "type": "float"
+      },
+      {
+        "description": "Failed satellite ID",
+        "maximum": 255,
+        "minimum": 1,
+        "name": "failed_sat",
+        "type": "int_optional"
+      },
+      {
+        "description": "Probability of missed detection",
+        "maximum": 1,
+        "minimum": 0,
+        "name": "probability",
+        "type": "float_optional"
+      },
+      {
+        "description": "Estimate of bias on failed satellite",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "bias",
+        "type": "float_optional"
+      },
+      {
+        "description": "Std dev of bias estimate",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "stddev",
+        "type": "float_optional"
+      },
+      {
+        "description": "GNSS system identifier",
+        "name": "system",
+        "type": "choice:,1,2,3,4"
+      },
+      {
+        "description": "Signal identifier",
+        "name": "signal",
+        "type": "choice:,1,2,3,4,5,6"
+      }
+    ],
+    "name": "GNSS Satellite Fault Detection"
+  },
+  "GGA": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "GNSS quality indicator",
+        "name": "quality",
+        "type": "choice:0,1,2,4,5"
+      },
+      {
+        "description": "Satellites used",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "sats",
+        "type": "int"
+      },
+      {
+        "description": "Horizontal dilution of precision",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "hdop",
+        "type": "float"
+      },
+      {
+        "description": "Antenna altitude metres",
+        "maximum": 10000,
+        "minimum": -100,
+        "name": "alt",
+        "type": "float"
+      },
+      {
+        "description": "Metres",
+        "name": "alt_unit",
+        "type": "choice:M"
+      },
+      {
+        "description": "Geoidal separation metres",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "sep",
+        "type": "float"
+      },
+      {
+        "description": "Metres",
+        "name": "sep_unit",
+        "type": "choice:M"
+      },
+      {
+        "description": "DGPS age",
+        "name": "age",
+        "type": "text_optional"
+      },
+      {
+        "description": "DGPS station ID",
+        "name": "station",
+        "type": "text_optional"
+      }
+    ],
+    "name": "GNSS Fix Data"
+  },
+  "GLL": {
+    "fields": [
+      {
+        "description": "Latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,M,S,N"
+      }
+    ],
+    "name": "Geographic Position"
+  },
+  "GNS": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Mode indicator characters",
+        "name": "mode",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Satellites used",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "sats",
+        "type": "int"
+      },
+      {
+        "description": "HDOP",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "hdop",
+        "type": "float"
+      },
+      {
+        "description": "Altitude metres",
+        "maximum": 10000,
+        "minimum": -100,
+        "name": "alt",
+        "type": "float"
+      },
+      {
+        "description": "Geoidal separation metres",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "sep",
+        "type": "float"
+      },
+      {
+        "description": "Differential age",
+        "name": "age",
+        "type": "text_optional"
+      },
+      {
+        "description": "Reference station ID",
+        "name": "station",
+        "type": "text_optional"
+      },
+      {
+        "description": "Navigational status",
+        "name": "nav_status",
+        "type": "choice:S,C,U,V"
+      }
+    ],
+    "name": "GNSS Fix Data"
+  },
+  "GRS": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "Residual mode",
+        "name": "mode",
+        "type": "choice:0,1"
+      },
+      {
+        "description": "Range residual satellite 1",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r1",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 2",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r2",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 3",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r3",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 4",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r4",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 5",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r5",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 6",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r6",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 7",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r7",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 8",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r8",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 9",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r9",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 10",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r10",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 11",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r11",
+        "type": "float_optional"
+      },
+      {
+        "description": "Range residual satellite 12",
+        "maximum": 999.9,
+        "minimum": -999.9,
+        "name": "r12",
+        "type": "float_optional"
+      },
+      {
+        "description": "GNSS system identifier",
+        "name": "system",
+        "type": "choice:,1,2,3,4"
+      },
+      {
+        "description": "Signal identifier",
+        "name": "signal",
+        "type": "choice:,1,2,3,4,5,6"
+      }
+    ],
+    "name": "GNSS Range Residuals"
+  },
+  "GSA": {
+    "fields": [
+      {
+        "description": "Manual or automatic 2D/3D selection",
+        "name": "mode1",
+        "type": "choice:M,A"
+      },
+      {
+        "description": "Fix type",
+        "name": "mode2",
+        "type": "choice:1,2,3"
+      },
+      {
+        "description": "Satellite used for fix channel 1",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv1",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 2",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv2",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 3",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv3",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 4",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv4",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 5",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv5",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 6",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv6",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 7",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv7",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 8",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv8",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 9",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv9",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 10",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv10",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 11",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv11",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite used for fix channel 12",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "sv12",
+        "type": "int_optional"
+      },
+      {
+        "description": "Position dilution of precision",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "pdop",
+        "type": "float"
+      },
+      {
+        "description": "Horizontal dilution of precision",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "hdop",
+        "type": "float"
+      },
+      {
+        "description": "Vertical dilution of precision",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "vdop",
+        "type": "float"
+      },
+      {
+        "description": "GNSS system identifier",
+        "name": "system",
+        "type": "choice:,1,2,3,4"
+      }
+    ],
+    "name": "GNSS DOP and Active Satellites"
+  },
+  "GST": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "RMS pseudorange residual",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "rms",
+        "type": "float"
+      },
+      {
+        "description": "Error ellipse semi-major std dev",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "std_major",
+        "type": "float"
+      },
+      {
+        "description": "Error ellipse semi-minor std dev",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "std_minor",
+        "type": "float"
+      },
+      {
+        "description": "Error ellipse orientation degrees",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "orient",
+        "type": "float"
+      },
+      {
+        "description": "Latitude std dev",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "std_lat",
+        "type": "float"
+      },
+      {
+        "description": "Longitude std dev",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "std_lon",
+        "type": "float"
+      },
+      {
+        "description": "Altitude std dev",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "std_alt",
+        "type": "float"
+      },
+      {
+        "description": "GNSS system identifier",
+        "name": "system",
+        "type": "choice:,1,2,3,4"
+      },
+      {
+        "description": "Signal identifier",
+        "name": "signal",
+        "type": "choice:,1,2,3,4,5,6"
+      }
+    ],
+    "name": "GNSS Pseudorange Error Statistics"
+  },
+  "GSV": {
+    "fields": [
+      {
+        "description": "Number of GSV sentences in this cycle",
+        "maximum": 9,
+        "minimum": 1,
+        "name": "total_msgs",
+        "type": "int"
+      },
+      {
+        "description": "Current GSV sentence number",
+        "maximum": 9,
+        "minimum": 1,
+        "name": "msg_num",
+        "type": "int"
+      },
+      {
+        "description": "Total satellites in view",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "sats_in_view",
+        "type": "int"
+      },
+      {
+        "description": "Satellite PRN number 1",
+        "maximum": 255,
+        "minimum": 1,
+        "name": "sv_prn_1",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite elevation 1",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "elev_1",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite azimuth 1",
+        "maximum": 359,
+        "minimum": 0,
+        "name": "az_1",
+        "type": "int_optional"
+      },
+      {
+        "description": "Signal-to-noise 1",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "snr_1",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite PRN number 2",
+        "maximum": 255,
+        "minimum": 1,
+        "name": "sv_prn_2",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite elevation 2",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "elev_2",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite azimuth 2",
+        "maximum": 359,
+        "minimum": 0,
+        "name": "az_2",
+        "type": "int_optional"
+      },
+      {
+        "description": "Signal-to-noise 2",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "snr_2",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite PRN number 3",
+        "maximum": 255,
+        "minimum": 1,
+        "name": "sv_prn_3",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite elevation 3",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "elev_3",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite azimuth 3",
+        "maximum": 359,
+        "minimum": 0,
+        "name": "az_3",
+        "type": "int_optional"
+      },
+      {
+        "description": "Signal-to-noise 3",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "snr_3",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite PRN number 4",
+        "maximum": 255,
+        "minimum": 1,
+        "name": "sv_prn_4",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite elevation 4",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "elev_4",
+        "type": "int_optional"
+      },
+      {
+        "description": "Satellite azimuth 4",
+        "maximum": 359,
+        "minimum": 0,
+        "name": "az_4",
+        "type": "int_optional"
+      },
+      {
+        "description": "Signal-to-noise 4",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "snr_4",
+        "type": "int_optional"
+      },
+      {
+        "description": "GNSS system identifier",
+        "name": "system",
+        "type": "choice:,1,2,3,4"
+      }
+    ],
+    "name": "Satellites in View"
+  },
+  "HBT": {
+    "fields": [
+      {
+        "description": "Configured repeat interval seconds",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "interval",
+        "type": "float"
+      },
+      {
+        "description": "Seconds",
+        "name": "unit",
+        "type": "choice:s"
+      },
+      {
+        "description": "Equipment status",
+        "name": "status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Sequential sentence identifier",
+        "maximum": 999,
+        "minimum": 0,
+        "name": "sequence",
+        "type": "int"
+      }
+    ],
+    "name": "Heartbeat Supervision"
+  },
+  "HDG": {
+    "fields": [
+      {
+        "description": "Heading magnetic in degrees",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading",
+        "type": "float"
+      },
+      {
+        "description": "Deviation degrees, optional",
+        "name": "deviation",
+        "type": "text_optional"
+      },
+      {
+        "description": "Deviation direction, optional",
+        "name": "dev_dir",
+        "type": "choice:,E,W"
+      },
+      {
+        "description": "Variation degrees, optional",
+        "name": "variation",
+        "type": "text_optional"
+      },
+      {
+        "description": "Variation direction, optional",
+        "name": "var_dir",
+        "type": "choice:,E,W"
+      }
+    ],
+    "name": "Heading, Deviation and Variation"
+  },
+  "HDM": {
+    "fields": [
+      {
+        "description": "Heading magnetic in degrees",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading",
+        "type": "float"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "ref",
+        "type": "choice:M"
+      }
+    ],
+    "name": "Heading Magnetic"
+  },
+  "HDT": {
+    "fields": [
+      {
+        "description": "Heading true in degrees",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "ref",
+        "type": "choice:T"
+      }
+    ],
+    "name": "Heading True"
+  },
+  "HRM": {
+    "fields": [
+      {
+        "description": "Actual heel angle in degrees (+ starboard, - port)",
+        "maximum": 90,
+        "minimum": -90,
+        "name": "heel_angle",
+        "type": "float"
+      },
+      {
+        "description": "Roll period in seconds",
+        "maximum": 120,
+        "minimum": 0,
+        "name": "roll_period",
+        "type": "float"
+      },
+      {
+        "description": "Roll amplitude port side (degrees)",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "roll_amplitude_port",
+        "type": "float"
+      },
+      {
+        "description": "Roll amplitude starboard side (degrees)",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "roll_amplitude_starboard",
+        "type": "float"
+      },
+      {
+        "description": "Data status",
+        "name": "status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Roll peak hold value port side (degrees)",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "roll_peak_port",
+        "type": "float_optional"
+      },
+      {
+        "description": "Roll peak hold value starboard side (degrees)",
+        "maximum": 90,
+        "minimum": 0,
+        "name": "roll_peak_starboard",
+        "type": "float_optional"
+      },
+      {
+        "description": "Peak hold reset UTC time (hhmmss)",
+        "name": "reset_time",
+        "type": "time_hhmmss_optional"
+      },
+      {
+        "description": "Peak hold reset day (01-31)",
+        "maximum": 31,
+        "minimum": 1,
+        "name": "reset_day",
+        "type": "int_optional"
+      },
+      {
+        "description": "Peak hold reset month (01-12)",
+        "maximum": 12,
+        "minimum": 1,
+        "name": "reset_month",
+        "type": "int_optional"
+      },
+      {
+        "description": "Peak hold reset year (yyyy)",
+        "maximum": 2200,
+        "minimum": 1900,
+        "name": "reset_year",
+        "type": "int_optional"
+      },
+      {
+        "description": "Heel angle alert threshold",
+        "maximum": 90,
+        "minimum": -90,
+        "name": "heel_alert_threshold",
+        "type": "float_optional"
+      },
+      {
+        "description": "R report, C configuration command",
+        "name": "sentence_status",
+        "type": "choice:R,C"
+      }
+    ],
+    "name": "Heel Angle"
+  },
+  "HSC": {
+    "fields": [
+      {
+        "description": "Commanded heading true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading_true",
+        "type": "float"
+      },
+      {
+        "description": "True heading reference",
+        "name": "true_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Commanded heading magnetic",
+        "name": "heading_mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic heading reference",
+        "name": "mag_ref",
+        "type": "choice:M"
+      },
+      {
+        "description": "Sentence status flag",
+        "name": "sentence_status",
+        "type": "choice:R,C"
+      }
+    ],
+    "name": "Heading Steering Command"
+  },
+  "HSS": {
+    "fields": [
+      {
+        "description": "Hull stress measurement point identifier",
+        "name": "measurement_point_id",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Measured hull stress value",
+        "maximum": 99999,
+        "minimum": -99999,
+        "name": "measurement_value",
+        "type": "float"
+      },
+      {
+        "description": "Data status",
+        "name": "status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Hull Stress Surveillance Systems"
+  },
+  "MDA": {
+    "fields": [
+      {
+        "description": "Barometric pressure inches",
+        "maximum": 40,
+        "minimum": 0,
+        "name": "bar_in",
+        "type": "float"
+      },
+      {
+        "description": "Inches of mercury",
+        "name": "in_unit",
+        "type": "choice:I"
+      },
+      {
+        "description": "Barometric pressure bar",
+        "maximum": 2,
+        "minimum": 0,
+        "name": "bar_bar",
+        "type": "float"
+      },
+      {
+        "description": "Bar",
+        "name": "bar_unit",
+        "type": "choice:B"
+      },
+      {
+        "description": "Air temperature Celsius",
+        "maximum": 80,
+        "minimum": -50,
+        "name": "air_c",
+        "type": "float"
+      },
+      {
+        "description": "Celsius",
+        "name": "air_unit",
+        "type": "choice:C"
+      },
+      {
+        "description": "Water temperature Celsius",
+        "maximum": 50,
+        "minimum": -10,
+        "name": "water_c",
+        "type": "float"
+      },
+      {
+        "description": "Celsius",
+        "name": "water_unit",
+        "type": "choice:C"
+      },
+      {
+        "description": "Absolute humidity percent",
+        "maximum": 100,
+        "minimum": 0,
+        "name": "humidity_abs",
+        "type": "float"
+      },
+      {
+        "description": "Relative humidity percent",
+        "maximum": 100,
+        "minimum": 0,
+        "name": "humidity_rel",
+        "type": "float"
+      },
+      {
+        "description": "Dew point Celsius",
+        "maximum": 80,
+        "minimum": -50,
+        "name": "dew",
+        "type": "float"
+      },
+      {
+        "description": "Celsius",
+        "name": "dew_unit",
+        "type": "choice:C"
+      },
+      {
+        "description": "Wind direction true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "wind_dir_t",
+        "type": "float"
+      },
+      {
+        "description": "True",
+        "name": "t",
+        "type": "choice:T"
+      },
+      {
+        "description": "Wind direction magnetic",
+        "name": "wind_dir_m",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic",
+        "name": "m",
+        "type": "choice:M"
+      },
+      {
+        "description": "Wind speed knots",
+        "maximum": 120,
+        "minimum": 0,
+        "name": "wind_kn",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "n",
+        "type": "choice:N"
+      },
+      {
+        "description": "Wind speed m/s",
+        "name": "wind_ms",
+        "type": "text_optional"
+      },
+      {
+        "description": "Metres per second",
+        "name": "ms",
+        "type": "choice:M"
+      }
+    ],
+    "name": "Meteorological Composite"
+  },
+  "MSK": {
+    "fields": [
+      {
+        "description": "Beacon frequency in kHz",
+        "maximum": 325.0,
+        "minimum": 283.5,
+        "name": "beacon_frequency",
+        "type": "float"
+      },
+      {
+        "description": "Auto/manual frequency",
+        "name": "frequency_mode",
+        "type": "choice:A,M"
+      },
+      {
+        "description": "Beacon bit rate",
+        "name": "beacon_bit_rate",
+        "type": "choice:25,50,100,200"
+      },
+      {
+        "description": "Auto/manual bit rate",
+        "name": "bit_rate_mode",
+        "type": "choice:A,M"
+      },
+      {
+        "description": "Interval for sending MSS status in seconds",
+        "name": "status_interval",
+        "type": "text_optional"
+      },
+      {
+        "description": "Channel number",
+        "name": "channel",
+        "type": "choice:,1"
+      },
+      {
+        "description": "Sentence status flag",
+        "name": "sentence_status",
+        "type": "choice:R,C"
+      }
+    ],
+    "name": "MSK Receiver Interface"
+  },
+  "MSS": {
+    "fields": [
+      {
+        "description": "Signal strength dB/1 uV/m",
+        "name": "signal_strength",
+        "type": "float"
+      },
+      {
+        "description": "Signal-to-noise ratio dB",
+        "name": "snr",
+        "type": "float"
+      },
+      {
+        "description": "Beacon frequency in kHz",
+        "maximum": 325.0,
+        "minimum": 283.5,
+        "name": "beacon_frequency",
+        "type": "float"
+      },
+      {
+        "description": "Beacon bit rate",
+        "name": "bit_rate",
+        "type": "choice:25,50,100,200"
+      },
+      {
+        "description": "Channel number (1 or blank)",
+        "name": "channel",
+        "type": "choice:,1"
+      }
+    ],
+    "name": "MSK Receiver Signal Status"
+  },
+  "MTW": {
+    "fields": [
+      {
+        "description": "Water temperature Celsius",
+        "maximum": 50,
+        "minimum": -10,
+        "name": "temperature",
+        "type": "float"
+      },
+      {
+        "description": "Celsius",
+        "name": "unit",
+        "type": "choice:C"
+      }
+    ],
+    "name": "Water Temperature"
+  },
+  "MWD": {
+    "fields": [
+      {
+        "description": "Wind direction true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "true",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "t",
+        "type": "choice:T"
+      },
+      {
+        "description": "Wind direction magnetic, optional",
+        "name": "mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "m",
+        "type": "choice:M"
+      },
+      {
+        "description": "Wind speed knots",
+        "maximum": 120,
+        "minimum": 0,
+        "name": "kn",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "n",
+        "type": "choice:N"
+      },
+      {
+        "description": "Wind speed m/s, optional",
+        "name": "ms",
+        "type": "text_optional"
+      },
+      {
+        "description": "Metres per second",
+        "name": "msu",
+        "type": "choice:M"
+      }
+    ],
+    "name": "Wind Direction and Speed"
+  },
+  "MWV": {
+    "fields": [
+      {
+        "description": "Wind angle or direction",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "angle",
+        "type": "float"
+      },
+      {
+        "description": "Relative or true",
+        "name": "ref",
+        "type": "choice:R,T"
+      },
+      {
+        "description": "Wind speed",
+        "maximum": 120,
+        "minimum": 0,
+        "name": "speed",
+        "type": "float"
+      },
+      {
+        "description": "Speed unit",
+        "name": "unit",
+        "type": "choice:N,M,K"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Wind Speed and Angle"
+  },
+  "NAK": {
+    "fields": [
+      {
+        "description": "Talker ID of sentence causing NAK",
+        "name": "talker",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Affected sentence formatter",
+        "name": "formatter",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Unique identifier",
+        "name": "unique_id",
+        "type": "text_optional"
+      },
+      {
+        "description": "Reason code",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "reason_code",
+        "type": "int"
+      },
+      {
+        "description": "Descriptive text",
+        "name": "description",
+        "type": "text_optional"
+      }
+    ],
+    "name": "Negative Acknowledgement"
+  },
+  "OSD": {
+    "fields": [
+      {
+        "description": "Heading true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading",
+        "type": "float"
+      },
+      {
+        "description": "Heading status",
+        "name": "heading_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Vessel course true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "course",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "course_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Vessel speed",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "speed",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "speed_ref",
+        "type": "choice:N"
+      },
+      {
+        "description": "Current set true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "set",
+        "type": "float"
+      },
+      {
+        "description": "Current drift knots",
+        "maximum": 20,
+        "minimum": 0,
+        "name": "drift",
+        "type": "float"
+      }
+    ],
+    "name": "Own Ship Data"
+  },
+  "PRC": {
+    "fields": [
+      {
+        "description": "Lever demand position; -100 full astern, 0 stop, +100 full ahead",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "lever",
+        "type": "float"
+      },
+      {
+        "description": "Lever demand status",
+        "name": "lever_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "RPM demand value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "rpm",
+        "type": "float"
+      },
+      {
+        "description": "P percent, R RPM, V invalid",
+        "name": "rpm_mode",
+        "type": "choice:P,R,V"
+      },
+      {
+        "description": "Pitch demand value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "pitch",
+        "type": "float"
+      },
+      {
+        "description": "P percent, D degrees, V invalid",
+        "name": "pitch_mode",
+        "type": "choice:P,D,V"
+      },
+      {
+        "description": "Operating location",
+        "name": "location",
+        "type": "choice:,B,P,S,C,E,W"
+      },
+      {
+        "description": "Engine or propeller shaft number; 0 means single/centre-line",
+        "maximum": 9,
+        "minimum": 0,
+        "name": "shaft",
+        "type": "int"
+      }
+    ],
+    "name": "Propulsion Remote Control Status"
+  },
+  "RMC": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Speed over ground knots",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "sog",
+        "type": "float"
+      },
+      {
+        "description": "Course over ground degrees true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "cog",
+        "type": "float"
+      },
+      {
+        "description": "UTC date ddmmyy",
+        "name": "date",
+        "type": "date"
+      },
+      {
+        "description": "Magnetic variation",
+        "name": "mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Variation direction",
+        "name": "mag_ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,F,M,N,P,R,S"
+      },
+      {
+        "description": "Navigational status",
+        "name": "nav_status",
+        "type": "choice:S,C,U,V"
+      }
+    ],
+    "name": "Recommended Minimum Navigation Data"
+  },
+  "ROR": {
+    "fields": [
+      {
+        "description": "Starboard or single rudder order angle; negative turns bow to port",
+        "maximum": 45,
+        "minimum": -45,
+        "name": "stbd_order",
+        "type": "float"
+      },
+      {
+        "description": "Starboard/single rudder order status",
+        "name": "stbd_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Port rudder order angle, optional",
+        "name": "port_order",
+        "type": "text_optional"
+      },
+      {
+        "description": "Port rudder status, optional",
+        "name": "port_status",
+        "type": "choice:,A,V"
+      },
+      {
+        "description": "Operating location: bridge, port wing, starboard wing, engine control room, local or wing unspecified",
+        "name": "location",
+        "type": "choice:,B,P,S,C,E,W"
+      },
+      {
+        "description": "Bow/other rudder order angle, optional",
+        "name": "bow_order",
+        "type": "text_optional"
+      },
+      {
+        "description": "Bow/other rudder status, optional",
+        "name": "bow_status",
+        "type": "choice:,A,V"
+      },
+      {
+        "description": "Centre rudder order angle, optional",
+        "name": "center_order",
+        "type": "text_optional"
+      },
+      {
+        "description": "Centre rudder status, optional",
+        "name": "center_status",
+        "type": "choice:,A,V"
+      }
+    ],
+    "name": "Rudder Order Status"
+  },
+  "ROT": {
+    "fields": [
+      {
+        "description": "Rate of turn in degrees per minute",
+        "maximum": 720,
+        "minimum": -720,
+        "name": "rot",
+        "type": "float"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Rate of Turn"
+  },
+  "RPM": {
+    "fields": [
+      {
+        "description": "S shaft, E engine",
+        "name": "source",
+        "type": "choice:S,E"
+      },
+      {
+        "description": "Engine or shaft number",
+        "maximum": 9,
+        "minimum": 0,
+        "name": "number",
+        "type": "int"
+      },
+      {
+        "description": "Revolutions per minute",
+        "maximum": 9999,
+        "minimum": -9999,
+        "name": "speed",
+        "type": "float"
+      },
+      {
+        "description": "Propeller pitch percent",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "pitch",
+        "type": "float"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Revolutions"
+  },
+  "RSA": {
+    "fields": [
+      {
+        "description": "Starboard rudder angle",
+        "maximum": 45,
+        "minimum": -45,
+        "name": "starboard",
+        "type": "float"
+      },
+      {
+        "description": "Starboard status",
+        "name": "stbd_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Port rudder angle",
+        "maximum": 45,
+        "minimum": -45,
+        "name": "port",
+        "type": "float"
+      },
+      {
+        "description": "Port status",
+        "name": "port_status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Rudder Sensor Angle"
+  },
+  "THS": {
+    "fields": [
+      {
+        "description": "True heading in degrees",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "heading",
+        "type": "float"
+      },
+      {
+        "description": "A valid, V invalid",
+        "name": "status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "True Heading and Status"
+  },
+  "TLL": {
+    "fields": [
+      {
+        "description": "Target number",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "target",
+        "type": "int"
+      },
+      {
+        "description": "Target latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Target longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Target name",
+        "name": "name",
+        "type": "nmea_text"
+      },
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "L lost, Q query, T tracking",
+        "name": "status",
+        "type": "choice:L,Q,T"
+      }
+    ],
+    "name": "Target Latitude and Longitude"
+  },
+  "TRC": {
+    "fields": [
+      {
+        "description": "Thruster number; odd bow, even stern, negative for port",
+        "maximum": 9,
+        "minimum": -9,
+        "name": "number",
+        "type": "int"
+      },
+      {
+        "description": "RPM demand value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "rpm_demand",
+        "type": "float"
+      },
+      {
+        "description": "P percent, R RPM, V invalid",
+        "name": "rpm_mode",
+        "type": "choice:P,R,V"
+      },
+      {
+        "description": "Pitch demand value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "pitch_demand",
+        "type": "float"
+      },
+      {
+        "description": "P percent, D degrees, V invalid",
+        "name": "pitch_mode",
+        "type": "choice:P,D,V"
+      },
+      {
+        "description": "Azimuth demand degrees true",
+        "maximum": 360,
+        "minimum": 0,
+        "name": "azimuth",
+        "type": "float"
+      },
+      {
+        "description": "Operating location",
+        "name": "location",
+        "type": "choice:B,P,S,C,E,W"
+      },
+      {
+        "description": "R status report, C configuration command",
+        "name": "status",
+        "type": "choice:R,C"
+      }
+    ],
+    "name": "Thruster Control Data"
+  },
+  "TRD": {
+    "fields": [
+      {
+        "description": "Thruster number; odd bow, even stern, negative for port",
+        "maximum": 9,
+        "minimum": -9,
+        "name": "number",
+        "type": "int"
+      },
+      {
+        "description": "RPM response value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "rpm_response",
+        "type": "float"
+      },
+      {
+        "description": "P percent, R RPM, V invalid",
+        "name": "rpm_mode",
+        "type": "choice:P,R,V"
+      },
+      {
+        "description": "Pitch response value",
+        "maximum": 100,
+        "minimum": -100,
+        "name": "pitch_response",
+        "type": "float"
+      },
+      {
+        "description": "P percent, D degrees, V invalid",
+        "name": "pitch_mode",
+        "type": "choice:P,D,V"
+      },
+      {
+        "description": "Azimuth response degrees true",
+        "maximum": 360,
+        "minimum": 0,
+        "name": "azimuth_response",
+        "type": "float"
+      }
+    ],
+    "name": "Thruster Response Data"
+  },
+  "TTM": {
+    "fields": [
+      {
+        "description": "Target number",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "target",
+        "type": "int"
+      },
+      {
+        "description": "Target distance",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "distance",
+        "type": "float"
+      },
+      {
+        "description": "Bearing from own ship",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "bearing",
+        "type": "float"
+      },
+      {
+        "description": "True or relative bearing",
+        "name": "bearing_ref",
+        "type": "choice:T,R"
+      },
+      {
+        "description": "Target speed",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "speed",
+        "type": "float"
+      },
+      {
+        "description": "Target course",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "course",
+        "type": "float"
+      },
+      {
+        "description": "True or relative course",
+        "name": "course_ref",
+        "type": "choice:T,R"
+      },
+      {
+        "description": "Distance of closest point of approach",
+        "maximum": 999.9,
+        "minimum": 0,
+        "name": "cpa",
+        "type": "float"
+      },
+      {
+        "description": "Time to CPA minutes",
+        "maximum": 999,
+        "minimum": -999,
+        "name": "tcpa",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Target name",
+        "name": "name",
+        "type": "nmea_text"
+      },
+      {
+        "description": "Target status",
+        "name": "status",
+        "type": "choice:L,Q,T"
+      },
+      {
+        "description": "Reference target flag",
+        "name": "reference",
+        "type": "choice:R,T"
+      }
+    ],
+    "name": "Tracked Target Message"
+  },
+  "TXT": {
+    "fields": [
+      {
+        "description": "Total number of text messages",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "total",
+        "type": "int"
+      },
+      {
+        "description": "Message number",
+        "maximum": 99,
+        "minimum": 1,
+        "name": "number",
+        "type": "int"
+      },
+      {
+        "description": "Text identifier",
+        "maximum": 99,
+        "minimum": 0,
+        "name": "identifier",
+        "type": "int"
+      },
+      {
+        "description": "Text message without comma, $, ! or *",
+        "name": "text",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Text Transmission"
+  },
+  "VBW": {
+    "fields": [
+      {
+        "description": "Longitudinal water speed knots",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "long_water",
+        "type": "float"
+      },
+      {
+        "description": "Transverse water speed knots",
+        "maximum": 20,
+        "minimum": -20,
+        "name": "trans_water",
+        "type": "float"
+      },
+      {
+        "description": "Water speed status",
+        "name": "water_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Longitudinal ground speed knots",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "long_ground",
+        "type": "float"
+      },
+      {
+        "description": "Transverse ground speed knots",
+        "maximum": 20,
+        "minimum": -20,
+        "name": "trans_ground",
+        "type": "float"
+      },
+      {
+        "description": "Ground speed status",
+        "name": "ground_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Stern transverse water speed knots",
+        "maximum": 20,
+        "minimum": -20,
+        "name": "stern_water",
+        "type": "float"
+      },
+      {
+        "description": "Stern water speed status",
+        "name": "stern_water_status",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Stern transverse ground speed knots",
+        "maximum": 20,
+        "minimum": -20,
+        "name": "stern_ground",
+        "type": "float"
+      },
+      {
+        "description": "Stern ground speed status",
+        "name": "stern_ground_status",
+        "type": "choice:A,V"
+      }
+    ],
+    "name": "Dual Ground/Water Speed"
+  },
+  "VDR": {
+    "fields": [
+      {
+        "description": "Direction of current set true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "set_true",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "true_ref",
+        "type": "choice:T"
+      },
+      {
+        "description": "Direction of current set magnetic, optional",
+        "name": "set_mag",
+        "type": "text_optional"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "mag_ref",
+        "type": "choice:M"
+      },
+      {
+        "description": "Current drift speed",
+        "maximum": 20,
+        "minimum": 0,
+        "name": "drift",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "unit",
+        "type": "choice:N"
+      }
+    ],
+    "name": "Set and Drift"
+  },
+  "VHW": {
+    "fields": [
+      {
+        "description": "Heading true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "hdg_t",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "t",
+        "type": "choice:T"
+      },
+      {
+        "description": "Heading magnetic",
+        "name": "hdg_m",
+        "type": "text"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "m",
+        "type": "choice:M"
+      },
+      {
+        "description": "Speed through water knots",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "stw_n",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "n",
+        "type": "choice:N"
+      },
+      {
+        "description": "Speed through water km/h",
+        "maximum": 120,
+        "minimum": -20,
+        "name": "stw_k",
+        "type": "float"
+      },
+      {
+        "description": "km/h",
+        "name": "k",
+        "type": "choice:K"
+      }
+    ],
+    "name": "Water Speed and Heading"
+  },
+  "VLW": {
+    "fields": [
+      {
+        "description": "Total cumulative water distance NM",
+        "maximum": 999999,
+        "minimum": 0,
+        "name": "total",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "total_unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Trip water distance NM",
+        "maximum": 999999,
+        "minimum": 0,
+        "name": "trip",
+        "type": "float"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "trip_unit",
+        "type": "choice:N"
+      }
+    ],
+    "name": "Distance Travelled Through Water"
+  },
+  "VTG": {
+    "fields": [
+      {
+        "description": "Course over ground true",
+        "maximum": 359.9,
+        "minimum": 0,
+        "name": "cog_t",
+        "type": "float"
+      },
+      {
+        "description": "True reference",
+        "name": "t",
+        "type": "choice:T"
+      },
+      {
+        "description": "Course magnetic, optional",
+        "name": "cog_m",
+        "type": "text"
+      },
+      {
+        "description": "Magnetic reference",
+        "name": "m",
+        "type": "choice:M"
+      },
+      {
+        "description": "Speed over ground knots",
+        "maximum": 60,
+        "minimum": -10,
+        "name": "sog_n",
+        "type": "float"
+      },
+      {
+        "description": "Knots",
+        "name": "n",
+        "type": "choice:N"
+      },
+      {
+        "description": "Speed over ground km/h",
+        "maximum": 120,
+        "minimum": -20,
+        "name": "sog_k",
+        "type": "float"
+      },
+      {
+        "description": "km/h",
+        "name": "k",
+        "type": "choice:K"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,M,S,N"
+      }
+    ],
+    "name": "Course and Speed Over Ground"
+  },
+  "WPL": {
+    "fields": [
+      {
+        "description": "Waypoint latitude ddmm.mmmm",
+        "name": "lat",
+        "type": "lat"
+      },
+      {
+        "description": "North/South",
+        "name": "ns",
+        "type": "choice:N,S"
+      },
+      {
+        "description": "Waypoint longitude dddmm.mmmm",
+        "name": "lon",
+        "type": "lon"
+      },
+      {
+        "description": "East/West",
+        "name": "ew",
+        "type": "choice:E,W"
+      },
+      {
+        "description": "Waypoint identifier",
+        "name": "waypoint",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Waypoint Location"
+  },
+  "XDR": {
+    "fields": [
+      {
+        "description": "Transducer type",
+        "name": "type",
+        "type": "choice:A,B,C,D,E,F,G,H,I,L,N,P,R,S,T,U,V,W"
+      },
+      {
+        "description": "Measurement value",
+        "maximum": 99999,
+        "minimum": -99999,
+        "name": "value",
+        "type": "float"
+      },
+      {
+        "description": "Units of measure",
+        "name": "unit",
+        "type": "text_optional"
+      },
+      {
+        "description": "Transducer name",
+        "name": "name",
+        "type": "nmea_text"
+      }
+    ],
+    "name": "Transducer Measurements"
+  },
+  "XTE": {
+    "fields": [
+      {
+        "description": "General warning flag",
+        "name": "status1",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Cycle lock flag",
+        "name": "status2",
+        "type": "choice:A,V"
+      },
+      {
+        "description": "Magnitude of cross-track error",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "xte",
+        "type": "float"
+      },
+      {
+        "description": "Direction to steer",
+        "name": "steer",
+        "type": "choice:L,R"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      },
+      {
+        "description": "Mode indicator",
+        "name": "mode",
+        "type": "choice:A,D,E,M,S,N"
+      }
+    ],
+    "name": "Cross Track Error"
+  },
+  "XTR": {
+    "fields": [
+      {
+        "description": "Magnitude of dead-reckoning cross-track error",
+        "maximum": 99.9,
+        "minimum": 0,
+        "name": "xte",
+        "type": "float"
+      },
+      {
+        "description": "Direction to steer",
+        "name": "steer",
+        "type": "choice:L,R"
+      },
+      {
+        "description": "Nautical miles",
+        "name": "unit",
+        "type": "choice:N"
+      }
+    ],
+    "name": "Cross-track Error, Dead Reckoning"
+  },
+  "ZDA": {
+    "fields": [
+      {
+        "description": "UTC time",
+        "name": "time",
+        "type": "time"
+      },
+      {
+        "description": "UTC day",
+        "maximum": 31,
+        "minimum": 1,
+        "name": "day",
+        "type": "float"
+      },
+      {
+        "description": "UTC month",
+        "maximum": 12,
+        "minimum": 1,
+        "name": "month",
+        "type": "float"
+      },
+      {
+        "description": "UTC year",
+        "maximum": 2100,
+        "minimum": 1970,
+        "name": "year",
+        "type": "float"
+      },
+      {
+        "description": "Local zone hours",
+        "maximum": 13,
+        "minimum": -13,
+        "name": "zone_h",
+        "type": "float"
+      },
+      {
+        "description": "Local zone minutes",
+        "maximum": 59,
+        "minimum": 0,
+        "name": "zone_m",
+        "type": "float"
+      }
+    ],
+    "name": "Time and Date"
+  }
+}

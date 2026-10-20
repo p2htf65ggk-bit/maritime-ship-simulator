@@ -1,0 +1,424 @@
+<?xml version='1.0' encoding='utf-8'?>
+<route xmlns="http://www.cirm.org/RTZ/1/0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://www.cirm.org/RTZ/1/0/rtz.xsd">
+  <routeInfo routeName="USNYC-USBAL" />
+  <waypoints>
+    <defaultWaypoint radius="1">
+      <leg starboardXTD="0.0539956803455724" portsideXTD="0.0539956803455724" geometryType="Loxodrome" speedMin="8" speedMax="12" />
+    </defaultWaypoint>
+    <waypoint id="1" radius="0">
+      <position lat="40.643759" lon="-74.056721" />
+    </waypoint>
+    <waypoint id="2" radius="0.795774715459476">
+      <position lat="40.612015" lon="-74.046692" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="3" radius="0.795774715459476">
+      <position lat="40.582275" lon="-74.035591" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="4" radius="0.795774715459476">
+      <position lat="40.53828" lon="-74.023438" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="5" radius="0.795774715459476">
+      <position lat="40.525932" lon="-74.011925" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="6" radius="0.795774715459476">
+      <position lat="40.471298" lon="-73.870811" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="7" radius="0.795774715459476">
+      <position lat="40.451405" lon="-73.83075" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="8" radius="0.795774715459476">
+      <position lat="40.441532" lon="-73.823952" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="9" radius="0.795774715459476">
+      <position lat="40.398674" lon="-73.815262" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="10" radius="0.795774715459476">
+      <position lat="40.344715" lon="-73.812103" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="11" radius="0.795774715459476">
+      <position lat="39.764305" lon="-73.870125" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="12" radius="0.795774715459476">
+      <position lat="39.04969" lon="-73.998131" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="13" radius="0.795774715459476">
+      <position lat="37.736099" lon="-74.397301" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" geometryType="Orthodrome" />
+    </waypoint>
+    <waypoint id="14" radius="0.795774715459476">
+      <position lat="37.196838" lon="-75.172211" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="15" radius="0.795774715459476">
+      <position lat="36.968452" lon="-75.774017" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="16" radius="0.795774715459476">
+      <position lat="36.962532" lon="-75.804405" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="17" radius="0.795774715459476">
+      <position lat="36.944386" lon="-75.872314" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="18" radius="0.795774715459476">
+      <position lat="36.94442" lon="-75.917397" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="19" radius="0.795774715459476">
+      <position lat="36.945694" lon="-75.940399" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="20" radius="0.795774715459476">
+      <position lat="36.951473" lon="-75.977249" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="21" radius="0.795774715459476">
+      <position lat="36.962234" lon="-75.990509" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="22" radius="0.795774715459476">
+      <position lat="36.986813" lon="-76.006111" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="23" radius="0.795774715459476">
+      <position lat="37.017067" lon="-76.046188" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="24" radius="0.795774715459476">
+      <position lat="37.064583" lon="-76.091805" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="25" radius="0.795774715459476">
+      <position lat="37.139191" lon="-76.144867" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="26" radius="0.795774715459476">
+      <position lat="37.145405" lon="-76.148323" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="27" radius="0.795774715459476">
+      <position lat="37.151955" lon="-76.150116" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="28" radius="0.795774715459476">
+      <position lat="37.17997" lon="-76.154305" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="29" radius="0.795774715459476">
+      <position lat="37.186081" lon="-76.154526" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="30" radius="0.795774715459476">
+      <position lat="37.192097" lon="-76.152878" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="31" radius="0.795774715459476">
+      <position lat="37.29332" lon="-76.113388" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="32" radius="0.795774715459476">
+      <position lat="37.318996" lon="-76.098938" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="33" radius="0.795774715459476">
+      <position lat="37.332726" lon="-76.086411" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="34" radius="0.795774715459476">
+      <position lat="37.363686" lon="-76.076996" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="35" radius="0.795774715459476">
+      <position lat="37.388443" lon="-76.076286" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="36" radius="0.795774715459476">
+      <position lat="37.410511" lon="-76.082123" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="37" radius="0.795774715459476">
+      <position lat="37.432884" lon="-76.089653" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="38" radius="0.795774715459476">
+      <position lat="37.500629" lon="-76.045448" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="39" radius="0.795774715459476">
+      <position lat="37.523785" lon="-76.041748" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="40" radius="0.795774715459476">
+      <position lat="37.550163" lon="-76.039803" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="41" radius="0.795774715459476">
+      <position lat="37.567478" lon="-76.04454" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="42" radius="0.795774715459476">
+      <position lat="37.631226" lon="-76.108429" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="43" radius="0.795774715459476">
+      <position lat="37.673592" lon="-76.155663" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="44" radius="0.795774715459476">
+      <position lat="37.703484" lon="-76.186913" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="45" radius="0.795774715459476">
+      <position lat="37.742195" lon="-76.188728" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="46" radius="0.795774715459476">
+      <position lat="37.813251" lon="-76.173935" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="47" radius="0.795774715459476">
+      <position lat="37.854004" lon="-76.151276" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="48" radius="0.795774715459476">
+      <position lat="37.879421" lon="-76.143654" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="49" radius="0.795774715459476">
+      <position lat="37.904163" lon="-76.151558" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="50" radius="0.795774715459476">
+      <position lat="37.930378" lon="-76.161163" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="51" radius="0.795774715459476">
+      <position lat="37.961769" lon="-76.190247" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="52" radius="0.795774715459476">
+      <position lat="38.045071" lon="-76.213219" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="53" radius="0.795774715459476">
+      <position lat="38.206627" lon="-76.236191" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="54" radius="0.795774715459476">
+      <position lat="38.254349" lon="-76.267868" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="55" radius="0.795774715459476">
+      <position lat="38.284767" lon="-76.285049" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="56" radius="0.795774715459476">
+      <position lat="38.312916" lon="-76.299446" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="57" radius="0.795774715459476">
+      <position lat="38.385811" lon="-76.332291" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="58" radius="0.795774715459476">
+      <position lat="38.403179" lon="-76.342354" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="59" radius="0.795774715459476">
+      <position lat="38.463512" lon="-76.375259" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="60" radius="0.795774715459476">
+      <position lat="38.533157" lon="-76.426666" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="61" radius="0.795774715459476">
+      <position lat="38.553669" lon="-76.43647" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="62" radius="0.795774715459476">
+      <position lat="38.577621" lon="-76.435883" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="63" radius="0.795774715459476">
+      <position lat="38.652882" lon="-76.410179" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="64" radius="0.795774715459476">
+      <position lat="38.700817" lon="-76.431084" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="65" radius="0.795774715459476">
+      <position lat="38.755203" lon="-76.429131" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="66" radius="0.795774715459476">
+      <position lat="38.793457" lon="-76.419785" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="67" radius="0.795774715459476">
+      <position lat="38.834423" lon="-76.401352" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="68" radius="0.795774715459476">
+      <position lat="38.933453" lon="-76.387787" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="69" radius="0.795774715459476">
+      <position lat="38.972172" lon="-76.391937" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="70" radius="0.795774715459476">
+      <position lat="38.982563" lon="-76.386475" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="71" radius="0.795774715459476">
+      <position lat="38.994053" lon="-76.38324" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="72" radius="0.795774715459476">
+      <position lat="39.000877" lon="-76.378876" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="73" radius="0.795774715459476">
+      <position lat="39.017307" lon="-76.374512" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="74" radius="0.795774715459476">
+      <position lat="39.069862" lon="-76.394341" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="75" radius="0.795774715459476">
+      <position lat="39.116623" lon="-76.394424" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="76" radius="0.795774715459476">
+      <position lat="39.126064" lon="-76.396729" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="77" radius="0.795774715459476">
+      <position lat="39.141674" lon="-76.406364" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="78" radius="0.795774715459476">
+      <position lat="39.170639" lon="-76.428146" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="79" radius="0.795774715459476">
+      <position lat="39.181221" lon="-76.443932" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="80" radius="0.795774715459476">
+      <position lat="39.199482" lon="-76.504524" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="81" radius="0.795774715459476">
+      <position lat="39.207325" lon="-76.518036" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+    <waypoint id="82" radius="0">
+      <position lat="39.225307" lon="-76.536957" />
+      <leg starboardXTD="0.1" portsideXTD="0.1" />
+    </waypoint>
+  </waypoints>
+  <schedules>
+    <schedule id="1" name="Default Schedule">
+      <manual>
+        <sheduleElement waypointId="1" etd="2026-10-12T06:38:57.4654992+00:00" />
+        <sheduleElement waypointId="2" speed="10" />
+        <sheduleElement waypointId="3" speed="10" />
+        <sheduleElement waypointId="4" speed="10" />
+        <sheduleElement waypointId="5" speed="10" />
+        <sheduleElement waypointId="6" speed="10" />
+        <sheduleElement waypointId="7" speed="10" />
+        <sheduleElement waypointId="8" speed="10" />
+        <sheduleElement waypointId="9" speed="10" />
+        <sheduleElement waypointId="10" speed="10" />
+        <sheduleElement waypointId="11" speed="10" />
+        <sheduleElement waypointId="12" speed="10" />
+        <sheduleElement waypointId="13" speed="10" />
+        <sheduleElement waypointId="14" speed="10" />
+        <sheduleElement waypointId="15" speed="10" />
+        <sheduleElement waypointId="16" speed="10" />
+        <sheduleElement waypointId="17" speed="10" />
+        <sheduleElement waypointId="18" speed="10" />
+        <sheduleElement waypointId="19" speed="10" />
+        <sheduleElement waypointId="20" speed="10" />
+        <sheduleElement waypointId="21" speed="10" />
+        <sheduleElement waypointId="22" speed="10" />
+        <sheduleElement waypointId="23" speed="10" />
+        <sheduleElement waypointId="24" speed="10" />
+        <sheduleElement waypointId="25" speed="10" />
+        <sheduleElement waypointId="26" speed="10" />
+        <sheduleElement waypointId="27" speed="10" />
+        <sheduleElement waypointId="28" speed="10" />
+        <sheduleElement waypointId="29" speed="10" />
+        <sheduleElement waypointId="30" speed="10" />
+        <sheduleElement waypointId="31" speed="10" />
+        <sheduleElement waypointId="32" speed="10" />
+        <sheduleElement waypointId="33" speed="10" />
+        <sheduleElement waypointId="34" speed="10" />
+        <sheduleElement waypointId="35" speed="10" />
+        <sheduleElement waypointId="36" speed="10" />
+        <sheduleElement waypointId="37" speed="10" />
+        <sheduleElement waypointId="38" speed="10" />
+        <sheduleElement waypointId="39" speed="10" />
+        <sheduleElement waypointId="40" speed="10" />
+        <sheduleElement waypointId="41" speed="10" />
+        <sheduleElement waypointId="42" speed="10" />
+        <sheduleElement waypointId="43" speed="10" />
+        <sheduleElement waypointId="44" speed="10" />
+        <sheduleElement waypointId="45" speed="10" />
+        <sheduleElement waypointId="46" speed="10" />
+        <sheduleElement waypointId="47" speed="10" />
+        <sheduleElement waypointId="48" speed="10" />
+        <sheduleElement waypointId="49" speed="10" />
+        <sheduleElement waypointId="50" speed="10" />
+        <sheduleElement waypointId="51" speed="10" />
+        <sheduleElement waypointId="52" speed="10" />
+        <sheduleElement waypointId="53" speed="10" />
+        <sheduleElement waypointId="54" speed="10" />
+        <sheduleElement waypointId="55" speed="10" />
+        <sheduleElement waypointId="56" speed="10" />
+        <sheduleElement waypointId="57" speed="10" />
+        <sheduleElement waypointId="58" speed="10" />
+        <sheduleElement waypointId="59" speed="10" />
+        <sheduleElement waypointId="60" speed="10" />
+        <sheduleElement waypointId="61" speed="10" />
+        <sheduleElement waypointId="62" speed="10" />
+        <sheduleElement waypointId="63" speed="10" />
+        <sheduleElement waypointId="64" speed="10" />
+        <sheduleElement waypointId="65" speed="10" />
+        <sheduleElement waypointId="66" speed="10" />
+        <sheduleElement waypointId="67" speed="10" />
+        <sheduleElement waypointId="68" speed="10" />
+        <sheduleElement waypointId="69" speed="10" />
+        <sheduleElement waypointId="70" speed="10" />
+        <sheduleElement waypointId="71" speed="10" />
+        <sheduleElement waypointId="72" speed="10" />
+        <sheduleElement waypointId="73" speed="10" />
+        <sheduleElement waypointId="74" speed="10" />
+        <sheduleElement waypointId="75" speed="10" />
+        <sheduleElement waypointId="76" speed="10" />
+        <sheduleElement waypointId="77" speed="10" />
+        <sheduleElement waypointId="78" speed="10" />
+        <sheduleElement waypointId="79" speed="10" />
+        <sheduleElement waypointId="80" speed="10" />
+        <sheduleElement waypointId="81" speed="10" />
+        <sheduleElement waypointId="82" speed="10" />
+      </manual>
+    </schedule>
+  </schedules>
+</route>

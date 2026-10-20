@@ -1,0 +1,11 @@
+Maritime Ship Simulator V2
+Copyright (c) 2026 Pascal Göllnitz
+
+Original project source material, except material identified in
+THIRD_PARTY_NOTICES.md or carrying its own upstream notice, is subject to the
+Mozilla Public License, v. 2.0. A copy is provided in LICENSE and at
+https://mozilla.org/MPL/2.0/.
+
+Original source files use SPDX-License-Identifier: MPL-2.0. This notice also
+applies to original documentation and data files that cannot contain an inline
+comment. Third-party software and chart data retain their separate terms.

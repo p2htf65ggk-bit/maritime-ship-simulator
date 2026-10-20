@@ -1,0 +1,2037 @@
+<!-- SPDX-License-Identifier: MPL-2.0 -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+<link rel="stylesheet" href="leaflet/leaflet.css"/>
+<script src="leaflet/leaflet.js"></script>
+<script src="s57_portrayal.js"></script>
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+
+<style>
+html, body, #map {
+    height: 100%;
+    margin: 0;
+    background: #1a2633;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
+}
+.ship-icon {
+    transform-origin: center;
+}
+.ais-icon {
+    transform-origin: center;
+}
+.map-control {
+    position: absolute;
+    top: 10px;
+    left: 50px;
+    z-index: 1000;
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    max-width: calc(100% - 65px);
+}
+.map-control select {
+    font: 13px Arial, sans-serif;
+    color: #e8f3f7;
+    background: #172a35;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    height: 32px;
+    width: 190px;
+}
+.enc-status {
+    position: absolute;
+    left: 10px;
+    bottom: 28px;
+    z-index: 900;
+    max-width: calc(100% - 30px);
+    color: #e8f3f7;
+    background: #172a35;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font: 12px Arial, sans-serif;
+    pointer-events: none;
+}
+.leaflet-tooltip.enc-depth { background: transparent; border: 0; box-shadow: none; color: #203d4b; font: 11px Arial, sans-serif; padding: 0; }
+.leaflet-tooltip.enc-depth::before { display: none; }
+.leaflet-tooltip.enc-depth-shallow { color: #162933; font-weight: bold; }
+.offline-area-capture {
+    position: absolute;
+    inset: 0;
+    z-index: 3000;
+    cursor: crosshair;
+    touch-action: none;
+}
+.offline-area-tools {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3001;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: calc(100% - 60px);
+    width: 590px;
+    box-sizing: border-box;
+    background: #101419;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    padding: 8px;
+}
+.offline-area-tools button, .offline-area-tools select {
+    font: 13px Arial, sans-serif;
+    color: #e8f3f7;
+    background: #1c2b35;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+.offline-area-tools button.active { background: #087b90; }
+.offline-area-tools button:disabled { opacity: 0.4; }
+.offline-area-legend {
+    flex-basis: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    color: #cbdde6;
+    font: 12px Arial, sans-serif;
+}
+@media (max-width: 1150px) {
+    .offline-area-tools { top: calc(var(--map-toolbar-bottom, 42px) + 12px); max-width: calc(100% - 70px); }
+}
+.offline-area-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.offline-area-warning { flex-basis: 100%; color: #f0bf46; font-size: 12px; }
+.offline-area-swatch { width: 12px; height: 12px; border: 2px solid; box-sizing: border-box; }
+.offline-area-swatch.harbour { border-color: #05bdd1; background: #05bdd133; }
+.offline-area-swatch.regional { border-color: #449af0; background: #449af033; }
+.offline-area-swatch.overview { border-color: #f0bf46; background: #f0bf4633; }
+.offline-area-swatch.downloaded { border-color: #cbdde6; background: #cbdde644; }
+.offline-area-swatch.planned { border-color: #cbdde6; border-style: dashed; }
+.leaflet-tooltip.offline-area-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 5px;
+    background: rgba(16, 27, 35, 0.42);
+    color: #eff8fb;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
+    border: 0;
+    border-radius: 2px;
+    box-shadow: none;
+    font: 11px/15px Arial, sans-serif;
+    max-width: 190px;
+    box-sizing: border-box;
+    width: max-content;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.offline-area-name { overflow: hidden; text-overflow: ellipsis; }
+.offline-area-size { flex-shrink: 0; color: #d1e0e7; }
+.map-control button {
+    background: #101419;
+    color: #d8e0e8;
+    border: 1px solid #354454;
+    border-radius: 4px;
+    width: 34px;
+    height: 32px;
+    padding: 0;
+    font: 18px Arial, sans-serif;
+    line-height: 30px;
+}
+.map-control button.active {
+    background: #2f6f94;
+    border-color: #4ea3cf;
+    color: #ffffff;
+}
+#encLayersBtn { width: auto; min-width: 64px; padding: 0 8px; font-size: 13px; }
+.route-context-menu {
+    position: absolute;
+    z-index: 1600;
+    background: #101419;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+}
+.route-context-menu button {
+    display: block;
+    width: 190px;
+    padding: 8px 10px;
+    background: #101419;
+    color: #e8f3f7;
+    border: 0;
+    text-align: left;
+    font: 12px Arial, sans-serif;
+}
+.route-context-menu button:hover {
+    background: #263746;
+}
+.leaflet-tooltip-pane {
+    z-index: 2200;
+    pointer-events: none;
+}
+.leaflet-tooltip {
+    background: rgba(16, 20, 25, 0.90);
+    border: 1px solid rgba(216, 224, 232, 0.72);
+    color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.34);
+    font: 12px Arial, sans-serif;
+    opacity: 1;
+}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+    opacity: 0.90;
+}
+.ais-popup {
+    min-width: 230px;
+    color: #d8e0e8;
+    font: 12px Arial, sans-serif;
+}
+.ais-popup h3 {
+    margin: 0 0 6px 0;
+    color: #ffffff;
+    font-size: 14px;
+}
+.ais-popup table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.ais-popup td {
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(216, 224, 232, 0.14);
+}
+.ais-popup td:first-child {
+    color: #9fb5bf;
+    width: 42%;
+}
+.ais-popup .ais-nowrap {
+    white-space: nowrap;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: rgba(16, 20, 25, 0.94);
+    color: #d8e0e8;
+    border: 1px solid rgba(216, 224, 232, 0.40);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+}
+.leaflet-popup-close-button {
+    color: #d8e0e8 !important;
+}
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+<div class="map-control">
+    <button id="centerBtn" title="Center on own ship" onclick="centerOwnship()">⌖</button>
+    <button id="followBtn" title="Follow own ship" onclick="toggleFollowOwnship()">◎</button>
+    <button id="vectorModeBtn" title="Switch to predicted path" onclick="toggleVectorMode()">↦</button>
+    <button id="expandBtn" title="Open map in separate window" onclick="requestMapExpand()">⛶</button>
+    <select id="mapSource" aria-label="2D map source" onchange="emitMapCommand({action:'map_source', source:this.value})">
+        <option value="online">OpenSeaMap (Online)</option>
+        <option value="protomaps" disabled>Protomaps (Offline)</option>
+        <option value="s57" disabled>S-57 (Experimental)</option>
+    </select>
+    <button id="encLayersBtn" title="S57 chart layers" onclick="emitMapCommand({action:'s57_layers'})" hidden>Layers</button>
+</div>
+<div id="encStatus" class="enc-status" role="status" hidden></div>
+
+<script>
+let map;
+let ship = null;
+let shipVector = null;
+let shipHeadingLine = null;
+let ownShipHistoryLayer = null;
+let ownShipHistory = [];
+let ownShipHistoryLine = null;
+let aisLayer = null;
+let aisVectorLayer = null;
+let routeLayer = null;
+let baseLayer = null;
+let seaLayer = null;
+let encLayer = null;
+let encRenderer = null;
+let encSource = null;
+let encFetch = null;
+let encTimer = null;
+let encSequence = 0;
+let encCoverage = null;
+let encIncompleteCoverage = null;
+let encPendingCoverage = null;
+let encReloadNeeded = false;
+let encRetryDelay = 750;
+let ownShipLatLng = null;
+let routeEvents = [];
+let mapContextInstalled = false;
+let routeEditInstalled = false;
+let routeWaypointMarkers = [];
+let mapBridge = null;
+let contextMenu = null;
+let contextMode = "sensor";
+let followOwnShip = false;
+let offlineAreaSelection = null;
+let aisPopupOpen = false;
+let aisMarkers = new Map();
+let aisVectors = new Map();
+let aisVectorHandles = new Map();
+let aisMarkerCreateCount = 0;
+let aisVectorCreateCount = 0;
+let hoveredAisKey = null;
+let vectorMode = "vector";
+let aisEditMode = false;
+let syntheticDragLocks = 0;
+let navigationStateRestored = false;
+window.exportNavigationState = () => ({
+    center: map ? [map.getCenter().lat, map.getCenter().lng] : null,
+    zoom: map?.getZoom(), follow: followOwnShip, vectorMode,
+    busy: Boolean(offlineAreaSelection || syntheticDragLocks)
+});
+window.restoreNavigationState = state => {
+    if (!map || !Array.isArray(state?.center)) return;
+    navigationStateRestored = true;
+    followOwnShip = Boolean(state.follow);
+    vectorMode = state.vectorMode === 'predicted' ? 'predicted' : 'vector';
+    updateVectorModeButton();
+    map.options.touchZoom = followOwnShip ? 'center' : true;
+    document.getElementById('followBtn')?.classList.toggle('active', followOwnShip);
+    map.setView(state.center, Number(state.zoom), {animate: false});
+};
+const MAX_OWN_SHIP_HISTORY_POINTS = 4096;
+const MAX_OWN_SHIP_HISTORY_SPACING_M = 128;
+let ownShipHistorySpacingM = 2;
+let trackpadWheelSessionUntil = 0;
+let smoothZoomFrame = 0;
+let smoothZoomTarget = null;
+let smoothZoomCenter = null;
+let smoothZoomLastFrame = 0;
+let smoothZoomLastInput = 0;
+let smoothZoomActive = false;
+let trackpadPanFrame = 0;
+let trackpadPanX = 0;
+let trackpadPanY = 0;
+
+function flushTrackpadPan() {
+    if (trackpadPanFrame) window.cancelAnimationFrame(trackpadPanFrame);
+    trackpadPanFrame = 0;
+    if (!map) return;
+    const x = Math.round(trackpadPanX), y = Math.round(trackpadPanY);
+    trackpadPanX -= x;
+    trackpadPanY -= y;
+    if (x || y) map.panBy([x, y], {animate: false, noMoveStart: true});
+}
+
+function endSmoothMapZoom() {
+    if (!map || !smoothZoomActive) return;
+    if (smoothZoomFrame) window.cancelAnimationFrame(smoothZoomFrame);
+    const center = followOwnShip && ownShipLatLng ? L.latLng(ownShipLatLng) : smoothZoomCenter;
+    if (center && Number.isFinite(smoothZoomTarget)) {
+        map._move(center, smoothZoomTarget, {pinch: true, round: false});
+    }
+    map._moveEnd(true);
+    smoothZoomActive = false;
+    smoothZoomTarget = null;
+    smoothZoomCenter = null;
+    smoothZoomLastFrame = 0;
+    smoothZoomFrame = 0;
+}
+
+function animateSmoothMapZoom(timestamp) {
+    smoothZoomFrame = 0;
+    if (!map || !smoothZoomActive || !Number.isFinite(smoothZoomTarget)) return;
+    const currentZoom = map.getZoom();
+    const remaining = smoothZoomTarget - currentZoom;
+    const elapsed = smoothZoomLastFrame ? Math.min(34, timestamp - smoothZoomLastFrame) : 16;
+    smoothZoomLastFrame = timestamp;
+    const settled = Math.abs(remaining) < 0.0015;
+    if (settled && timestamp - smoothZoomLastInput >= 70) {
+        endSmoothMapZoom();
+        return;
+    }
+    const blend = 1.0 - Math.exp(-elapsed / 72.0);
+    const interpolatedStep = remaining * blend;
+    const limitedStep = Math.max(-0.24, Math.min(0.24, interpolatedStep));
+    const nextZoom = settled ? smoothZoomTarget : currentZoom + limitedStep;
+    const center = followOwnShip && ownShipLatLng ? L.latLng(ownShipLatLng) : smoothZoomCenter;
+    if (center) map._move(center, nextZoom, {pinch: true, round: false});
+    smoothZoomFrame = window.requestAnimationFrame(animateSmoothMapZoom);
+}
+
+function beginSmoothMapZoom() {
+    if (smoothZoomActive || !map) return;
+    flushTrackpadPan();
+    trackpadPanX = trackpadPanY = 0;
+    map.stop();
+    smoothZoomActive = true;
+    smoothZoomTarget = map.getZoom();
+    smoothZoomCenter = followOwnShip && ownShipLatLng
+        ? L.latLng(ownShipLatLng)
+        : map.getCenter();
+    smoothZoomLastFrame = 0;
+    map._moveStart(true, false);
+}
+
+function forwardWheelZoom(deltaY, clientX = null, clientY = null, deltaMode = 0) {
+    if (!map) return false;
+    const modeScale = Number(deltaMode) === 1 ? 20.0 : (Number(deltaMode) === 2 ? 60.0 : 1.0);
+    const steps = -(Number(deltaY) || 0) * modeScale / 120.0;
+    if (Math.abs(steps) < 0.002) return false;
+    beginSmoothMapZoom();
+    smoothZoomTarget = Math.max(
+        map.getMinZoom(),
+        Math.min(map.getMaxZoom(), smoothZoomTarget + steps)
+    );
+    smoothZoomLastInput = performance.now();
+    if (!smoothZoomFrame) {
+        smoothZoomFrame = window.requestAnimationFrame(animateSmoothMapZoom);
+    }
+    return true;
+}
+
+window.zoomMapByNativeGesture = function(steps, clientX = null, clientY = null) {
+    const amount = Math.max(-4, Math.min(4, Number(steps) || 0));
+    if (Math.abs(amount) < 0.002) return false;
+    return forwardWheelZoom(-amount * 120.0, clientX, clientY, 0);
+};
+
+window.panMapByTrackpad = function(deltaX, deltaY) {
+    if (!map) return false;
+    const x = Number(deltaX), y = Number(deltaY);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    if (x === 0 && y === 0) return false;
+    endSmoothMapZoom();
+    trackpadPanX += x;
+    trackpadPanY += y;
+    if (!trackpadPanFrame) trackpadPanFrame = window.requestAnimationFrame(flushTrackpadPan);
+    return true;
+};
+
+function installTrackpadPan() {
+    const container = map.getContainer();
+    document.addEventListener('wheel', (event) => {
+        if (!event.ctrlKey) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        forwardWheelZoom(event.deltaY, event.clientX, event.clientY, event.deltaMode);
+    }, {passive: false, capture: true});
+    container.addEventListener('wheel', (event) => {
+        if (event.ctrlKey) return;
+        const horizontal = Math.abs(Number(event.deltaX) || 0);
+        const vertical = Math.abs(Number(event.deltaY) || 0);
+        const now = performance.now();
+        const looksLikeTrackpad = event.deltaMode === 0 && (horizontal > 0.5
+            || vertical < 50
+            || now < trackpadWheelSessionUntil);
+        if (!looksLikeTrackpad) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            forwardWheelZoom(event.deltaY, event.clientX, event.clientY, event.deltaMode);
+            return;
+        }
+        trackpadWheelSessionUntil = now + 140;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        window.panMapByTrackpad(event.deltaX, event.deltaY);
+    }, {passive: false, capture: true});
+}
+
+function installTwoButtonZoom() {
+    const container = map.getContainer();
+    let gesture = null;
+    let suppressContextUntil = 0;
+    const finish = () => {
+        if (!gesture) return;
+        if (gesture.dragging && !syntheticDragLocks) map.dragging.enable();
+        container.style.cursor = gesture.cursor;
+        gesture = null;
+        suppressContextUntil = performance.now() + 250;
+    };
+    const start = event => {
+        if ((event.buttons & 3) !== 3 || gesture || syntheticDragLocks || !map.dragging.enabled()) return;
+        const menu = event.target.closest('.route-context-menu');
+        if (!container.contains(event.target) && !menu) return;
+        if (!menu && event.target.closest('button,input,select,.leaflet-control,.leaflet-marker-draggable,.offline-area-tools,.offline-area-capture')) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        endSmoothMapZoom();
+        hideRouteContextMenu();
+        gesture = {y: event.clientY, dragging: map.dragging.enabled(), cursor: container.style.cursor};
+        map.dragging.disable();
+        container.style.cursor = 'ns-resize';
+    };
+    document.addEventListener('mousedown', start, true);
+    document.addEventListener('mousemove', event => {
+        if (!gesture) start(event);
+        if (!gesture) return;
+        if ((event.buttons & 3) !== 3) { finish(); return; }
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        forwardWheelZoom((event.clientY - gesture.y) * 1.2);
+        gesture.y = event.clientY;
+    }, true);
+    document.addEventListener('mouseup', event => {
+        if (!gesture || (event.buttons & 3) === 3) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        finish();
+    }, true);
+    document.addEventListener('contextmenu', event => {
+        if (!gesture && performance.now() >= suppressContextUntil) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+    }, true);
+    window.addEventListener('blur', finish);
+}
+
+function createShipIcon(heading) {
+    const normalized = ((Number(heading) || 0) % 360 + 360) % 360;
+    return L.divIcon({
+        className: "ship-icon",
+        html: `<svg width="26" height="26" viewBox="0 0 22 22" style="transform: rotate(${normalized}deg); overflow: visible; filter: drop-shadow(0 0 1px rgba(255,255,255,0.9));">
+            <polygon points="11,2 19,19 11,15 3,19"
+                fill="#ffc94f"
+                stroke="#0a1720"
+                stroke-width="2.6"
+                stroke-linejoin="round"/>
+        </svg>`,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13]
+    });
+}
+
+function updateShipMarkerIcon(marker, heading) {
+    const normalized = ((Number(heading) || 0) % 360 + 360) % 360;
+    const element = marker.getElement();
+    const svg = element ? element.querySelector('svg') : null;
+    if (!svg) {
+        marker.setIcon(createShipIcon(normalized));
+        return;
+    }
+    svg.style.transform = `rotate(${normalized}deg)`;
+}
+
+function createAISIcon(course) {
+    return createAISIconStyled(course, "#38d66b", 2.2);
+}
+
+function createAISIconStyled(course, color, width) {
+    return L.divIcon({
+        className: "ais-icon",
+        html: `<svg width="22" height="22" viewBox="0 0 22 22" style="transform: rotate(${course}deg); overflow: visible;">
+            <polygon points="11,2 19,19 11,15 3,19"
+                fill="none"
+                stroke="${color}"
+                stroke-width="${width}"
+                stroke-linejoin="round"/>
+        </svg>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11]
+    });
+}
+
+function updateAISMarkerIcon(marker, course, color, width) {
+    const element = marker.getElement();
+    const svg = element ? element.querySelector('svg') : null;
+    const polygon = element ? element.querySelector('polygon') : null;
+    if (!svg || !polygon) {
+        marker.setIcon(createAISIconStyled(course, color, width));
+        return;
+    }
+    svg.style.transform = `rotate(${course}deg)`;
+    polygon.setAttribute('stroke', color);
+    polygon.setAttribute('stroke-width', width);
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[char]));
+}
+
+function formatAISValue(value, suffix = "") {
+    if (value === null || value === undefined || value === "") return "";
+    if (typeof value === "number" && Number.isFinite(value)) {
+        return `${value.toFixed(Math.abs(value) >= 100 ? 0 : 1)}${suffix}`;
+    }
+    return `${escapeHtml(value)}${suffix}`;
+}
+
+function formatAISAgeSeconds(value) {
+    const seconds = Number(value);
+    return Number.isFinite(seconds) ? `${Math.max(0, Math.round(seconds))} s` : "";
+}
+
+function aisPopupHtml(target) {
+    const rows = [
+        ["MMSI", target.mmsi],
+        ["Callsign", target.callsign],
+        ["Type", target.ship_type],
+        ["Navigation", target.nav_status],
+        ["Position", `${formatAISValue(target.lat)} / ${formatAISValue(target.lon)}`],
+        ["SOG", target.speed !== undefined ? formatAISValue(Number(target.speed), " kn") : ""],
+        ["COG", target.course !== undefined ? formatAISValue(Number(target.course), "°") : ""],
+        ["Heading", target.heading !== undefined ? formatAISValue(Number(target.heading), "°") : ""],
+        ["ROT", target.rot !== undefined ? formatAISValue(Number(target.rot), "°/min") : ""],
+        ["Length", target.length !== undefined ? formatAISValue(Number(target.length), " m") : ""],
+        ["Beam", target.beam !== undefined ? formatAISValue(Number(target.beam), " m") : ""],
+        ["Draught", target.draught !== undefined ? formatAISValue(Number(target.draught), " m") : ""],
+        ["Destination", target.destination],
+        ["ETA", target.eta],
+        ["Distance", target.distance_nm !== undefined ? formatAISValue(Number(target.distance_nm), " NM") : ""],
+        ["Real report age", target.provider_report_age_s !== null && target.provider_report_age_s !== undefined
+            ? formatAISValue(Number(target.provider_report_age_s), " s") : ""],
+        ["Last real interval", target.provider_report_interval_s !== null && target.provider_report_interval_s !== undefined
+            ? formatAISValue(Number(target.provider_report_interval_s), " s") : ""],
+        ["Position source", target.dead_reckoning_active
+            ? `<span class="ais-nowrap">Dead reckoning ${formatAISAgeSeconds(target.dead_reckoning_age_s)}</span>`
+            : "Provider report"],
+        ["Status", target.active === false ? "Outside output limits" : "Output active"]
+    ].filter(([, value]) => value !== "" && value !== null && value !== undefined);
+    const rowHtml = rows.map(([label, value]) => `<tr><td>${escapeHtml(label)}</td><td>${value}</td></tr>`).join("");
+    return `<div class="ais-popup"><h3>${escapeHtml(target.name || "AIS target")}</h3><table>${rowHtml}</table></div>`;
+}
+
+function initMap() {
+    map = L.map('map', {
+        zoomControl: true,
+        scrollWheelZoom: true,
+        zoomSnap: 0,
+        zoomDelta: 0.25,
+        wheelDebounceTime: 20,
+        wheelPxPerZoomLevel: 80,
+        touchZoom: true,
+        bounceAtZoomLimits: false,
+        tap: false
+    }).setView([43.27626785, -79.85237616666667], 10);
+    installTrackpadPan();
+    installTwoButtonZoom();
+    map.createPane('routePane');
+    map.getPane('routePane').style.zIndex = 450;
+    map.createPane('historyPane');
+    map.getPane('historyPane').style.zIndex = 520;
+    map.getPane('historyPane').style.pointerEvents = 'none';
+    map.createPane('vectorPane');
+    map.getPane('vectorPane').style.zIndex = 625;
+    map.getPane('vectorPane').style.pointerEvents = 'none';
+    map.createPane('trafficPane');
+    map.getPane('trafficPane').style.zIndex = 650;
+    map.createPane('encPane');
+    map.getPane('encPane').style.zIndex = 250;
+    L.control.scale({imperial: false, maxWidth: 100}).addTo(map);
+
+    baseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+    seaLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        opacity: 0.95
+    }).addTo(map);
+    routeLayer = L.layerGroup().addTo(map);
+    ownShipHistoryLayer = L.layerGroup().addTo(map);
+    aisLayer = L.layerGroup().addTo(map);
+    aisVectorLayer = L.layerGroup().addTo(map);
+    map.on('zoomend', () => {
+        if (followOwnShip && ownShipLatLng && !aisPopupOpen) centerOwnship();
+    });
+    map.on('zoomend moveend resize', refreshHeadingLine);
+    map.on('moveend zoomend resize', scheduleENC);
+    L.DomEvent.disableClickPropagation(document.querySelector('.map-control'));
+    new ResizeObserver(() => {
+        const bottom = document.querySelector('.map-control').getBoundingClientRect().bottom;
+        document.documentElement.style.setProperty('--map-toolbar-bottom', `${bottom}px`);
+    }).observe(document.querySelector('.map-control'));
+    installMapRouteContext();
+    map.getContainer().addEventListener('contextmenu', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+    });
+    if (window.qt && window.qt.webChannelTransport) {
+        new QWebChannel(window.qt.webChannelTransport, (channel) => {
+            mapBridge = channel.objects.mapBridge;
+        });
+    }
+
+    updateVectorModeButton();
+    window.mapReady = true;
+}
+
+function setMapSource(source) {
+    if (!map || !source) return;
+    if (baseLayer) map.removeLayer(baseLayer);
+    if (seaLayer && map.hasLayer(seaLayer)) map.removeLayer(seaLayer);
+    clearTimeout(encTimer);
+    encFetch?.abort();
+    encSequence += 1;
+    encCoverage = null;
+    encIncompleteCoverage = null;
+    encPendingCoverage = null;
+    encReloadNeeded = false;
+    encRetryDelay = 750;
+    encSource = null;
+    if (encLayer) { map.removeLayer(encLayer); encLayer = null; }
+    map.attributionControl.removeAttribution('S57 ENC | Simulator portrayal, not for navigation');
+    const status = document.getElementById('encStatus');
+    status.hidden = true;
+    const select = document.getElementById('mapSource');
+    select.replaceChildren();
+    const choices = source.available || [{id: source.offline ? 'protomaps' : 'online', label: source.offline ? 'Protomaps (Offline)' : 'OpenSeaMap (Online)', enabled: true}];
+    for (const choice of choices) {
+        const option = new Option(choice.label, choice.id);
+        option.disabled = !choice.enabled;
+        select.add(option);
+    }
+    const selected = source.id || (source.offline ? 'protomaps' : 'online');
+    if (selected === 'schematic') select.add(new Option('Offline coastlines', 'schematic'));
+    select.value = selected;
+    document.getElementById('encLayersBtn').hidden = selected !== 's57';
+    map.getContainer().style.background = selected === 's57' ? '#d0e8ed' : '#1a2633';
+    if (selected === 's57') {
+        baseLayer = source.url ? L.tileLayer(source.url, {
+            maxZoom:19, minNativeZoom:source.minZoom ?? 0, maxNativeZoom:source.maxZoom ?? 12,
+            attribution:source.attribution || 'Schematic coastlines | OpenStreetMap contributors / ODbL | not a navigation chart'
+        }).addTo(map) : null;
+        encSource = source;
+        encRenderer ||= S57Portrayal.renderer({pane: 'encPane', padding: 0.3});
+        encLayer = L.geoJSON(null, {
+            pane: 'encPane', renderer: encRenderer, style: encStyle,
+            pointToLayer: (feature, ll) => S57Portrayal.point(feature, ll, encRenderer),
+            onEachFeature: (feature, layer) => {
+                const firstClick = event => {
+                    layer.off('click', firstClick);
+                    const p = feature.properties;
+                    layer.bindPopup(`<strong>${escapeHtml(p.OBJNAM || S57Portrayal.objectName(p))}</strong><br>${escapeHtml(p.layer)} · ${escapeHtml(p.chart)}<br>`
+                        + S57Portrayal.details(p).map(({label,value}) => `${escapeHtml(label)}: ${escapeHtml(value)}`).join('<br>'));
+                    layer.openPopup(event.latlng);
+                };
+                layer.on('click', firstClick);
+            }
+        }).addTo(map);
+        map.attributionControl.addAttribution('S57 ENC | Simulator portrayal, not for navigation');
+        scheduleENC();
+        return;
+    }
+    if (encRenderer && map.hasLayer(encRenderer)) map.removeLayer(encRenderer);
+    baseLayer = L.tileLayer(source.url || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        maxNativeZoom: source.maxZoom ?? 19,
+        minNativeZoom: source.minZoom ?? 0,
+        attribution: source.attribution || '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+    if (!source.offline && seaLayer) seaLayer.addTo(map);
+}
+
+function encStyle(feature) {
+    return S57Portrayal.style(feature);
+}
+
+function scheduleENC() {
+    if (!encSource || document.hidden) return;
+    clearTimeout(encTimer);
+    encTimer = setTimeout(loadENC, 180);
+}
+
+async function loadENC() {
+    if (!encSource || !map || document.hidden) return;
+    const current = map.getBounds();
+    const zoom = Math.floor(map.getZoom());
+    if (encCoverage && encCoverage.zoom === zoom && encCoverage.bounds.contains(current)) return;
+    const retry = encIncompleteCoverage?.zoom === zoom && encIncompleteCoverage.bounds.contains(current)
+        ? encIncompleteCoverage : null;
+    if (retry?.attempts >= 3) return;
+    if (retry && Date.now() < retry.nextAttempt) {
+        clearTimeout(encTimer);
+        encTimer = setTimeout(loadENC, retry.nextAttempt-Date.now());
+        return;
+    }
+    if (encPendingCoverage) {
+        if (encPendingCoverage.zoom !== zoom || !encPendingCoverage.bounds.contains(current)) encReloadNeeded = true;
+        return;
+    }
+    encFetch?.abort();
+    const controller = encFetch = new AbortController();
+    const sequence = ++encSequence;
+    const source = encSource;
+    const padded = current.pad(0.25);
+    encPendingCoverage = {bounds:padded, zoom};
+    encReloadNeeded = false;
+    const shift = Math.floor((padded.getCenter().lng + 180) / 360) * 360;
+    let west = padded.getWest() - shift, east = padded.getEast() - shift;
+    const south = Math.max(-85, padded.getSouth()), north = Math.min(85, padded.getNorth());
+    const pieces = east - west >= 360 ? [[-180,180]] : west < -180 ? [[west+360,180],[-180,east]] : east > 180 ? [[west,180],[-180,east-360]] : [[west,east]];
+    const status = document.getElementById('encStatus');
+    try {
+        const results = await Promise.all(pieces.map(async ([w,e]) => {
+            const url = new URL(source.encUrl);
+            url.searchParams.set('bbox', [w,south,e,north].join(','));
+            url.searchParams.set('zoom', zoom);
+            url.searchParams.set('layers', source.layers === null || source.layers === undefined ? '*' : source.layers.join(','));
+            url.searchParams.set('display', source.base ? 'base' : 'all');
+            url.searchParams.set('contour', source.safetyContour ?? 30);
+            url.searchParams.set('depth', source.safetyDepth ?? 30);
+            const response = await fetch(url, {signal: controller.signal});
+            if (!response.ok) {
+                const problem = await response.json().catch(() => null);
+                throw new Error(problem?.error || `Local chart service: ${response.status}`);
+            }
+            return response.json();
+        }));
+        if (sequence !== encSequence || source !== encSource) return;
+        const features = results.flatMap(result => result.features);
+        encLayer.clearLayers();
+        encLayer.options.coordsToLatLng = coordinates => {
+            let lon = coordinates[0] + shift;
+            while (lon < padded.getWest() - 180) lon += 360;
+            while (lon > padded.getEast() + 180) lon -= 360;
+            return L.latLng(coordinates[1], lon);
+        };
+        encLayer.addData({type:'FeatureCollection', features: features.slice(0,8000)});
+        let labels = 0, clearances = 0;
+        encLayer.eachLayer(layer => {
+            const p = layer.feature?.properties;
+            if (p?.layer === 'SOUNDG' && p.DEPTH !== undefined && labels++ < 150) {
+                layer.bindTooltip(String(Number(p.DEPTH).toFixed(1)), {permanent:true, direction:'center',
+                    className:p.shallow_sounding ? 'enc-depth enc-depth-shallow' : 'enc-depth'});
+            }
+            if (p && ['CBLOHD','PIPOHD','BRIDGE'].includes(p.layer) && zoom>=12 && clearances<30) {
+                const text=S57Portrayal.clearanceText(p);
+                if (text) {
+                    clearances++;
+                    layer.bindTooltip(text,{permanent:true,direction:'top',className:'enc-clearance'});
+                }
+            }
+        });
+        const retryable = results.some(result => result.retryable);
+        encCoverage = retryable ? null : {bounds:padded, zoom};
+        encIncompleteCoverage = retryable ? {bounds:padded, zoom, attempts:retry ? retry.attempts+1 : 0,
+            nextAttempt:Date.now()+encRetryDelay} : null;
+        if (retryable) {
+            clearTimeout(encTimer);
+            if (encIncompleteCoverage.attempts < 3 && !document.hidden) encTimer = setTimeout(loadENC, encRetryDelay);
+            encRetryDelay = Math.min(8000, encRetryDelay * 2);
+        } else encRetryDelay = 750;
+        const limited = results.some(result => result.limited) || features.length > 8000;
+        const contours = Object.assign({}, ...results.map(result => result.effective_safety_contours || {}));
+        const values = [...new Set(Object.values(contours).filter(value => Number.isFinite(value)))].sort((a,b) => a-b);
+        const differs = values.some(value => value !== (source.safetyContour ?? 30));
+        const missing = Object.values(contours).some(value => value === null);
+        const effective = values.slice(0,4).join(' / ') + (values.length>4 ? ' / ...' : '');
+        const safety = differs || missing ? `Safety contour: ${source.safetyContour ?? 30} m | Cell contours: ${effective ? effective+' m' : 'not available'}${missing && effective ? ' / unavailable in some cells' : ''}` : '';
+        const mode = source.base ? `Base | ${safety || `Safety contour: ${source.safetyContour ?? 30} m`} | Depth/height: m | North: up` : safety;
+        status.title = Object.entries(contours).map(([cell,value]) => `${cell}: ${value === null ? 'no contour at or deeper than requested' : value+' m'}`).join('\n');
+        status.textContent = (retryable ? encIncompleteCoverage.attempts < 3
+            ? 'Loading remaining chart detail...' : 'Chart loading incomplete; move or zoom to retry'
+            : limited ? 'Chart detail limited; zoom in' : !features.length
+            ? results.some(result => result.overview) ? 'World overview; zoom in for S57 charts'
+                : 'No S57 data at this scale/location; schematic coastline background' : '') || mode;
+        status.hidden = !status.textContent;
+    } catch (error) {
+        if (error.name !== 'AbortError' && sequence === encSequence) {
+            status.textContent = `S57 unavailable: ${error.message}`;
+            status.hidden = false;
+            encCoverage = null;
+            clearTimeout(encTimer);
+            encTimer = setTimeout(loadENC, encRetryDelay);
+            encRetryDelay = Math.min(8000, encRetryDelay * 2);
+        }
+    } finally {
+        if (sequence === encSequence) {
+            encPendingCoverage = null;
+            encFetch = null;
+            if (encReloadNeeded && !document.hidden) scheduleENC();
+        }
+    }
+}
+
+function fitChartBounds(bounds) {
+    if (!map || !Array.isArray(bounds) || bounds.length !== 4 || !bounds.every(Number.isFinite)) return;
+    disableFollowOwnship();
+    map.fitBounds([[bounds[1],bounds[0]],[bounds[3],bounds[2]]], {padding:[30,30]});
+}
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { clearTimeout(encTimer); encFetch?.abort(); }
+    else scheduleENC();
+});
+
+function offlinePolygonValid(points) {
+    if (!Array.isArray(points) || points.length < 3 || points.length > 64
+        || points.some(point => !Array.isArray(point) || point.length !== 2 || !point.every(Number.isFinite))) return false;
+    const cross = (a, b, c) => (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
+    const on = (a, b, p) => Math.abs(cross(a, b, p)) < 1e-12
+        && p[0] >= Math.min(a[0], b[0]) && p[0] <= Math.max(a[0], b[0])
+        && p[1] >= Math.min(a[1], b[1]) && p[1] <= Math.max(a[1], b[1]);
+    let area = 0;
+    for (let i = 0; i < points.length; i++) {
+        const a = points[i], b = points[(i + 1) % points.length];
+        if (a[0] === b[0] && a[1] === b[1]) return false;
+        area += cross(points[0], a, b);
+        for (let j = i + 2; j < points.length; j++) {
+            if (i === 0 && j === points.length - 1) continue;
+            const c = points[j], d = points[(j + 1) % points.length];
+            if (cross(a, b, c) * cross(a, b, d) < 0 && cross(c, d, a) * cross(c, d, b) < 0
+                || on(a, b, c) || on(a, b, d) || on(c, d, a) || on(c, d, b)) return false;
+        }
+    }
+    return Math.abs(area) > 1e-12;
+}
+
+function offlineAreaTileCounts(bounds, zoom, polygon = null) {
+    const [west, south, east, north] = bounds;
+    if (!bounds.every(Number.isFinite) || west < -180 || east > 180 || west >= east || south < -85 || north > 85 || south >= north) return null;
+    if (polygon && !offlinePolygonValid(polygon)) return null;
+    const counts = [];
+    for (let z = 0; z <= zoom; z++) {
+        const scale = 2 ** z;
+        const left = Math.max(0, Math.floor((west + 180) / 360 * scale));
+        const right = Math.min(scale - 1, Math.floor((east + 180) / 360 * scale));
+        const row = lat => Math.max(0, Math.min(scale - 1, Math.floor((1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * scale)));
+        if (!polygon) {
+            counts.push((right - left + 1) * (row(south) - row(north) + 1));
+            continue;
+        }
+        const points = polygon.map(([lon, lat]) => [(lon + 180) / 360 * scale,
+            (1 - Math.asinh(Math.tan(lat * Math.PI / 180)) / Math.PI) / 2 * scale]);
+        let count = 0;
+        // Merge boundary projections and interior scanlines into tile runs.
+        for (let y = row(north); y <= row(south); y++) {
+            const intervals = [], crossings = [];
+            const add = (a, b) => intervals.push([Math.max(0, Math.floor(Math.min(a, b))),
+                Math.min(scale - 1, Math.floor(Math.max(a, b)))]);
+            for (let i = 0; i < points.length; i++) {
+                const a = points[i], b = points[(i + 1) % points.length];
+                const low = Math.max(y, Math.min(a[1], b[1])), high = Math.min(y + 1, Math.max(a[1], b[1]));
+                const xAt = height => a[0] + (height - a[1]) / (b[1] - a[1]) * (b[0] - a[0]);
+                if (low <= high) {
+                    if (a[1] === b[1]) add(a[0], b[0]);
+                    else add(xAt(low), xAt(high));
+                }
+                if ((a[1] > y + 0.5) !== (b[1] > y + 0.5)) crossings.push(xAt(y + 0.5));
+            }
+            crossings.sort((a, b) => a - b);
+            for (let i = 0; i + 1 < crossings.length; i += 2) add(crossings[i], crossings[i + 1]);
+            intervals.sort((a, b) => a[0] - b[0]);
+            let end = -1;
+            for (const [start, stop] of intervals) {
+                count += Math.max(0, stop - Math.max(start, end + 1) + 1);
+                end = Math.max(end, stop);
+            }
+        }
+        counts.push(count);
+    }
+    return counts;
+}
+
+function offlineAreaEstimate(bounds, zoom, polygon = null) {
+    return offlineAreaTileCounts(bounds, zoom, polygon)?.reduce((sum, count) => sum + count, 0) ?? null;
+}
+
+function offlineAreaColour(zoom) {
+    return zoom === 15 ? '#05bdd1' : zoom === 14 ? '#449af0' : '#f0bf46';
+}
+
+function offlineAreaLabel(name, sizeMb = null) {
+    const size = Number.isFinite(sizeMb) && sizeMb >= 0
+        ? `<span class="offline-area-size">${sizeMb < 1 ? '&lt;1' : Math.round(sizeMb)} MB</span>` : '';
+    return `<span class="offline-area-name">${escapeHtml(name)}</span>` + size;
+}
+
+function beginOfflineAreaSelection(options = {}) {
+    if (!map || offlineAreaSelection) return;
+    endSmoothMapZoom();
+    hideRouteContextMenu();
+    const saved = {follow: followOwnShip};
+    followOwnShip = false;
+    map.options.touchZoom = true;
+    document.getElementById('followBtn')?.classList.remove('active');
+    const capture = document.createElement('div');
+    capture.className = 'offline-area-capture';
+    map.getContainer().appendChild(capture);
+    const tools = document.createElement('div');
+    tools.className = 'offline-area-tools';
+    tools.innerHTML = '<button data-mode="navigate" class="active">Navigate</button>'
+        + '<button data-mode="draw">Rectangle</button>'
+        + '<button data-mode="polygon">Polygon</button>'
+        + '<select aria-label="Detail for new areas"><option value="15">Harbour detail</option><option value="14">Regional detail</option><option value="13">Overview</option></select>'
+        + '<button data-action="close" hidden disabled>Close Polygon</button>'
+        + '<button data-action="undo" title="Remove last corner or area" disabled>Undo</button>'
+        + '<button data-action="next" disabled>Continue</button>'
+        + '<button data-action="cancel">Cancel</button>'
+        + '<div class="offline-area-legend" aria-label="Area colours and download status">'
+        + '<span><i class="offline-area-swatch harbour"></i>Harbour</span>'
+        + '<span><i class="offline-area-swatch regional"></i>Regional</span>'
+        + '<span><i class="offline-area-swatch overview"></i>Overview</span>'
+        + '<span><i class="offline-area-swatch downloaded"></i>Downloaded</span>'
+        + '<span><i class="offline-area-swatch planned"></i>To download</span></div>'
+        + '<div class="offline-area-warning" role="status" aria-live="polite" hidden></div>';
+    map.getContainer().appendChild(tools);
+    const areas = [];
+    const downloaded = [];
+    for (const area of options.downloadedAreas || []) {
+        const bounds = area.bounds;
+        const zoom = Number(area.max_zoom);
+        if (!Array.isArray(bounds) || bounds.length !== 4 || ![13, 14, 15].includes(zoom)
+            || offlineAreaEstimate(bounds, 0) === null || area.polygon && !offlinePolygonValid(area.polygon)) continue;
+        const [west, south, east, north] = bounds;
+        const geometry = area.polygon ? area.polygon.map(([lon, lat]) => [lat, lon]) : [[south, west], [north, east]];
+        const layer = (area.polygon ? L.polygon : L.rectangle)(geometry, {
+            color: offlineAreaColour(zoom), weight: 2, fillOpacity: 0.22, interactive: false,
+        }).addTo(map);
+        const hasSize = Number.isFinite(area.content_bytes) && area.content_bytes >= 0;
+        const sizeMb = hasSize ? area.content_bytes / (1024 ** 2) : null;
+        layer.bindTooltip(offlineAreaLabel(area.name || 'Saved area', sizeMb), {
+            permanent: true, direction: 'center', className: 'offline-area-label',
+        });
+        downloaded.push(layer);
+    }
+    let drawing = false;
+    let start = null;
+    let startPixel = null;
+    let rectangle = null;
+    let pointer = null;
+    let drawMode = 'navigate';
+    let polygon = [];
+    let polygonLayer = null;
+    let firstCorner = null;
+    let draftError = '';
+    const maxTiles = options.maxTiles || 200000;
+    const warningTiles = options.warningTiles || 20000;
+    function updateWarning(currentCount = 0) {
+        const large = currentCount > warningTiles || areas.some(area => area.count > warningTiles);
+        const warning = tools.querySelector('.offline-area-warning');
+        warning.hidden = !large && !draftError;
+        warning.textContent = draftError || (large ? 'Large area: downloading and preparing it may take a long time.' : '');
+    }
+    function rectangleLabel() {
+        if (!rectangle) return;
+        const bounds = rectangle.getBounds();
+        const coordinates = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+        const zoom = Number(tools.querySelector('select').value);
+        const count = offlineAreaEstimate(coordinates, zoom);
+        updateWarning(count || 0);
+        const valid = count !== null && count <= maxTiles;
+        const label = offlineAreaLabel(`Area ${areas.length + 1}`);
+        rectangle.setStyle({color: valid ? offlineAreaColour(zoom) : '#f16b64'});
+        if (rectangle.getTooltip()) rectangle.setTooltipContent(label);
+        else rectangle.bindTooltip(label, {permanent: true, direction: 'center', className: 'offline-area-label'});
+        rectangle.getTooltip().setLatLng(bounds.getCenter());
+        return coordinates;
+    }
+    function finish(command) {
+        if (rectangle) map.removeLayer(rectangle);
+        clearPolygon();
+        for (const area of areas) map.removeLayer(area.rectangle);
+        for (const layer of downloaded) map.removeLayer(layer);
+        capture.remove();
+        tools.remove();
+        document.removeEventListener('keydown', escape);
+        followOwnShip = saved.follow;
+        map.options.touchZoom = followOwnShip ? 'center' : true;
+        document.getElementById('followBtn')?.classList.toggle('active', followOwnShip);
+        offlineAreaSelection = null;
+        if (followOwnShip && ownShipLatLng) {
+            endSmoothMapZoom();
+            map.stop();
+            map.setView(ownShipLatLng, map.getZoom(), {animate: false});
+        }
+        emitMapCommand(command);
+    }
+    function updateTools() {
+        updateWarning();
+        tools.querySelector('[data-action="undo"]').disabled = areas.length === 0 && polygon.length === 0;
+        tools.querySelector('[data-action="next"]').disabled = areas.length === 0 || polygon.length > 0
+            || areas.some(area => area.count === null || area.count > maxTiles);
+        tools.querySelector('[data-action="next"]').textContent = areas.length ? `Continue (${areas.length})` : 'Continue';
+        tools.querySelector('[data-action="close"]').hidden = polygon.length === 0;
+        tools.querySelector('[data-action="close"]').disabled = polygon.length < 3 || !offlinePolygonValid(polygon);
+        capture.style.cursor = drawing ? 'crosshair' : 'grab';
+    }
+    function escape(event) {
+        if (event.key === 'Escape') finish({action: 'offline_area_cancel'});
+        if (event.key === 'Enter' && polygon.length >= 3 && event.target.tagName !== 'SELECT') {
+            event.preventDefault();
+            event.stopPropagation();
+            finishPolygon();
+        }
+    }
+    function clearPolygon() {
+        if (polygonLayer) map.removeLayer(polygonLayer);
+        if (firstCorner) map.removeLayer(firstCorner);
+        polygon = [];
+        polygonLayer = firstCorner = null;
+        draftError = '';
+    }
+    function polygonPreview() {
+        if (!polygon.length) { clearPolygon(); updateTools(); return; }
+        const points = polygon.map(([lon, lat]) => [lat, lon]);
+        const style = {color: offlineAreaColour(Number(tools.querySelector('select').value)),
+            weight: 2, dashArray: '7 5', fillOpacity: 0.05, interactive: false};
+        if (!polygonLayer) polygonLayer = L.polygon(points, style).addTo(map);
+        else polygonLayer.setLatLngs(points).setStyle(style);
+        if (!firstCorner) firstCorner = L.circleMarker(points[0], {radius: 5, color: '#ffffff',
+            fillColor: style.color, fillOpacity: 1, weight: 2, interactive: false}).addTo(map);
+        draftError = polygon.length >= 3 && !offlinePolygonValid(polygon) ? 'Polygon edges must not cross.' : '';
+        if (draftError) polygonLayer.setStyle({color: '#f16b64'});
+        updateTools();
+    }
+    function finishPolygon() {
+        if (!offlinePolygonValid(polygon)) return;
+        const bounds = polygonLayer.getBounds();
+        const coordinates = [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()];
+        const zoom = Number(tools.querySelector('select').value);
+        const count = offlineAreaEstimate(coordinates, zoom, polygon);
+        if (count === null || count > maxTiles) {
+            draftError = 'Area exceeds the tile limit; reduce detail or remove corners.';
+            polygonLayer.setStyle({color: '#f16b64'});
+            updateTools();
+            return;
+        }
+        polygonLayer.bindTooltip(offlineAreaLabel(`Area ${areas.length + 1}`), {
+            permanent: true, direction: 'center', className: 'offline-area-label'});
+        polygonLayer.getTooltip().setLatLng(bounds.getCenter());
+        areas.push({rectangle: polygonLayer, bounds: coordinates, polygon: polygon.map(point => [...point]), max_zoom: zoom, count});
+        polygonLayer = null;
+        clearPolygon();
+        updateTools();
+    }
+    document.addEventListener('keydown', escape);
+    for (const type of ['pointerdown', 'mousedown', 'dblclick', 'wheel']) tools.addEventListener(type, event => event.stopPropagation());
+    tools.addEventListener('click', event => {
+        const button = event.target.closest('button');
+        if (!button) return;
+        if (button.dataset.mode) {
+            if (button.dataset.mode === 'draw') clearPolygon();
+            drawMode = button.dataset.mode;
+            drawing = drawMode !== 'navigate';
+            for (const item of tools.querySelectorAll('[data-mode]')) item.classList.toggle('active', item === button);
+        } else if (button.dataset.action === 'undo') {
+            if (polygon.length) { polygon.pop(); polygonPreview(); }
+            else if (areas.length) map.removeLayer(areas.pop().rectangle);
+        } else if (button.dataset.action === 'close') {
+            finishPolygon();
+        } else if (button.dataset.action === 'next' && areas.length) {
+            finish({action: 'offline_area', areas: areas.map(({bounds, max_zoom, polygon}) =>
+                polygon ? {bounds, max_zoom, polygon} : {bounds, max_zoom})});
+            return;
+        } else if (button.dataset.action === 'cancel') {
+            finish({action: 'offline_area_cancel'});
+            return;
+        }
+        updateTools();
+    });
+    capture.addEventListener('mousedown', event => { if (drawing) event.stopPropagation(); });
+    tools.querySelector('select').addEventListener('change', () => {
+        if (polygon.length) polygonPreview();
+        if (rectangle) rectangleLabel();
+    });
+    capture.addEventListener('dblclick', event => {
+        if (drawing) { event.preventDefault(); event.stopPropagation(); }
+        if (drawMode === 'polygon') finishPolygon();
+    });
+    capture.addEventListener('pointerdown', event => {
+        if (!drawing || event.button !== 0 || pointer !== null || areas.length >= 32) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (drawMode === 'polygon') {
+            const location = map.mouseEventToLatLng(event);
+            const pixel = map.mouseEventToContainerPoint(event);
+            if (polygon.length >= 3 && pixel.distanceTo(map.latLngToContainerPoint([polygon[0][1], polygon[0][0]])) < 8) {
+                finishPolygon();
+            } else if (polygon.length < 64 && (!polygon.length
+                || pixel.distanceTo(map.latLngToContainerPoint([polygon.at(-1)[1], polygon.at(-1)[0]])) > 2)) {
+                polygon.push([location.lng, location.lat]);
+                polygonPreview();
+            }
+            return;
+        }
+        pointer = event.pointerId;
+        capture.setPointerCapture(pointer);
+        start = map.mouseEventToLatLng(event);
+        startPixel = map.mouseEventToContainerPoint(event);
+        rectangle = L.rectangle([start, start], {
+            color: '#05bdd1', weight: 2, dashArray: '7 5', fillOpacity: 0.05, interactive: false,
+        }).addTo(map);
+        rectangleLabel();
+    });
+    capture.addEventListener('pointermove', event => {
+        if (event.pointerId !== pointer || !rectangle) return;
+        rectangle.setBounds(L.latLngBounds(start, map.mouseEventToLatLng(event)));
+        rectangleLabel();
+    });
+    capture.addEventListener('pointerup', event => {
+        if (event.pointerId !== pointer || !rectangle) return;
+        const endPixel = map.mouseEventToContainerPoint(event);
+        if (Math.abs(endPixel.x - startPixel.x) < 8 || Math.abs(endPixel.y - startPixel.y) < 8) {
+            map.removeLayer(rectangle);
+            rectangle = null;
+            pointer = null;
+            return;
+        }
+        const maxZoom = Number(tools.querySelector('select').value);
+        const bounds = rectangleLabel();
+        areas.push({rectangle, bounds, max_zoom: maxZoom, count: offlineAreaEstimate(bounds, maxZoom)});
+        rectangle = null;
+        pointer = null;
+        updateTools();
+    });
+    capture.addEventListener('pointercancel', () => {
+        if (rectangle) map.removeLayer(rectangle);
+        rectangle = null;
+        pointer = null;
+    });
+    offlineAreaSelection = {finish, areas, downloaded};
+    updateTools();
+}
+
+function emitRouteEvent(event) {
+    if (Number.isFinite(event.lon)) event.lon = ((event.lon + 180) % 360 + 360) % 360 - 180;
+    routeEvents.push(event);
+    if (mapBridge && mapBridge.sendRouteEvent) {
+        mapBridge.sendRouteEvent(JSON.stringify(event));
+    }
+}
+
+function emitMapCommand(command) {
+    if (Number.isFinite(command.lon)) command.lon = ((command.lon + 180) % 360 + 360) % 360 - 180;
+    if (mapBridge && mapBridge.sendMapCommand) {
+        mapBridge.sendMapCommand(JSON.stringify(command));
+    }
+}
+
+function destinationPoint(lat, lon, bearing, distanceNm) {
+    const radiusNm = 3440.065;
+    const angular = distanceNm / radiusNm;
+    const brg = Number(bearing) * Math.PI / 180;
+    const phi1 = Number(lat) * Math.PI / 180;
+    const lambda1 = Number(lon) * Math.PI / 180;
+    const phi2 = Math.asin(Math.sin(phi1) * Math.cos(angular) + Math.cos(phi1) * Math.sin(angular) * Math.cos(brg));
+    const lambda2 = lambda1 + Math.atan2(
+        Math.sin(brg) * Math.sin(angular) * Math.cos(phi1),
+        Math.cos(angular) - Math.sin(phi1) * Math.sin(phi2)
+    );
+    return [phi2 * 180 / Math.PI, lambda2 * 180 / Math.PI];
+}
+
+function bearingBetween(a, b) {
+    const first = Number(a.lat) * Math.PI / 180;
+    const second = Number(b.lat) * Math.PI / 180;
+    const delta = (Number(b.lng) - Number(a.lng)) * Math.PI / 180;
+    const y = Math.sin(delta) * Math.cos(second);
+    const x = Math.cos(first) * Math.sin(second) - Math.sin(first) * Math.cos(second) * Math.cos(delta);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function distanceBetweenNm(a, b) {
+    return map.distance(a, b) / 1852.0;
+}
+
+function syntheticVectorHandleIcon() {
+    return L.divIcon({
+        className: "synthetic-vector-handle",
+        html: '<div style="width:12px;height:12px;border:2px solid #65e8ff;background:#10232d;border-radius:50%;box-sizing:border-box;"></div>',
+        iconSize: [12, 12],
+        iconAnchor: [6, 6]
+    });
+}
+
+function updateVectorModeButton() {
+    const button = document.getElementById('vectorModeBtn');
+    if (!button) return;
+    const predicted = vectorMode === "predicted";
+    button.classList.toggle('active', predicted);
+    button.textContent = predicted ? "⌒" : "↦";
+    button.title = predicted ? "Switch to speed vector" : "Switch to predicted path";
+}
+
+function toggleVectorMode() {
+    vectorMode = vectorMode === "predicted" ? "vector" : "predicted";
+    updateVectorModeButton();
+    if (!ship) return;
+    const current = ship.getLatLng();
+    updateShip(
+        current.lat,
+        current.lng,
+        Number(ship.options.currentHeading || 0),
+        false,
+        Number(ship.options.currentSog || 0),
+        Number(ship.options.currentCog || 0),
+        Number(ship.options.currentRot || 0),
+        false
+    );
+}
+
+function buildPredictedPath(lat, lon, cog, sog, rot) {
+    const speed = Math.abs(Number(sog) || 0);
+    if (speed <= 0.01) return [];
+    const points = [[lat, lon]];
+    const horizonSec = 360; // 6 min
+    const stepSec = 6;
+    const speedNmPerSec = speed / 3600.0;
+    let headingNow = Number(cog) || 0;
+    let currentLat = lat;
+    let currentLon = lon;
+    const rotDegPerSec = (Number(rot) || 0) / 60.0;
+    for (let t = 0; t < horizonSec; t += stepSec) {
+        headingNow = (headingNow + rotDegPerSec * stepSec) % 360.0;
+        const distNm = speedNmPerSec * stepSec;
+        const next = destinationPoint(currentLat, currentLon, headingNow, distNm);
+        points.push(next);
+        currentLat = next[0];
+        currentLon = next[1];
+    }
+    return points;
+}
+
+function headingLineCoordinates(lat, lon, heading) {
+    // Mercator is conformal, so a screen-space ray preserves the heading at
+    // own ship without wrapping around the globe at small zoom levels.
+    const origin = map.latLngToLayerPoint([lat, lon]);
+    const bearingRad = (((Number(heading) || 0) % 360) + 360) % 360 * Math.PI / 180.0;
+    const size = map.getSize();
+    const rayLength = Math.max(1000.0, Math.hypot(size.x, size.y) * 2.5);
+    const endpoint = L.point(
+        origin.x + Math.sin(bearingRad) * rayLength,
+        origin.y - Math.cos(bearingRad) * rayLength
+    );
+    const endpointLatLng = map.layerPointToLatLng(endpoint);
+    return [[lat, lon], [endpointLatLng.lat, endpointLatLng.lng]];
+}
+
+function refreshHeadingLine() {
+    if (!map || !ship || !ownShipLatLng) return;
+    const heading = Number(ship.options.currentHeading || 0);
+    const headingCoords = headingLineCoordinates(ownShipLatLng[0], ownShipLatLng[1], heading);
+    if (!shipHeadingLine) {
+        shipHeadingLine = L.polyline(headingCoords, {
+            pane: 'vectorPane',
+            color: "#5f7483",
+            weight: 1,
+            opacity: 0.90
+        }).addTo(map);
+    } else {
+        shipHeadingLine.setLatLngs(headingCoords);
+    }
+}
+
+function centerOwnship() {
+    if (!map || !ownShipLatLng) return;
+    map.setView(ownShipLatLng, map.getZoom());
+}
+
+function toggleFollowOwnship() {
+    followOwnShip = !followOwnShip;
+    map.options.touchZoom = followOwnShip ? 'center' : true;
+    const button = document.getElementById('followBtn');
+    if (button) button.classList.toggle('active', followOwnShip);
+    if (followOwnShip) centerOwnship();
+}
+
+function disableFollowOwnship() {
+    if (!followOwnShip) return;
+    followOwnShip = false;
+    const button = document.getElementById('followBtn');
+    if (button) button.classList.remove('active');
+}
+
+function beginSyntheticDrag() {
+    syntheticDragLocks += 1;
+    if (map && map.dragging) map.dragging.disable();
+}
+
+function endSyntheticDrag() {
+    syntheticDragLocks = Math.max(0, syntheticDragLocks - 1);
+    if (syntheticDragLocks === 0 && map && map.dragging) map.dragging.enable();
+}
+
+function requestMapExpand() {
+    emitMapCommand({action: 'expand'});
+}
+
+function setMapDetached(detached) {
+    const button = document.getElementById('expandBtn');
+    if (!button) return;
+    button.title = detached
+        ? 'Toggle full screen (F11; Escape exits)'
+        : 'Open map in separate window';
+}
+
+function setContextMode(mode) {
+    contextMode = mode || "sensor";
+    installMapRouteContext();
+}
+
+function updateShip(lat, lon, heading, center, sog, cog, rot, resetHistory, timeScale) {
+    if (!window.mapReady) return;
+    ownShipLatLng = [lat, lon];
+    updateOwnShipHistory(lat, lon, resetHistory);
+
+    if (!ship) {
+        ship = L.marker([lat, lon], {
+            icon: createShipIcon(heading),
+            pane: 'trafficPane',
+            zIndexOffset: 3000
+        }).addTo(map);
+        if (!navigationStateRestored) map.setView([lat, lon], map.getZoom());
+    } else {
+        ship.setLatLng([lat, lon]);
+        updateShipMarkerIcon(ship, heading);
+    }
+    ship.options.currentHeading = Number(heading) || 0;
+    ship.options.currentSog = Number(sog) || 0;
+    ship.options.currentCog = Number(cog) || 0;
+    ship.options.currentRot = Number(rot) || 0;
+
+    if ((center || followOwnShip) && !aisPopupOpen && !smoothZoomActive && !offlineAreaSelection) {
+        const c = map.getCenter();
+        if (map.distance(c, [lat, lon]) > 6.0) {
+            map.setView([lat, lon], map.getZoom());
+        }
+    }
+
+    refreshHeadingLine();
+
+    // Keep visual vector horizon constant at 6 simulated minutes regardless of time acceleration.
+    const simHorizonHours = 6.0 / 60.0;
+    const vectorDistance = Math.abs(Number(sog) || 0) * simHorizonHours;
+    if (vectorMode === "predicted") {
+        const predicted = buildPredictedPath(lat, lon, cog, sog, rot);
+        if (predicted.length > 1) {
+            if (!shipVector) {
+                shipVector = L.polyline(predicted, {
+                    pane: 'vectorPane',
+                    color: "#26323d",
+                    weight: 2,
+                    opacity: 0.95
+                }).addTo(map);
+            } else {
+                shipVector.setLatLngs(predicted);
+            }
+        } else if (shipVector) {
+            map.removeLayer(shipVector);
+            shipVector = null;
+        }
+    } else if (vectorDistance > 0.01) {
+        const vectorCoords = [[lat, lon], destinationPoint(lat, lon, cog, vectorDistance)];
+        if (!shipVector) {
+            shipVector = L.polyline(vectorCoords, {
+                pane: 'vectorPane',
+                color: "#26323d",
+                weight: 2,
+                opacity: 0.95
+            }).addTo(map);
+        } else {
+            shipVector.setLatLngs(vectorCoords);
+        }
+    } else if (shipVector) {
+        map.removeLayer(shipVector);
+        shipVector = null;
+    }
+}
+
+function updateOwnShipHistory(lat, lon, resetHistory) {
+    if (!ownShipHistoryLayer) return;
+    if (resetHistory) {
+        ownShipHistory = [];
+        ownShipHistorySpacingM = 2;
+        ownShipHistoryLayer.clearLayers();
+        ownShipHistoryLine = null;
+    }
+    const point = [Number(lat), Number(lon)];
+    if (!Number.isFinite(point[0]) || !Number.isFinite(point[1])) return;
+    const last = ownShipHistory[ownShipHistory.length - 1];
+    if (!last || map.distance(last, point) >= ownShipHistorySpacingM) {
+        ownShipHistory.push(point);
+        let compacted = false;
+        if (ownShipHistory.length > MAX_OWN_SHIP_HISTORY_POINTS) {
+            const reduced = ownShipHistory.filter((_entry, index) => index % 2 === 0);
+            const newest = ownShipHistory[ownShipHistory.length - 1];
+            if (reduced[reduced.length - 1] !== newest) reduced.push(newest);
+            ownShipHistory = reduced;
+            ownShipHistorySpacingM = Math.min(
+                MAX_OWN_SHIP_HISTORY_SPACING_M,
+                ownShipHistorySpacingM * 2
+            );
+            compacted = true;
+        }
+        if (ownShipHistory.length > 1) {
+            if (!ownShipHistoryLine) {
+                ownShipHistoryLine = L.polyline(ownShipHistory, {
+                    pane: 'historyPane',
+                    color: "#77b7d8",
+                    weight: 1,
+                    opacity: 0.58,
+                    interactive: false,
+                    smoothFactor: 0.8
+                }).addTo(ownShipHistoryLayer);
+            } else if (compacted) {
+                ownShipHistoryLine.setLatLngs(ownShipHistory);
+            } else {
+                ownShipHistoryLine.addLatLng(point);
+            }
+        } else if (!ownShipHistoryLine) {
+            ownShipHistoryLine = L.polyline([], {
+                pane: 'historyPane',
+                color: "#77b7d8",
+                weight: 1,
+                opacity: 0.58,
+                interactive: false,
+                smoothFactor: 0.8
+            }).addTo(ownShipHistoryLayer);
+        }
+    }
+}
+
+function updateAIS(targets) {
+    if (!window.mapReady) return;
+
+    const seen = new Set();
+    const seenVectors = new Set();
+    targets.forEach((t, index) => {
+        let lat = Number(t.lat);
+        let lon = Number(t.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+
+        const key = String(t.mmsi || t.name || `${lat.toFixed(5)},${lon.toFixed(5)},${index}`);
+        seen.add(key);
+        let course = Number(t.course) || 0;
+        let speed = Math.abs(Number(t.speed) || 0);
+        let m = aisMarkers.get(key);
+        let handle = aisVectorHandles.get(key);
+        const nowMs = Date.now();
+        if (m && m.syntheticPendingPosition) {
+            const pending = m.syntheticPendingPosition;
+            if (Math.abs(lat - pending.lat) < 0.00001 && Math.abs(lon - pending.lon) < 0.00001) {
+                m.syntheticPendingPosition = null;
+            } else if (nowMs < pending.expiresAt) {
+                lat = pending.lat;
+                lon = pending.lon;
+            } else {
+                m.syntheticPendingPosition = null;
+            }
+        }
+        if (handle && handle.syntheticPendingVector) {
+            const pending = handle.syntheticPendingVector;
+            const courseDifference = Math.abs(((course - pending.course + 540) % 360) - 180);
+            if (courseDifference < 0.2 && Math.abs(speed - pending.speed) < 0.05) {
+                handle.syntheticPendingVector = null;
+            } else if (nowMs < pending.expiresAt) {
+                course = pending.course;
+                speed = pending.speed;
+            } else {
+                handle.syntheticPendingVector = null;
+            }
+        }
+        const hasReportedHeading = t.heading !== null && t.heading !== undefined && t.heading !== "";
+        const reportedHeading = Number(t.heading);
+        let orientation = hasReportedHeading && Number.isFinite(reportedHeading)
+                && reportedHeading >= 0 && reportedHeading < 360
+            ? reportedHeading
+            : course;
+        if (handle && handle.syntheticPendingVector) orientation = course;
+        const color = t.active === false ? "#8a949d" : "#38d66b";
+        const width = t.active === false ? 1.7 : 2.2;
+        if (!m) {
+            m = L.marker([lat, lon], {
+                pane: 'trafficPane',
+                zIndexOffset: 2500,
+                icon: createAISIconStyled(orientation, color, width),
+                draggable: Boolean(t.synthetic && aisEditMode)
+            }).addTo(aisLayer);
+            aisMarkerCreateCount += 1;
+            m.on('mouseover', () => {
+                hoveredAisKey = key;
+                m.openTooltip();
+            });
+            m.on('mouseout', () => {
+                if (hoveredAisKey === key) {
+                    hoveredAisKey = null;
+                }
+            });
+            m.on('popupopen', () => {
+                aisPopupOpen = true;
+                m.setPopupContent(aisPopupHtml(m.latestAisTarget));
+            });
+            m.on('popupclose', () => {
+                aisPopupOpen = false;
+                if (followOwnShip) centerOwnship();
+            });
+            aisMarkers.set(key, m);
+        } else {
+            if (!m.syntheticDragging) m.setLatLng([lat, lon]);
+            updateAISMarkerIcon(m, orientation, color, width);
+        }
+        if (m.dragging) {
+            if (t.synthetic && aisEditMode) m.dragging.enable();
+            else m.dragging.disable();
+        }
+        if (t.synthetic && !m.syntheticHandlersInstalled) {
+            m.syntheticHandlersInstalled = true;
+            m.on('dragstart', () => {
+                m.syntheticDragging = true;
+                beginSyntheticDrag();
+            });
+            m.on('drag', () => {
+                const point = m.getLatLng();
+                const current = m.latestAisTarget || t;
+                const previewCourse = Number(current.course) || 0;
+                const previewSpeed = Math.abs(Number(current.speed) || 0);
+                const endpoint = destinationPoint(
+                    point.lat,
+                    point.lng,
+                    previewCourse,
+                    Math.max(0.05, previewSpeed * 0.1)
+                );
+                const vector = aisVectors.get(key);
+                if (vector) vector.setLatLngs([[point.lat, point.lng], endpoint]);
+                const vectorHandle = aisVectorHandles.get(key);
+                if (vectorHandle && !vectorHandle.syntheticDragging) vectorHandle.setLatLng(endpoint);
+            });
+            m.on('dragend', () => {
+                const point = m.getLatLng();
+                m.syntheticPendingPosition = {
+                    lat: point.lat,
+                    lon: point.lng,
+                    expiresAt: Date.now() + 3000
+                };
+                m.syntheticDragging = false;
+                endSyntheticDrag();
+                emitMapCommand({action: 'synthetic_move', mmsi: Number(m.latestAisTarget.mmsi), lat: point.lat, lon: point.lng});
+            });
+        }
+        m.latestAisTarget = {...t, lat, lon, course, speed, heading: orientation};
+        if (!m.getPopup()) {
+            m.bindPopup(aisPopupHtml(t), {
+                pane: 'popupPane',
+                maxWidth: 360,
+                autoPan: true,
+                autoPanPaddingTopLeft: [24, 72],
+                autoPanPaddingBottomRight: [24, 24]
+            });
+        } else if (m.isPopupOpen()) {
+            m.setPopupContent(aisPopupHtml(m.latestAisTarget));
+        }
+        if (t.name) {
+            const details = [
+                t.name,
+                t.mmsi ? `MMSI ${t.mmsi}` : "",
+                t.callsign ? `Call ${t.callsign}` : "",
+                t.ship_type ? `${t.ship_type}` : "",
+                t.destination ? `Dest ${t.destination}` : ""
+            ].filter(Boolean).join("<br>");
+            if (m.latestTooltipHtml !== details) {
+                if (m.getTooltip()) {
+                    m.setTooltipContent(details);
+                } else {
+                    m.bindTooltip(details, {
+                        direction: 'top',
+                        sticky: true,
+                        opacity: 1,
+                        pane: 'tooltipPane'
+                    });
+                }
+                m.latestTooltipHtml = details;
+            }
+            if (hoveredAisKey === key) {
+                m.openTooltip();
+            }
+        } else if (m.getTooltip()) {
+            m.unbindTooltip();
+            m.latestTooltipHtml = "";
+        }
+        if (speed > 0.01 || t.synthetic) {
+            const vectorDistance = t.synthetic ? Math.max(0.05, speed * 0.1) : speed * 0.1;
+            const vectorCoordinates = [[lat, lon], destinationPoint(lat, lon, course, vectorDistance)];
+            let vector = aisVectors.get(key);
+            if (!vector) {
+                vector = L.polyline(vectorCoordinates, {
+                    pane: 'vectorPane',
+                    color: "#26323d",
+                    weight: 1,
+                    opacity: 0.75
+                }).addTo(aisVectorLayer || aisLayer);
+                aisVectors.set(key, vector);
+                aisVectorCreateCount += 1;
+            } else if (!m.syntheticDragging && !(handle && handle.syntheticDragging)) {
+                vector.setLatLngs(vectorCoordinates);
+            }
+            seenVectors.add(key);
+            if (t.synthetic && aisEditMode) {
+                const endpoint = vectorCoordinates[1];
+                handle = aisVectorHandles.get(key);
+                if (!handle) {
+                    handle = L.marker(endpoint, {
+                        pane: 'trafficPane',
+                        zIndexOffset: 2600,
+                        icon: syntheticVectorHandleIcon(),
+                        draggable: true
+                    }).addTo(aisLayer);
+                    handle.on('dragstart', () => {
+                        handle.syntheticDragging = true;
+                        beginSyntheticDrag();
+                    });
+                    handle.on('drag', () => {
+                        const vector = aisVectors.get(key);
+                        if (vector) vector.setLatLngs([m.getLatLng(), handle.getLatLng()]);
+                    });
+                    handle.on('dragend', () => {
+                        const targetPoint = m.getLatLng();
+                        const vectorPoint = handle.getLatLng();
+                        const editedCourse = bearingBetween(targetPoint, vectorPoint);
+                        const editedSpeed = Math.max(0.0, distanceBetweenNm(targetPoint, vectorPoint) / 0.1);
+                        handle.syntheticPendingVector = {
+                            course: editedCourse,
+                            speed: editedSpeed,
+                            expiresAt: Date.now() + 3000
+                        };
+                        handle.syntheticDragging = false;
+                        endSyntheticDrag();
+                        emitMapCommand({
+                            action: 'synthetic_vector',
+                            mmsi: Number(m.latestAisTarget.mmsi),
+                            course: editedCourse,
+                            speed: editedSpeed
+                        });
+                    });
+                    aisVectorHandles.set(key, handle);
+                } else if (!handle.syntheticDragging) {
+                    handle.setLatLng(endpoint);
+                }
+            } else if (aisVectorHandles.has(key)) {
+                aisLayer.removeLayer(aisVectorHandles.get(key));
+                aisVectorHandles.delete(key);
+            }
+        }
+    });
+    aisVectors.forEach((vector, key) => {
+        if (!seenVectors.has(key)) {
+            (aisVectorLayer || aisLayer).removeLayer(vector);
+            aisVectors.delete(key);
+        }
+    });
+    aisVectorHandles.forEach((handle, key) => {
+        if (!seenVectors.has(key) || !seen.has(key)) {
+            if (handle.syntheticDragging) {
+                handle.syntheticDragging = false;
+                endSyntheticDrag();
+            }
+            aisLayer.removeLayer(handle);
+            aisVectorHandles.delete(key);
+        }
+    });
+    aisMarkers.forEach((marker, key) => {
+        if (!seen.has(key)) {
+            if (marker.syntheticDragging) {
+                marker.syntheticDragging = false;
+                endSyntheticDrag();
+            }
+            aisLayer.removeLayer(marker);
+            aisMarkers.delete(key);
+            if (hoveredAisKey === key) {
+                hoveredAisKey = null;
+            }
+        }
+    });
+    window.lastAISCount = targets.length;
+}
+
+function setAISEditMode(active) {
+    aisEditMode = Boolean(active);
+}
+
+window.getMapDiagnostics = () => ({
+    ownShipHistoryPoints: ownShipHistory.length,
+    ownShipHistorySpacingM,
+    ownShipHistoryLimit: MAX_OWN_SHIP_HISTORY_POINTS,
+    aisMarkers: aisMarkers.size,
+    aisVectors: aisVectors.size,
+    aisMarkerCreateCount,
+    aisVectorCreateCount,
+    routeObjects: routeLayer ? routeLayer.getLayers().length : 0,
+});
+
+function updateRoute(routeData) {
+    if (!window.mapReady) return;
+
+    routeLayer.clearLayers();
+    routeWaypointMarkers = [];
+    const waypoints = Array.isArray(routeData) ? routeData : (routeData.waypoints || []);
+    const wheelOver = Array.isArray(routeData) ? [] : (routeData.wheelOver || []);
+    const turnArcs = Array.isArray(routeData) ? [] : (routeData.turnArcs || []);
+
+    const points = [];
+    waypoints.forEach((wp, index) => {
+        const lat = Number(wp.lat);
+        const lon = Number(wp.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        const point = [lat, lon];
+        points.push(point);
+        const marker = L.marker(point, {
+            pane: 'routePane',
+            icon: L.divIcon({
+                className: "route-wp-icon",
+                html: `<div class="route-wp-handle" style="width: 18px; height: 18px; border: 2px solid #ff4b4b; background: transparent; border-radius: 50%; box-sizing: border-box; cursor: grab; pointer-events: auto;"></div>`,
+                iconSize: [18, 18],
+                iconAnchor: [9, 9]
+            }),
+            zIndexOffset: 1200
+        }).addTo(routeLayer);
+        routeWaypointMarkers[index] = marker;
+        marker.bindTooltip(`WP ${wp.name || index + 1}`);
+        marker.on('contextmenu', (event) => {
+            showRouteContextMenu(event.originalEvent, event.latlng, index);
+            L.DomEvent.stop(event);
+        });
+    });
+
+    if (points.length > 1) {
+        const line = L.polyline(points, {
+            pane: 'routePane',
+            color: "#ff4b4b",
+            weight: 2,
+            opacity: 0.9
+        }).addTo(routeLayer);
+        line.on('contextmenu', (event) => {
+            let insertIndex = 1;
+            let best = Infinity;
+            const p = map.latLngToLayerPoint(event.latlng);
+            for (let i = 0; i < points.length - 1; i++) {
+                const a = map.latLngToLayerPoint(points[i]);
+                const b = map.latLngToLayerPoint(points[i + 1]);
+                const d = distanceToSegment(p, a, b);
+                if (d < best) {
+                    best = d;
+                    insertIndex = i + 1;
+                }
+            }
+            emitRouteEvent({action: 'insert', index: insertIndex, lat: event.latlng.lat, lon: event.latlng.lng});
+            L.DomEvent.stop(event);
+        });
+    }
+
+    turnArcs.forEach((arc) => {
+        const arcPoints = Array.isArray(arc.points) ? arc.points : [];
+        const latLngs = arcPoints
+            .map((p) => [Number(p.lat), Number(p.lon)])
+            .filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+        if (latLngs.length < 2) return;
+        const hasOverlap = Boolean(arc.overlap);
+        L.polyline(latLngs, {
+            pane: 'routePane',
+            color: hasOverlap ? "#ff5252" : "#ffb347",
+            weight: hasOverlap ? 2.6 : 1.5,
+            opacity: hasOverlap ? 0.98 : 0.92,
+            dashArray: hasOverlap ? "4 2" : "6 4"
+        }).addTo(routeLayer);
+        const compromisePoints = Array.isArray(arc.compromise_points) ? arc.compromise_points : [];
+        const compromiseLatLngs = compromisePoints
+            .map((p) => [Number(p.lat), Number(p.lon)])
+            .filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+        if (compromiseLatLngs.length >= 2) {
+            L.polyline(compromiseLatLngs, {
+                pane: 'routePane',
+                color: "#ffd166",
+                weight: 2.4,
+                opacity: 0.98,
+                dashArray: "8 3"
+            }).bindTooltip("Controller compromise path for overlapping turn geometry").addTo(routeLayer);
+        }
+        const transition = arc.conflict_transition;
+        if (transition && Number.isFinite(Number(transition.lat)) && Number.isFinite(Number(transition.lon))) {
+            L.circleMarker([Number(transition.lat), Number(transition.lon)], {
+                pane: 'routePane',
+                radius: 6,
+                color: "#ffd166",
+                weight: 2,
+                fillColor: "#0f1d26",
+                fillOpacity: 0.95
+            }).bindTooltip("Average transition point").addTo(routeLayer);
+        }
+    });
+
+    wheelOver.forEach(mark => {
+        const lat = Number(mark.lat);
+        const lon = Number(mark.lon);
+        const bearing = Number(mark.bearing);
+        const half = (Number(mark.length_nm) || 0.18) / 2;
+        if (!Number.isFinite(lat) || !Number.isFinite(lon) || !Number.isFinite(bearing)) return;
+        const a = destinationPoint(lat, lon, bearing, half);
+        const b = destinationPoint(lat, lon, (bearing + 180) % 360, half);
+        L.polyline([a, b], {
+            pane: 'routePane',
+            color: "#ff4b4b",
+            weight: 2,
+            opacity: 0.95
+        }).addTo(routeLayer);
+    });
+    installRouteEditor();
+}
+
+function installRouteEditor() {
+    if (!map || routeEditInstalled) return;
+    routeEditInstalled = true;
+    let active = null;
+
+    map.on('mousedown', (event) => {
+        if (!routeWaypointMarkers.length || event.originalEvent.button !== 0) return;
+        const nearest = nearestWaypoint(event.containerPoint);
+        if (!nearest || nearest.distance > 24) return;
+
+        active = nearest;
+        L.DomEvent.stop(event);
+        if (event.originalEvent) {
+            event.originalEvent.preventDefault();
+            event.originalEvent.stopPropagation();
+        }
+        map.dragging.disable();
+        map.doubleClickZoom.disable();
+        map.getContainer().style.cursor = 'grabbing';
+    });
+
+    map.on('mousemove', (event) => {
+        if (!active) return;
+        active.marker.setLatLng(event.latlng);
+    });
+
+    map.on('mouseup', (event) => {
+        if (!active) return;
+        const ll = active.marker.getLatLng();
+        emitRouteEvent({action: 'move', index: active.index, lat: ll.lat, lon: ll.lng});
+        active = null;
+        map.dragging.enable();
+        map.doubleClickZoom.enable();
+        map.getContainer().style.cursor = '';
+    });
+
+    map.on('mouseout', () => {
+        if (!active) return;
+        const ll = active.marker.getLatLng();
+        emitRouteEvent({action: 'move', index: active.index, lat: ll.lat, lon: ll.lng});
+        active = null;
+        map.dragging.enable();
+        map.doubleClickZoom.enable();
+        map.getContainer().style.cursor = '';
+    });
+}
+
+function nearestWaypoint(containerPoint) {
+    let best = null;
+    routeWaypointMarkers.forEach((marker, index) => {
+        if (!marker) return;
+        const point = map.latLngToContainerPoint(marker.getLatLng());
+        const distance = point.distanceTo(containerPoint);
+        if (!best || distance < best.distance) {
+            best = {marker, index, distance};
+        }
+    });
+    return best;
+}
+
+function installMapRouteContext() {
+    if (!map || mapContextInstalled) return;
+    mapContextInstalled = true;
+    map.on('contextmenu', (event) => {
+        const nearest = nearestWaypoint(event.containerPoint);
+        showRouteContextMenu(event.originalEvent, event.latlng, nearest && nearest.distance <= 24 ? nearest.index : null);
+        L.DomEvent.stop(event);
+    });
+    map.on('dragstart', disableFollowOwnship);
+    map.on('click dragstart zoomstart', hideRouteContextMenu);
+}
+
+function showRouteContextMenu(domEvent, latlng, waypointIndex) {
+    if (offlineAreaSelection) return;
+    hideRouteContextMenu();
+    contextMenu = document.createElement('div');
+    contextMenu.className = 'route-context-menu';
+
+    if (aisEditMode) {
+        const addTargetButton = document.createElement('button');
+        addTargetButton.textContent = 'Add synthetic AIS target here';
+        addTargetButton.onclick = () => {
+            emitMapCommand({action: 'synthetic_add', lat: latlng.lat, lon: latlng.lng});
+            hideRouteContextMenu();
+        };
+        contextMenu.appendChild(addTargetButton);
+    }
+
+    if (contextMode === "track") {
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add waypoint here';
+        addButton.onclick = () => {
+            emitRouteEvent({action: 'append', lat: latlng.lat, lon: latlng.lng});
+            hideRouteContextMenu();
+        };
+        contextMenu.appendChild(addButton);
+    }
+
+    if (contextMode === "track" && waypointIndex !== null && waypointIndex !== undefined) {
+        const removeButton = document.createElement('button');
+        removeButton.textContent = 'Remove waypoint';
+        removeButton.onclick = () => {
+            emitRouteEvent({action: 'delete', index: waypointIndex});
+            hideRouteContextMenu();
+        };
+        contextMenu.appendChild(removeButton);
+    }
+
+    const ownshipButton = document.createElement('button');
+    ownshipButton.textContent = 'Set own position here';
+    ownshipButton.onclick = () => {
+        emitRouteEvent({action: 'set_ownship', lat: latlng.lat, lon: latlng.lng});
+        hideRouteContextMenu();
+    };
+    contextMenu.appendChild(ownshipButton);
+
+    const headingButton = document.createElement('button');
+    headingButton.textContent = 'Set heading toward here';
+    headingButton.onclick = () => {
+        emitRouteEvent({action: 'set_heading', lat: latlng.lat, lon: latlng.lng});
+        hideRouteContextMenu();
+    };
+    contextMenu.appendChild(headingButton);
+
+    document.body.appendChild(contextMenu);
+    const x = Math.min(domEvent.clientX, window.innerWidth - contextMenu.offsetWidth - 4);
+    const y = Math.min(domEvent.clientY, window.innerHeight - contextMenu.offsetHeight - 4);
+    contextMenu.style.left = `${Math.max(4, x)}px`;
+    contextMenu.style.top = `${Math.max(4, y)}px`;
+}
+
+function hideRouteContextMenu() {
+    if (contextMenu) {
+        contextMenu.remove();
+        contextMenu = null;
+    }
+}
+
+function distanceToSegment(p, a, b) {
+    const vx = b.x - a.x, vy = b.y - a.y;
+    const wx = p.x - a.x, wy = p.y - a.y;
+    const c1 = vx * wx + vy * wy;
+    if (c1 <= 0) return p.distanceTo(a);
+    const c2 = vx * vx + vy * vy;
+    if (c2 <= c1) return p.distanceTo(b);
+    const t = c1 / c2;
+    return p.distanceTo(L.point(a.x + t * vx, a.y + t * vy));
+}
+
+function consumeRouteEvents() {
+    installMapRouteContext();
+    const events = routeEvents;
+    routeEvents = [];
+    return events;
+}
+
+window.onload = initMap;
+</script>
+
+</body>
+</html>

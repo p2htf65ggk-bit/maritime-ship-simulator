@@ -1,0 +1,25 @@
+{
+  "duration": 120,
+  "own_ship": {
+    "start": [0, 0],
+    "heading": 90,
+    "sog": 12
+  },
+  "environment": {
+    "wind_dir": 60,
+    "wind_speed": 20,
+    "current_dir": 180,
+    "current_speed": 2
+  },
+  "events": [
+    {
+      "time": 30,
+      "type": "rudder",
+      "value": 20
+    },
+    {
+      "time": 60,
+      "type": "gnss_loss"
+    }
+  ]
+}

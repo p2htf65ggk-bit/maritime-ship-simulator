@@ -1,0 +1,14 @@
+# Minimal, pinned dependencies required to test and package V2.
+# Optional browser tooling is documented in CONTRIBUTING.md.
+certifi==2026.7.22
+PyInstaller==6.17.0
+PySide6==6.11.0
+pytest==9.0.3
+websockets==17.1
+pmtiles==3.8.1
+mapbox-vector-tile==2.2.0
+protobuf==6.33.6
+pyclipper==1.4.0
+shapely==2.2.0
+numpy==2.5.3
+pyogrio==0.13.0
