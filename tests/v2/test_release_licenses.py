@@ -74,3 +74,12 @@ def test_all_native_builds_collect_notices_before_signing():
     spec = (ROOT / "ship-simulator-v2.spec").read_text()
     assert 'modules=[entry[0] for entry in a.pure]' in spec
     assert '"pytest", "_pytest", "pygments", "IPython"' in spec
+
+
+def test_gdal_build_without_geos_does_not_require_a_nonexistent_library(tmp_path, monkeypatch):
+    import pyogrio
+    monkeypatch.setattr(pyogrio, "__gdal_geos_version__", None)
+    result = licenses.collect(ROOT, tmp_path / "notices")
+    assert result["geos_gdal"] is None
+    assert result["geos_shapely"]
+    licenses.validate(tmp_path / "notices")

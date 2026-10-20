@@ -76,10 +76,12 @@ def collect(root: Path, output: Path, *, modules=()) -> dict:
     import shapely
     result["gdal"] = pyogrio.__gdal_version_string__
     result["geos_shapely"] = shapely.geos_version_string
-    result["geos_gdal"] = ".".join(map(str, pyogrio.__gdal_geos_version__))
+    gdal_geos = getattr(pyogrio, "__gdal_geos_version__", None)
+    result["geos_gdal"] = ".".join(map(str, gdal_geos)) if gdal_geos else None
     source_manifest = json.loads((root / "LICENSES/upstream-sources.json").read_text(encoding="utf-8"))
     supplied_geos = {item["version"] for item in source_manifest["sources"] if item["component"] == "GEOS"}
-    if not {result["geos_shapely"], result["geos_gdal"]} <= supplied_geos:
+    actual_geos = {value for value in (result["geos_shapely"], result["geos_gdal"]) if value}
+    if not actual_geos <= supplied_geos:
         raise ValueError("The build's GEOS version needs a matching source archive in LICENSES/upstream-sources.json")
     shutil.copy2(root / "LICENSES/upstream-sources.json", output / "upstream-sources.json")
     missing = []

@@ -71,7 +71,9 @@ ZIP relocation, ad-hoc bundle integrity and DMG verification pass. It uses the
 existing pinned Python 3.13.7/PySide6 6.11.0 environment. This is not an Intel Mac,
 Windows or Ubuntu qualification or a fresh-dependency-installation claim.
 The final packaging gate passed 954 V2 tests and all 60 Track baseline cases;
-the focused license/handoff/tooling checks passed 46 tests. Upstream Qt/PySide
+the focused license/handoff/tooling checks passed 47 tests, including GDAL builds
+without an optional GEOS linkage. This build-only follow-up leaves the generated
+macOS notices unchanged. Upstream Qt/PySide
 notices contain 3,576/33 files with all declared LicenseFile references resolved.
 
 Windows and both supported Ubuntu build groups still need their native build,
