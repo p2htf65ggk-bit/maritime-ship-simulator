@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an operator workflow or simulator improvement.
+title: "[Feature] "
+body:
+  - type: markdown
+    attributes:
+      value: "Suggestions are welcome. Development is best effort, with no guaranteed implementation schedule. Do not include private equipment details or credentials."
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to do?
+      description: Describe the operator workflow and the limitation you encounter.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested improvement
+      description: Include alternatives or a workaround, if relevant.
+    validations:
+      required: true
+  - type: input
+    id: setup
+    attributes:
+      label: Relevant version, platform or protocol

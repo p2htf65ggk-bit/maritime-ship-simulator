@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: User Guide and troubleshooting
+    url: https://github.com/p2htf65ggk-bit/maritime-ship-simulator/blob/main/docs/v2_user_guide.md
+    about: Check operating instructions before opening an issue.
+  - name: Sensitive data and security reports
+    url: https://github.com/p2htf65ggk-bit/maritime-ship-simulator/blob/main/SECURITY.md
+    about: Never disclose vulnerabilities, credentials or private captures in a public issue.

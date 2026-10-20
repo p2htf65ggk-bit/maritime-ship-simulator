@@ -9,7 +9,7 @@ body:
     id: version
     attributes:
       label: Application version and package filename
-      placeholder: "2.2.1, Ubuntu 22.04 DEB"
+      placeholder: "2.3.0, Ubuntu 22.04 DEB"
     validations:
       required: true
   - type: textarea
