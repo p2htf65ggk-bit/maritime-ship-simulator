@@ -86,6 +86,17 @@ Actual Windows build completion remains to be confirmed on the build computer.
 
 ## Required before public binaries
 
+The subsequent Ubuntu build photos identified missing curl, Python 3.14 venv
+support and a partial environment without pip. The Linux build script now
+checks curl before compilation, offers version-matched venv support through
+APT/sudo, validates pip and repairs a compatible partial environment with
+ensurepip. Cached/custom AppImage tooling still works without curl. These
+build-time changes do not alter simulator runtime or require a Windows rebuild.
+All 52 focused build-tooling cases pass on the development host, including a
+real no-pip environment repaired offline without deleting an existing file.
+APT success/failure/decline and Python 3.12/3.13/3.14 package selection use
+controlled shell fixtures; they are not real Ubuntu package-installation tests.
+
 Run scripts/prebuild_v2.py --profile full and the native build script on each
 target OS. Test startup, relocation, dialogs, offline maps/ENCs, controller loss/
 recovery, real serial/network output and provider/GPU interaction. Review the

@@ -40,6 +40,20 @@ platform directory. The `.deb` declares Qt/XCB runtime dependencies. Apt needs
 internet or a prepared local package source if those system libraries are
 missing. Installing the finished application does not require a Python Venv.
 
+Before building, the script checks whether curl is needed to obtain appimagetool.
+An explicit, installed or cached tool keeps offline builds independent of curl.
+If curl is required but missing, the script offers to install curl and
+ca-certificates through APT before the long build starts.
+
+The selected Python must also have its matching venv/ensurepip package. For
+Python 3.14 this is python3.14-venv, not an arbitrary older Python's venv package.
+The script offers installation with sudo where needed and validates pip inside
+the actual build environment. An otherwise healthy environment missing pip is
+repaired with ensurepip rather than deleted. Missing pip is not reported as a
+network/DNS problem. Noninteractive builds fail early with manual instructions
+unless package installation was explicitly approved. These are build-time
+requirements; application users do not need curl, pip or Python venv tooling.
+
 The 2.3.0 binary release uses the maintainer's current Ubuntu LTS build only;
 the actual version and architecture must be recorded from RELEASE_INFO.txt and
 the build computer before publication. No separate 22.04 binary is planned.

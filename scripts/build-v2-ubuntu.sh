@@ -105,6 +105,44 @@ validate_release_source() {
 
 validate_release_source
 
+install_build_packages() {
+  local prompt=$1
+  shift
+  command -v apt-get >/dev/null 2>&1 || return 1
+  local -a elevate=()
+  if [[ "${EUID:-$(id -u)}" -ne 0 ]]; then
+    command -v sudo >/dev/null 2>&1 || return 1
+    elevate=(sudo)
+  fi
+  confirm_operation "${prompt}" 1 || return 1
+  run "${elevate[@]}" apt-get update &&
+    run "${elevate[@]}" apt-get install -y "$@"
+}
+
+ensure_appimage_download_prerequisites() {
+  [[ "${SKIP_APPIMAGE:-0}" != "1" ]] || return 0
+  [[ -z "${APPIMAGETOOL_BIN:-}" ]] || return 0
+  command -v appimagetool >/dev/null 2>&1 && return 0
+  local tool_arch
+  case "$(uname -m)" in
+    x86_64) tool_arch=x86_64 ;;
+    aarch64|arm64) tool_arch=aarch64 ;;
+    *) echo "ERROR: No automatic appimagetool download for $(uname -m). Set APPIMAGETOOL_BIN." >&2; return 1 ;;
+  esac
+  [[ ! -s "${ROOT_DIR}/.tools/appimagetool-${tool_arch}.AppImage" ]] || return 0
+  command -v curl >/dev/null 2>&1 && return 0
+
+  if install_build_packages \
+      "curl is needed to download appimagetool. Install curl and ca-certificates through apt before building?" \
+      curl ca-certificates && command -v curl >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "ERROR: curl is required to download appimagetool. Run 'sudo apt install curl ca-certificates', then rerun this build, or set APPIMAGETOOL_BIN to an existing tool." >&2
+  return 1
+}
+
+ensure_appimage_download_prerequisites
+
 python_supported() {
   "$1" -c "import sys; raise SystemExit(0 if sys.version_info >= (3, ${MIN_PYTHON_MINOR}) else 1)" >/dev/null 2>&1
 }
@@ -158,10 +196,22 @@ fi
 step "Using ${PYTHON_BIN}"
 run "${PYTHON_BIN}" -c "import sys; print(sys.version)"
 PYTHON_TAG="$(${PYTHON_BIN} -c 'import sys; print(f"py{sys.version_info.major}{sys.version_info.minor}")')"
+PYTHON_VENV_PACKAGE="$(${PYTHON_BIN} -c 'import sys; print(f"python{sys.version_info.major}.{sys.version_info.minor}-venv")')"
+
+ensure_venv_support() {
+  "${PYTHON_BIN}" -c 'import venv, ensurepip' >/dev/null 2>&1 && return 0
+  if install_build_packages \
+      "The selected Python is missing venv/ensurepip support. Install ${PYTHON_VENV_PACKAGE} through apt now?" \
+      "${PYTHON_VENV_PACKAGE}" && "${PYTHON_BIN}" -c 'import venv, ensurepip' >/dev/null 2>&1; then
+    return 0
+  fi
+  echo "ERROR: The selected Python requires ${PYTHON_VENV_PACKAGE}. Run 'sudo apt install ${PYTHON_VENV_PACKAGE}', then rerun this build. This is not a network failure." >&2
+  return 1
+}
 
 VENV_DIR="${V2_VENV_DIR:-venv-v2-linux}"
 VENV_PYTHON="${VENV_DIR}/bin/python"
-venv_healthy() {
+venv_interpreter_healthy() {
   [[ -x "${VENV_PYTHON}" ]] || return 1
   if command -v timeout >/dev/null 2>&1; then
     timeout 10s "${VENV_PYTHON}" -c "import sys; expected='${PYTHON_TAG}'; actual=f'py{sys.version_info.major}{sys.version_info.minor}'; raise SystemExit(0 if sys.version_info >= (3, ${MIN_PYTHON_MINOR}) and actual == expected else 1)" >/dev/null 2>&1
@@ -170,16 +220,34 @@ venv_healthy() {
   fi
 }
 
-if ! venv_healthy; then
-  if [[ -e "${VENV_DIR}" ]] && ! confirm_operation "The V2 virtual environment '${VENV_DIR}' is damaged, foreign, or uses another Python version. Delete and recreate it?" 1; then
-    echo "ERROR: A usable V2 virtual environment is required. Move it manually or approve recreation." >&2
-    exit 1
+venv_healthy() {
+  venv_interpreter_healthy || return 1
+  if command -v timeout >/dev/null 2>&1; then
+    timeout 10s "${VENV_PYTHON}" -m pip --version >/dev/null 2>&1
+  else
+    "${VENV_PYTHON}" -m pip --version >/dev/null 2>&1
   fi
-  step "Replacing missing, foreign or damaged V2 virtual environment"
-  rm -rf "${VENV_DIR}"
-  run "${PYTHON_BIN}" -m venv "${VENV_DIR}"
+}
+
+if ! venv_healthy; then
+  ensure_venv_support || exit 1
+  if venv_interpreter_healthy; then
+    step "Repairing missing pip in the existing V2 virtual environment"
+    run "${VENV_PYTHON}" -m ensurepip --upgrade
+  else
+    if [[ -e "${VENV_DIR}" ]] && ! confirm_operation "The V2 virtual environment '${VENV_DIR}' is damaged, foreign, or uses another Python version. Delete and recreate it?" 1; then
+      echo "ERROR: A usable V2 virtual environment is required. Move it manually or approve recreation." >&2
+      exit 1
+    fi
+    step "Replacing missing, foreign or damaged V2 virtual environment"
+    rm -rf "${VENV_DIR}"
+    run "${PYTHON_BIN}" -m venv "${VENV_DIR}"
+  fi
 fi
-venv_healthy || { echo "ERROR: ${VENV_PYTHON} is not usable after creation." >&2; exit 1; }
+if ! venv_healthy; then
+  echo "ERROR: ${VENV_PYTHON} is not usable with pip after environment setup. Install ${PYTHON_VENV_PACKAGE} and retry; no dependency download was attempted." >&2
+  exit 1
+fi
 
 dependencies_healthy() {
   "${VENV_PYTHON}" -c "from importlib.metadata import version; from pathlib import Path; expected=dict(line.split('==', 1) for line in Path('requirements-v2-release.txt').read_text(encoding='utf-8').splitlines() if line and not line.startswith('#')); raise SystemExit(0 if all(version(name) == wanted for name, wanted in expected.items()) else 1)" >/dev/null 2>&1 &&
