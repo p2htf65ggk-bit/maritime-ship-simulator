@@ -444,7 +444,7 @@ function forwardWheelZoom(deltaY, clientX = null, clientY = null, deltaMode = 0)
     if (!map) return false;
     const modeScale = Number(deltaMode) === 1 ? 20.0 : (Number(deltaMode) === 2 ? 60.0 : 1.0);
     const steps = -(Number(deltaY) || 0) * modeScale / 120.0;
-    if (Math.abs(steps) < 0.002) return false;
+    if (Math.abs(steps) < 1e-9) return false;
     beginSmoothMapZoom();
     smoothZoomTarget = Math.max(
         map.getMinZoom(),
@@ -459,7 +459,7 @@ function forwardWheelZoom(deltaY, clientX = null, clientY = null, deltaMode = 0)
 
 window.zoomMapByNativeGesture = function(steps, clientX = null, clientY = null) {
     const amount = Math.max(-4, Math.min(4, Number(steps) || 0));
-    if (Math.abs(amount) < 0.002) return false;
+    if (Math.abs(amount) < 1e-9) return false;
     return forwardWheelZoom(-amount * 120.0, clientX, clientY, 0);
 };
 

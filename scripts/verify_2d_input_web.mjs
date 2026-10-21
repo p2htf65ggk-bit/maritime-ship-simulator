@@ -87,6 +87,18 @@ try {
     await settled();
     assert.ok(Math.abs((await state()).zoom - 14.15) < .003, "Pinch must zoom the map without page scaling");
     assert.equal(await page.evaluate(() => window.visualViewport.scale), 1);
+    const precisePinches = [];
+    for (const direction of [-1, 1]) {
+      await reset();
+      await page.evaluate(direction => {
+        for (let i = 0; i < 500; i++) window.zoomMapByNativeGesture(direction * .0001);
+      }, direction);
+      await settled();
+      const precise = await state();
+      assert.ok(Math.abs(precise.zoom - (14 + direction * .05)) < 1e-6,
+        "Small native pinch deltas must accumulate equally in both directions");
+      precisePinches.push({ direction, zoom: precise.zoom, frames: precise.frames.length });
+    }
     for (const first of ["left", "right"]) {
       await reset();
       const second = first === "left" ? "right" : "left";
@@ -101,7 +113,7 @@ try {
     }
     await page.screenshot({ path: path.join(output, `map-input-scale-${scale}.png`) });
     results.push({ scale, smallWheelZoom: wheel.zoom, smoothFrames: wheel.frames.length, panPixels: pan.pixel.y - beforePan.pixel.y,
-      followCenter: follow.center, pinchPageScale: 1, bothMouseChords: true });
+      followCenter: follow.center, pinchPageScale: 1, precisePinches, bothMouseChords: true });
     await context.close();
   }
   assert.deepEqual(errors, []);

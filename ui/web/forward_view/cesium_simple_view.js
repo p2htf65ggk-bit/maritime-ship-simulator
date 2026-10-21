@@ -1090,6 +1090,16 @@ window.applyMouseWheelZoom = (deltaY) => {
   updateCamera();
 };
 
+window.applyNativeCameraScale = (factor) => {
+  const scale = Number(factor);
+  if (!Number.isFinite(scale) || scale <= 0) return false;
+  markCameraInteraction();
+  viewRangeM = clamp(viewRangeM / scale, MIN_CAMERA_RANGE_M, MAX_CAMERA_RANGE_M);
+  syncCameraControls();
+  updateCamera();
+  return true;
+};
+
 window.applyNativeCameraPan = (deltaX, deltaY) => {
   markCameraInteraction();
   panByScreenPixels(-safeNumber(deltaX), -safeNumber(deltaY));

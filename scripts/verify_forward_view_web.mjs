@@ -77,6 +77,31 @@ function startServer() {
   });
 }
 
+async function verifyNativePinchScale(page) {
+  const result = await page.evaluate(() => {
+    const before = window.getVisualDiagnostics();
+    const samples = [];
+    for (const scale of [.5, 2, 2, .25, 2]) {
+      const initial = window.getVisualDiagnostics().viewRangeM;
+      window.applyNativeCameraScale(scale);
+      samples.push({ scale, initial, after: window.getVisualDiagnostics().viewRangeM });
+    }
+    for (const scale of [0, -1, NaN, Infinity]) {
+      if (window.applyNativeCameraScale(scale) !== false) throw new Error("Invalid native scale accepted");
+    }
+    return { before, samples, after: window.getVisualDiagnostics() };
+  });
+  for (const sample of result.samples) {
+    if (Math.abs(sample.after - sample.initial / sample.scale) > .001) {
+      throw new Error(`Native pinch scale is not reciprocal: ${JSON.stringify(result)}`);
+    }
+  }
+  if (Math.abs(result.before.viewRangeM - result.after.viewRangeM) > .001) {
+    throw new Error("Native pinch reversal did not return to its initial range");
+  }
+  return result;
+}
+
 async function verifyMouseChordAndSliderReset(page, selector) {
   const surface = page.locator(selector);
   const box = await surface.boundingBox();
@@ -1537,6 +1562,7 @@ async function verifySimpleCesiumOverlay(browser, server) {
     await page.mouse.move(640, 360);
     await page.mouse.wheel(0, -120);
     const zoomed = await page.evaluate(() => window.getVisualDiagnostics());
+    const nativeScaleZoom = await verifyNativePinchScale(page);
     const mouseControls = await verifyMouseChordAndSliderReset(page, "#cesiumContainer");
     const overlayPinch = await page.evaluate(() => {
       const before = window.getVisualDiagnostics();
@@ -1823,7 +1849,7 @@ async function verifySimpleCesiumOverlay(browser, server) {
     if (failures.length) throw new Error(`cesium-simple-overlay: ${failures.join("; ")}`);
     console.error("[forward-view] cesium-simple-overlay: passed");
     return {
-      initial, nameToggle, top, orbit, dragged, panned, zoomed, mouseControls, overlayPinch, reset,
+      initial, nameToggle, top, orbit, dragged, panned, zoomed, nativeScaleZoom, mouseControls, overlayPinch, reset,
       anchoredBefore, smoothingStarted, anchoredAfter,
       endurance: {
         diagnostics: endurance,
@@ -2010,6 +2036,7 @@ async function verifyGoogleMaps3DOverlay(browser, server) {
         throw new Error(`Native trackpad pan changed range or failed to move: ${JSON.stringify(pan)}`);
       }
     }
+    const nativeScaleZoom = await verifyNativePinchScale(page);
     const pinchWheel = await page.evaluate(() => {
       const map = document.querySelector(".google-gesture-surface");
       map.dispatchEvent(new WheelEvent("wheel", {
@@ -2434,7 +2461,7 @@ async function verifyGoogleMaps3DOverlay(browser, server) {
     if (failures.length) throw new Error(`google-maps-3d-overlay: ${failures.join("; ")}`);
     console.error("[forward-view] google-maps-3d-overlay: passed");
     return {
-      initial, nameToggle, aisMotion, dragged, rightPanned, trackpadPanned, wheelZoomed, nativePans, pinchWheel, mouseControls,
+      initial, nameToggle, aisMotion, dragged, rightPanned, trackpadPanned, wheelZoomed, nativePans, nativeScaleZoom, pinchWheel, mouseControls,
       overlayPinch,
       dualMouseZoom, courseAnchor, fullscreenButtonPresent,
       touchPan, touchPinch, sliders, doubleClickReset, top, reset, expandedTargets, lateName,

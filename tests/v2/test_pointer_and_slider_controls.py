@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MPL-2.0
 import os
+import math
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("SHIP_SIMULATOR_HEADLESS_MAP", "1")
@@ -16,7 +17,7 @@ from maritime_simulator.domain.enums import ControlMode
 from maritime_simulator.ui.forward_view import _ForwardViewGestureMixin
 from maritime_simulator.ui.mode_panels import ModeControlStack, CompactModeControls
 from ui.style import apply_global_ui_style
-from ui.web_input import mouse_wheel_delta
+from ui.web_input import NativePinchZoom, mouse_wheel_delta
 from ui import web_input
 from ui.widgets import map_widget
 from ui.widgets.map_widget import _MapInputFilter, _map_scroll_kind, _map_wheel_zoom_steps, _trackpad_pan_pixels
@@ -51,6 +52,101 @@ class WheelDevice:
     def __init__(self, touchpad): self.touchpad = touchpad
     def type(self): return QInputDevice.DeviceType.TouchPad if self.touchpad else QInputDevice.DeviceType.Mouse
     def systemId(self): return 1 if self.touchpad else 2
+
+
+class NativeGesture:
+    def __init__(self, gesture, value=0, fingers=2):
+        self.gesture, self.amount, self.fingers = gesture, value, fingers
+        self.accepted = False
+    def type(self): return QEvent.Type.NativeGesture
+    def gestureType(self): return self.gesture
+    def value(self): return self.amount
+    def fingerCount(self): return self.fingers
+    def accept(self): self.accepted = True
+
+
+@pytest.mark.parametrize("scales", [
+    [.9, .75, .5], [1.25, 1.5, 2], [1.5, 2, 1, .75, .5],
+    [1 - i / 10000 for i in range(1, 501)],
+    [1 + i / 10000 for i in range(1, 501)],
+])
+def test_wayland_native_pinch_uses_absolute_scale_and_keeps_small_updates(scales):
+    pinch = NativePinchZoom(wayland=True)
+    assert pinch.handle(NativeGesture(Qt.BeginNativeGesture)) == (True, None)
+    previous, total, product = 1.0, 0.0, 1.0
+    for scale in scales:
+        handled, steps = pinch.handle(NativeGesture(Qt.ZoomNativeGesture, scale - previous))
+        assert handled
+        assert steps == pytest.approx(math.log2(scale / previous), abs=1e-14)
+        assert steps != 0
+        total += steps
+        product *= pinch.scale_ratio
+        previous = scale
+    assert total == pytest.approx(math.log2(scales[-1]), abs=1e-12)
+    assert product == pytest.approx(scales[-1])
+    assert pinch.handle(NativeGesture(Qt.EndNativeGesture)) == (True, None)
+    assert not pinch.active
+    assert pinch.update(-.5) == pytest.approx(-1)
+
+
+@pytest.mark.parametrize("value", [None, "invalid", float("nan"), float("inf"), -float("inf"), -1, -2])
+def test_wayland_native_pinch_ignores_invalid_scale_without_poisoning_next_update(value):
+    pinch = NativePinchZoom(wayland=True)
+    assert pinch.update(value) == 0
+    assert pinch.update(-.5) == pytest.approx(-1)
+
+
+def test_non_wayland_native_pinch_keeps_existing_cocoa_values():
+    pinch = NativePinchZoom(wayland=False)
+    assert pinch.handle(NativeGesture(Qt.BeginNativeGesture)) == (False, None)
+    for value in [.01, -.01, .5, -.5]:
+        assert pinch.handle(NativeGesture(Qt.ZoomNativeGesture, value)) == (True, value)
+    assert pinch.handle(NativeGesture(Qt.EndNativeGesture)) == (False, None)
+
+
+def test_wayland_pinch_owns_interleaved_pan_rotation_but_not_three_finger_swipe():
+    pinch = NativePinchZoom(wayland=True)
+    assert pinch.handle(NativeGesture(Qt.BeginNativeGesture, fingers=3)) == (False, None)
+    assert pinch.handle(NativeGesture(Qt.PanNativeGesture, fingers=3)) == (False, None)
+    assert pinch.handle(NativeGesture(Qt.EndNativeGesture, fingers=3)) == (False, None)
+    pinch.handle(NativeGesture(Qt.BeginNativeGesture))
+    assert pinch.handle(NativeGesture(Qt.PanNativeGesture)) == (True, None)
+    assert pinch.handle(NativeGesture(Qt.RotateNativeGesture)) == (True, None)
+    pinch.handle(NativeGesture(Qt.EndNativeGesture))
+    assert pinch.handle(NativeGesture(Qt.PanNativeGesture)) == (False, None)
+
+
+def test_wayland_pinch_routes_outward_first_resets_and_suppresses_duplicate_wheel(monkeypatch):
+    app = QApplication.instance() or QApplication([])
+    monkeypatch.setattr(web_input.sys, "platform", "linux")
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: "wayland")
+
+    class View(QWidget, _ForwardViewGestureMixin):
+        def __init__(self):
+            super().__init__()
+            self.scripts = []
+        def page(self): return self
+        def runJavaScript(self, script): self.scripts.append(script)
+
+    view = View()
+    router = _MapInputFilter(view)
+    try:
+        for handle, function in [(lambda event: router.eventFilter(view, event), "zoomMapByNativeGesture"),
+                                 (view._handle_native_camera_input, "applyNativeCameraScale")]:
+            view.scripts.clear()
+            for event in [NativeGesture(Qt.BeginNativeGesture), NativeGesture(Qt.ZoomNativeGesture, -.5),
+                          Wheel(-120, ctrl=True), NativeGesture(Qt.PanNativeGesture),
+                          NativeGesture(Qt.EndNativeGesture), NativeGesture(Qt.BeginNativeGesture),
+                          NativeGesture(Qt.ZoomNativeGesture, -.5), NativeGesture(Qt.EndNativeGesture)]:
+                assert handle(event) and event.accepted
+            assert len(view.scripts) == 2
+            assert all(function in script for script in view.scripts)
+            argument = "-1.00000000" if function == "zoomMapByNativeGesture" else "0.5"
+            assert all(f"{function}({argument})" in script for script in view.scripts)
+    finally:
+        router.disable()
+        view.deleteLater()
+        app.processEvents()
 
 
 @pytest.mark.parametrize("platform,backend,event,expected", [
@@ -205,9 +301,18 @@ def test_2d_platform_wheel_pan_and_pinch_are_routed_once(monkeypatch, platform, 
         app.processEvents()
 
 
-@pytest.mark.parametrize("y,pixel", [(1, False), (8, False), (120, False), (-120, False), (3, True)])
+@pytest.mark.parametrize("y,pixel", [(1, False), (8, False), (120, False), (-120, False)])
 def test_mouse_wheel_is_explicit_zoom_even_for_small_steps(y, pixel):
     assert mouse_wheel_delta(Wheel(y, pixel=pixel)) == -y
+
+
+@pytest.mark.parametrize("platform,backend,expected", [
+    ("darwin", "cocoa", -3), ("linux", "xcb", -3), ("win32", "windows", None),
+])
+def test_pixel_only_scroll_without_native_source_uses_platform_policy(monkeypatch, platform, backend, expected):
+    monkeypatch.setattr(web_input.sys, "platform", platform)
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: backend)
+    assert mouse_wheel_delta(Wheel(3, pixel=True)) == expected
 
 
 @pytest.mark.parametrize("kwargs", [{"touchpad": True, "phase": True, "source": Qt.MouseEventSynthesizedBySystem}, {"pixel": True, "phase": True}, {"ctrl": True}])

@@ -1,8 +1,66 @@
 # SPDX-License-Identifier: MPL-2.0
+import math
 import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QGuiApplication, QInputDevice
+
+
+class NativePinchZoom:
+    """Translate Qt's Wayland scale deltas into incremental logarithmic zoom."""
+
+    def __init__(self, *, wayland=None):
+        self.wayland = (sys.platform.startswith("linux")
+                        and QGuiApplication.platformName().startswith("wayland")) if wayland is None else wayland
+        self.reset()
+
+    def reset(self):
+        self.active = False
+        self._scale = 1.0
+        self.scale_ratio = 1.0
+
+    def update(self, value):
+        self.scale_ratio = 1.0
+        try:
+            value = float(value)
+        except (TypeError, ValueError, OverflowError):
+            return 0.0
+        if not math.isfinite(value):
+            return 0.0
+        if not self.wayland:
+            return value
+        # Qt Wayland forwards current_scale - previous_scale, with each
+        # gesture starting at 1. Adding this directly to zoom biases zoom-out.
+        scale = self._scale + value
+        if not math.isfinite(scale) or scale <= 0:
+            return 0.0
+        ratio = scale / self._scale
+        if not math.isfinite(ratio) or ratio <= 0:
+            return 0.0
+        self._scale = scale
+        self.scale_ratio = ratio
+        return math.log2(ratio)
+
+    def handle(self, event):
+        gesture = event.gestureType()
+        if gesture == Qt.NativeGestureType.BeginNativeGesture:
+            self.reset()
+            if self.wayland and event.fingerCount() in (0, 2):
+                self.active = True
+                return True, None
+        elif gesture == Qt.NativeGestureType.EndNativeGesture:
+            handled = self.wayland and self.active
+            self.reset()
+            return handled, None
+        elif gesture == Qt.NativeGestureType.ZoomNativeGesture:
+            self.active = True
+            return True, self.update(event.value())
+        elif self.wayland and self.active and gesture in (
+                Qt.NativeGestureType.PanNativeGesture, Qt.NativeGestureType.RotateNativeGesture):
+            # A pinch may include these events; do not start a second browser
+            # gesture while the simulator owns its stable-centre zoom.
+            return True, None
+        return False, None
 
 
 def trackpad_pan_pixels(event):

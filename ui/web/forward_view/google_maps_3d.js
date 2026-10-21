@@ -882,6 +882,14 @@ window.applyNativeCameraZoom = (steps) => {
   commitGestureCamera();
 };
 
+window.applyNativeCameraScale = (factor) => {
+  const scale = Number(factor);
+  if (!Number.isFinite(scale) || scale <= 0) return false;
+  viewRangeM = clamp(viewRangeM / scale, MIN_CAMERA_RANGE_M, MAX_CAMERA_RANGE_M);
+  commitGestureCamera();
+  return true;
+};
+
 window.applyMouseWheelZoom = (deltaY) => {
   zoomByVerticalDelta(deltaY, WHEEL_ZOOM_SENSITIVITY);
   commitGestureCamera();

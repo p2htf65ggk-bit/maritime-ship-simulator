@@ -621,7 +621,8 @@ def test_map_widget_routes_trackpad_scroll_to_pan_without_hijacking_mouse_wheel(
     source = Path("ui/widgets/map_widget.py").read_text(encoding="utf-8")
     html = Path("ui/web/map.html").read_text(encoding="utf-8")
     assert "class _MapInputFilter" in source
-    assert "Qt.NativeGestureType.ZoomNativeGesture" in source
+    assert "NativePinchZoom" in source
+    assert "Qt.NativeGestureType.ZoomNativeGesture" in Path("ui/web_input.py").read_text(encoding="utf-8")
     assert "window.zoomMapByNativeGesture" in source
     assert "window.zoomMapByNativeGesture = function" in html
     assert "function animateSmoothMapZoom(timestamp)" in html

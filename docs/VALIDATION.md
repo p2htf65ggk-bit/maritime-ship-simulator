@@ -160,3 +160,29 @@ those systems. No independent legal certification is claimed.
 
 Release labels do not certify navigation fitness. S57 portrayal remains
 experimental. Maintenance is best effort, without promised response times.
+
+## Wayland pinch and Windows test follow-up on 21 October 2026
+
+Qt 6.11 Wayland emits changes in gesture-relative absolute scale. The native
+adapter now tracks that scale from each gesture's start, converts it to
+logarithmic Leaflet zoom, and sends reciprocal scale factors to both 3D cameras.
+This removes the asymmetric limit on zooming out first. Begin/end and interleaved
+pinch events stay with the map, and duplicate Ctrl-wheel updates are consumed.
+Small native steps are retained instead of being dropped by a browser threshold.
+Non-Wayland native values and ordinary mouse/pan paths retain their existing policy.
+
+The Windows photo showed one failing test, 985 passing and 29 skipped: a generic
+pixel-only event was incorrectly asserted to mean physical-wheel zoom on every
+platform. That exact assertion was reproduced with the Windows classifier.
+The test now explicitly covers Cocoa/X11 wheel policy and Windows generic-pixel
+pan policy; native mouse/touchpad identity tests remain in place. No test was
+bypassed and the PowerShell release gate was not weakened or changed.
+
+The working clean-source gate passes 1,032 tests and all 60 Track baselines.
+The focused input/visual set passes 138 tests, including 28 platform/native-
+source policy cases. Native QtWebEngine render-widget fixtures verify zoom-out
+first, reversal and consecutive gestures with no page zoom. Browser tests pass
+at 100/150/200% scale, retaining 500 tiny updates in each direction. Full 2D,
+Google and Cesium checks pass, including reciprocal 3D scaling and invalid input.
+These are controlled development-host checks; physical Ubuntu/Wayland acceptance
+and Windows build completion still need confirmation on their target machines.

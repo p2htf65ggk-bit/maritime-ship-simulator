@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -31,7 +32,7 @@ from maritime_simulator.visual import (
     normalize_visual_quality_mode,
 )
 from ui.webengine_profile import configure_webengine_profile
-from ui.web_input import mouse_wheel_delta, scroll_kind, trackpad_pan_pixels
+from ui.web_input import NativePinchZoom, mouse_wheel_delta, scroll_kind, trackpad_pan_pixels
 from ui.windows_scroll import WindowsScrollSource
 
 from .dialogs import OpaqueDialog
@@ -163,17 +164,36 @@ class _ForwardViewGestureMixin:
     def _handle_native_camera_input(self, event) -> bool:
         if event.type() == QEvent.Type.NativeGesture:
             try:
-                gesture_type = event.gestureType()
+                pinch = getattr(self, "_native_pinch_zoom", None)
+                if pinch is None:
+                    pinch = self._native_pinch_zoom = NativePinchZoom()
+                handled, steps = pinch.handle(event)
             except AttributeError:
-                gesture_type = None
-            if gesture_type == Qt.NativeGestureType.ZoomNativeGesture:
-                self._apply_native_camera_zoom(float(event.value()))
+                handled, steps = False, None
+            if handled:
+                self._last_native_pinch_at = time.monotonic()
+                if steps is not None and abs(steps) >= 1e-9:
+                    if pinch.wayland:
+                        try:
+                            self.page().runJavaScript(
+                                "if (window.applyNativeCameraScale) "
+                                f"window.applyNativeCameraScale({pinch.scale_ratio:.12g});"
+                            )
+                        except RuntimeError:
+                            return False
+                    else:
+                        self._apply_native_camera_zoom(steps)
                 event.accept()
                 return True
         if (
             event.type() == QEvent.Type.Wheel
             and event.modifiers() & Qt.KeyboardModifier.ControlModifier
         ):
+            pinch = getattr(self, "_native_pinch_zoom", None)
+            if pinch is not None and pinch.wayland and (pinch.active
+                    or time.monotonic() - getattr(self, "_last_native_pinch_at", 0) < .16):
+                event.accept()
+                return True
             self._apply_native_camera_zoom(_wheel_zoom_steps(event))
             event.accept()
             return True

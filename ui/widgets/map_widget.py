@@ -10,6 +10,7 @@ from PySide6.QtCore import QEvent, QObject, Qt, QTimer, QUrl, Signal, Slot
 
 from ui.webengine_profile import configure_webengine_profile
 from ui.web_input import scroll_kind as _map_scroll_kind, trackpad_pan_pixels as _trackpad_pan_pixels
+from ui.web_input import NativePinchZoom
 from ui.windows_scroll import WindowsScrollSource
 
 
@@ -66,6 +67,7 @@ class _MapInputFilter(QObject):
         self._view = view
         self._active = True
         self._last_native_zoom_at = 0.0
+        self._native_pinch = NativePinchZoom()
         self._scroll_kind = None
         self._scroll_device = None
         self._scroll_source = None
@@ -105,9 +107,12 @@ class _MapInputFilter(QObject):
         steps = None
         if event.type() == QEvent.Type.NativeGesture:
             try:
-                if event.gestureType() == Qt.NativeGestureType.ZoomNativeGesture:
-                    steps = float(event.value())
+                handled, steps = self._native_pinch.handle(event)
+                if handled:
                     self._last_native_zoom_at = time.monotonic()
+                    if steps is None or abs(steps) < 1e-9:
+                        event.accept()
+                        return True
             except AttributeError:
                 steps = None
         elif (
@@ -117,7 +122,8 @@ class _MapInputFilter(QObject):
             # macOS and some Windows touchpad drivers emit a Ctrl-wheel event
             # immediately after the native pinch event. Consume that duplicate
             # instead of zooming the map twice.
-            if time.monotonic() - self._last_native_zoom_at < 0.16:
+            if (self._native_pinch.wayland and self._native_pinch.active
+                    or time.monotonic() - self._last_native_zoom_at < 0.16):
                 event.accept()
                 return True
             steps = _map_wheel_zoom_steps(event)
@@ -167,7 +173,7 @@ class _MapInputFilter(QObject):
             if abs(steps) < 1e-6:
                 event.accept()
                 return True
-        if steps is None or abs(steps) < 1e-6:
+        if steps is None or abs(steps) < 1e-9:
             return False
         try:
             position = _event_position_in_view(watched, event, self._view)

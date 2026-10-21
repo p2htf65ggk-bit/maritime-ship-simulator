@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import math
 import sys
 import tempfile
 import time
@@ -18,13 +19,14 @@ for path in (ROOT, SRC):
         sys.path.insert(0, str(path))
 
 from PySide6.QtCore import QEventLoop, QPoint, QPointF, Qt, QTimer
-from PySide6.QtGui import QInputDevice, QMouseEvent, QPointingDevice, QWheelEvent
+from PySide6.QtGui import QInputDevice, QMouseEvent, QNativeGestureEvent, QPointingDevice, QWheelEvent
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 from maritime_simulator.domain.enums import ControlMode
 from maritime_simulator.ui.main_window import V2MainWindow
 from ui.style import apply_global_ui_style
+from ui.web_input import NativePinchZoom
 
 
 def _wait(app: QApplication, predicate, timeout_s: float = 8.0) -> None:
@@ -99,6 +101,39 @@ def _verify_native_map_input(app, window):
     after_wheel = state()
     if abs(after_wheel["zoom"] - after_pan["zoom"] - 1) > .01:
         raise RuntimeError(f"Wheel failed after trackpad on shared Cocoa device: {after_pan} -> {after_wheel}")
+
+    # Feed Qt Wayland's absolute-scale differences through the actual render
+    # widget, even when this smoke runs on a different development platform.
+    router = window.map._input_filter
+    previous_pinch = router._native_pinch
+    router._native_pinch = NativePinchZoom(wayland=True)
+    def pinch_event(kind, value=0):
+        event = QNativeGestureEvent(kind, touchpad, 2, point, point, global_point, value, QPointF())
+        QApplication.sendEvent(target, event)
+        app.processEvents()
+    try:
+        for path in ([.5], [2, .5], [.75]):
+            _javascript(window, "followOwnShip=false; map.setView([53.54,9.93],14,{animate:false}); true")
+            pinch_event(Qt.BeginNativeGesture)
+            previous_scale = 1.0
+            for scale_target in path:
+                initial_scale = previous_scale
+                for step in range(1, 65):
+                    scale = initial_scale + (scale_target - initial_scale) * step / 64
+                    pinch_event(Qt.ZoomNativeGesture, scale - previous_scale)
+                    previous_scale = scale
+                QTest.qWait(100)
+                _wait(app, lambda: bool(_javascript(window, "!smoothZoomActive")))
+                actual = state()
+                if abs(actual["zoom"] - 14 - math.log2(scale_target)) > .003:
+                    raise RuntimeError(f"Wayland native pinch failed for {path}: {actual}")
+                if view.zoomFactor() != 1:
+                    raise RuntimeError("Native pinch changed page zoom")
+            pinch_event(Qt.EndNativeGesture)
+    finally:
+        router._native_pinch = previous_pinch
+        router._last_native_zoom_at = 0
+    print("Wayland pinch scale fixtures passed: zoom-out first, reversal, consecutive gestures; page zoom unchanged")
 
     def mouse_event(kind, y, button, buttons):
         pos = QPointF(point.x(), y)

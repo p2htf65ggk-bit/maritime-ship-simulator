@@ -68,7 +68,8 @@ def test_forward_view_native_pinch_is_routed_to_camera_zoom_locally():
     cesium = (root / "ui/web/forward_view/cesium_simple_view.js").read_text(encoding="utf-8")
     assert "class _ForwardViewGestureMixin" in dialog
     assert "QEvent.Type.NativeGesture" in dialog
-    assert "Qt.NativeGestureType.ZoomNativeGesture" in dialog
+    assert "NativePinchZoom" in dialog
+    assert "Qt.NativeGestureType.ZoomNativeGesture" in (root / "ui/web_input.py").read_text(encoding="utf-8")
     assert "window.applyNativeCameraZoom" in dialog
     assert "window.applyNativeCameraZoom" in google
     assert "window.applyNativeCameraZoom" in cesium
