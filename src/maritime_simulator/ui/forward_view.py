@@ -190,8 +190,8 @@ class _ForwardViewGestureMixin:
             and event.modifiers() & Qt.KeyboardModifier.ControlModifier
         ):
             pinch = getattr(self, "_native_pinch_zoom", None)
-            if pinch is not None and pinch.wayland and (pinch.active
-                    or time.monotonic() - getattr(self, "_last_native_pinch_at", 0) < .16):
+            if (pinch is not None and pinch.wayland
+                    and time.monotonic() - getattr(self, "_last_native_pinch_at", 0) < .16):
                 event.accept()
                 return True
             self._apply_native_camera_zoom(_wheel_zoom_steps(event))

@@ -122,8 +122,7 @@ class _MapInputFilter(QObject):
             # macOS and some Windows touchpad drivers emit a Ctrl-wheel event
             # immediately after the native pinch event. Consume that duplicate
             # instead of zooming the map twice.
-            if (self._native_pinch.wayland and self._native_pinch.active
-                    or time.monotonic() - self._last_native_zoom_at < 0.16):
+            if time.monotonic() - self._last_native_zoom_at < 0.16:
                 event.accept()
                 return True
             steps = _map_wheel_zoom_steps(event)

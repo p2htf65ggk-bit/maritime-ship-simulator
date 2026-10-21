@@ -116,7 +116,7 @@ def test_wayland_pinch_owns_interleaved_pan_rotation_but_not_three_finger_swipe(
     assert pinch.handle(NativeGesture(Qt.PanNativeGesture)) == (False, None)
 
 
-def test_wayland_pinch_routes_outward_first_resets_and_suppresses_duplicate_wheel(monkeypatch):
+def test_wayland_pinch_routes_zoom_out_first_resets_and_suppresses_duplicate_wheel(monkeypatch):
     app = QApplication.instance() or QApplication([])
     monkeypatch.setattr(web_input.sys, "platform", "linux")
     monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: "wayland")
@@ -143,6 +143,14 @@ def test_wayland_pinch_routes_outward_first_resets_and_suppresses_duplicate_whee
             assert all(function in script for script in view.scripts)
             argument = "-1.00000000" if function == "zoomMapByNativeGesture" else "0.5"
             assert all(f"{function}({argument})" in script for script in view.scripts)
+            # A lost EndNativeGesture must not block later Ctrl-wheel input.
+            handle(NativeGesture(Qt.BeginNativeGesture))
+            if function == "zoomMapByNativeGesture":
+                router._last_native_zoom_at -= 1
+            else:
+                view._last_native_pinch_at -= 1
+            assert handle(Wheel(120, ctrl=True))
+            assert len(view.scripts) == 3
     finally:
         router.disable()
         view.deleteLater()
