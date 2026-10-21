@@ -17,21 +17,25 @@ from maritime_simulator.ui.forward_view import _ForwardViewGestureMixin
 from maritime_simulator.ui.mode_panels import ModeControlStack, CompactModeControls
 from ui.style import apply_global_ui_style
 from ui.web_input import mouse_wheel_delta
+from ui import web_input
 from ui.widgets import map_widget
 from ui.widgets.map_widget import _MapInputFilter, _map_scroll_kind, _map_wheel_zoom_steps, _trackpad_pan_pixels
 from ui.widgets.slider import ResetSlider
+from ui.windows_scroll import WindowsScrollSource
 
 
 class Wheel:
     def __init__(self, y=8, *, pixel=False, touchpad=False, phase=False, ctrl=False,
-                 angle=None, source=None, device=None):
+                 angle=None, source=None, device=None, x=0, stamp=42):
         self.y, self.pixel, self.touchpad, self.phase_active, self.ctrl = y, pixel, touchpad, phase, ctrl
         self.angle, self._source, self._device = angle, source, device
+        self.x = x
+        self.stamp = stamp
         self.accepted = False
 
     def type(self): return QEvent.Type.Wheel
-    def pixelDelta(self): return QPoint(0, self.y if self.pixel else 0)
-    def angleDelta(self): return QPoint(0, self.angle if self.angle is not None else (0 if self.pixel else self.y))
+    def pixelDelta(self): return QPoint(self.x, self.y) if self.pixel else QPoint()
+    def angleDelta(self): return QPoint(0 if self.pixel else self.x, self.angle if self.angle is not None else (0 if self.pixel else self.y))
     def modifiers(self): return Qt.ControlModifier if self.ctrl else Qt.NoModifier
     def device(self): return self._device or WheelDevice(self.touchpad)
     def phase(self):
@@ -41,6 +45,7 @@ class Wheel:
         if self._source is not None: return self._source
         return Qt.MouseEventSynthesizedBySystem if self.pixel and self.phase_active else Qt.MouseEventNotSynthesized
     def accept(self): self.accepted = True
+    def timestamp(self): return self.stamp
 
 class WheelDevice:
     def __init__(self, touchpad): self.touchpad = touchpad
@@ -48,14 +53,194 @@ class WheelDevice:
     def systemId(self): return 1 if self.touchpad else 2
 
 
+@pytest.mark.parametrize("platform,backend,event,expected", [
+    ("linux", "wayland", Wheel(120, touchpad=True), "zoom"),
+    ("linux", "wayland-egl", Wheel(-15, touchpad=True), "zoom"),
+    ("linux", "wayland", Wheel(10, pixel=True, phase=True), "pan"),
+    ("linux", "wayland", Wheel(2, pixel=True, source=Qt.MouseEventSynthesizedBySystem), "pan"),
+    ("linux", "xcb", Wheel(120), "zoom"),
+    ("linux", "xcb", Wheel(3, pixel=True, x=1, angle=15), "zoom"),
+    ("linux", "xcb", Wheel(8, touchpad=True), "pan"),
+    ("linux", "xcb", Wheel(8, pixel=True, touchpad=True), "pan"),
+    ("win32", "windows", Wheel(120), "zoom"),
+    ("win32", "windows", Wheel(2, pixel=True, angle=120), "zoom"),
+    ("win32", "windows", Wheel(8, pixel=True, angle=24), "pan"),
+    ("win32", "windows", Wheel(8, pixel=True, x=4, angle=24), "pan"),
+    ("win32", "windows", Wheel(120, touchpad=True), "pan"),
+    ("win32", "windows", Wheel(0, x=16), "pan"),
+])
+def test_2d_scroll_platform_profiles(monkeypatch, platform, backend, event, expected):
+    monkeypatch.setattr(map_widget.sys, "platform", platform)
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: backend)
+    assert _map_scroll_kind(event) == expected
+
+
+def test_windows_unphased_vertical_touchpad_preserves_pixel_pan_distance(monkeypatch):
+    monkeypatch.setattr(map_widget.sys, "platform", "win32")
+    event = Wheel(18, pixel=True, angle=54)
+    assert _map_scroll_kind(event) == "pan"
+    assert _trackpad_pan_pixels(event) == (0, -18)
+
+
+def test_wayland_unphased_continuous_pan_preserves_pixels(monkeypatch):
+    monkeypatch.setattr(map_widget.sys, "platform", "linux")
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: "wayland")
+    event = Wheel(18, pixel=True, angle=216, source=Qt.MouseEventSynthesizedBySystem)
+    assert _map_scroll_kind(event) == "pan"
+    assert _trackpad_pan_pixels(event) == (0, -18)
+
+
+class NativeFilterHost:
+    def __init__(self): self.installed = []
+    def installNativeEventFilter(self, observer): self.installed.append(observer)
+    def removeNativeEventFilter(self, observer): self.installed.remove(observer)
+
+
+@pytest.mark.parametrize("device,kind", [(0x02, "zoom"), (0x10, "pan"), (0x00, None)])
+def test_windows_native_source_retains_identity_lost_by_qt(device, kind):
+    host = NativeFilterHost()
+    observer = WindowsScrollSource(host, lambda _address: (0x020A, 42, 120), lambda: device)
+    try:
+        assert observer.nativeEventFilter(b"windows_generic_MSG", 1) == (False, 0)
+        assert observer.kind_for(Wheel(120, stamp=41)) is None
+        assert observer.kind_for(Wheel(60)) is None
+        assert observer.kind_for(Wheel(120)) == kind
+        assert observer.kind_for(Wheel(120)) is None
+    finally:
+        observer.close()
+    assert not host.installed
+    observer.close()
+
+
+def test_windows_native_scroll_records_are_bounded_expire_and_ignore_unrelated_input(monkeypatch):
+    import ui.windows_scroll as windows_scroll
+    now = [10.0]
+    monkeypatch.setattr(windows_scroll.time, "monotonic", lambda: now[0])
+    host = NativeFilterHost()
+    message = [0x020E, 42, -120]
+    observer = WindowsScrollSource(host, lambda _address: tuple(message), lambda: 0x10)
+    try:
+        assert observer.nativeEventFilter(b"other", 1) == (False, 0)
+        assert not observer._pending
+        message[0] = 0x0200
+        observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        assert not observer._pending
+        message[0] = 0x020E
+        for _ in range(1000):
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        assert len(observer._pending) == 64
+        assert observer.kind_for(Wheel(0, x=120)) == "pan"
+        now[0] += .3
+        assert observer.kind_for(Wheel(0, x=120)) is None
+        assert not observer._pending
+    finally:
+        observer.close()
+
+
+def test_windows_native_source_failure_falls_back_without_eating_event():
+    def failed(): raise OSError("Input source unavailable")
+    host = NativeFilterHost()
+    observer = WindowsScrollSource(host, lambda _address: (0x020A, 42, 120), failed)
+    try:
+        assert observer.nativeEventFilter(b"windows_generic_MSG", 1) == (False, 0)
+        assert observer.kind_for(Wheel(120)) is None
+    finally:
+        observer.close()
+
+
+def test_windows_native_legacy_touchpad_wheel_and_mouse_get_different_actions():
+    app = QApplication.instance() or QApplication([])
+    host = NativeFilterHost()
+    source = [0x10]
+    observer = WindowsScrollSource(host, lambda _address: (0x020A, 42, 120), lambda: source[0])
+    view = QWidget()
+    scripts = []
+    view.page = lambda: view
+    view.runJavaScript = scripts.append
+    router = _MapInputFilter(view)
+    router._windows_scroll = observer
+    try:
+        for device in (0x10, 0x02):
+            source[0] = device
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+            assert router.eventFilter(view, Wheel(120))
+        assert "panMapByTrackpad(0.0, -15.0)" in scripts[0]
+        assert "zoomMapByNativeGesture(1.00000000)" in scripts[1]
+    finally:
+        router.disable()
+        assert not host.installed
+        view.deleteLater()
+        app.processEvents()
+
+
+@pytest.mark.parametrize("platform,backend,device", [
+    ("linux", "wayland", WheelDevice(True)),
+    ("linux", "xcb", WheelDevice(False)),
+    ("win32", "windows", WheelDevice(False)),
+])
+def test_2d_platform_wheel_pan_and_pinch_are_routed_once(monkeypatch, platform, backend, device):
+    app = QApplication.instance() or QApplication([])
+    view = QWidget()
+    scripts = []
+    view.page = lambda: view
+    view.runJavaScript = scripts.append
+    router = _MapInputFilter(view)
+    monkeypatch.setattr(map_widget.sys, "platform", platform)
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: backend)
+    try:
+        wheel = Wheel(120, device=device)
+        pad = Wheel(18, pixel=True, angle=54, touchpad=platform != "win32",
+                    source=Qt.MouseEventSynthesizedBySystem)
+        pinch = Wheel(18, pixel=True, ctrl=True)
+        for event in (wheel, pad, wheel, pinch):
+            assert router.eventFilter(view, event) and event.accepted
+        assert len(scripts) == 4
+        assert "zoomMapByNativeGesture(1.00000000)" in scripts[0]
+        assert "panMapByTrackpad(0, -18)" in scripts[1]
+        assert "zoomMapByNativeGesture(1.00000000)" in scripts[2]
+        assert "zoomMapByNativeGesture(0.15000000)" in scripts[3]
+    finally:
+        router.disable()
+        view.deleteLater()
+        app.processEvents()
+
+
 @pytest.mark.parametrize("y,pixel", [(1, False), (8, False), (120, False), (-120, False), (3, True)])
 def test_mouse_wheel_is_explicit_zoom_even_for_small_steps(y, pixel):
     assert mouse_wheel_delta(Wheel(y, pixel=pixel)) == -y
 
 
-@pytest.mark.parametrize("kwargs", [{"touchpad": True}, {"pixel": True, "phase": True}, {"ctrl": True}])
+@pytest.mark.parametrize("kwargs", [{"touchpad": True, "phase": True, "source": Qt.MouseEventSynthesizedBySystem}, {"pixel": True, "phase": True}, {"ctrl": True}])
 def test_native_wheel_classifier_leaves_trackpad_and_pinch_unchanged(kwargs):
     assert mouse_wheel_delta(Wheel(**kwargs)) is None
+
+
+@pytest.mark.parametrize("pixels", [(0, 2), (0, 60), (20, 0), (20, 30), (0, -60)])
+def test_3d_wayland_trackpad_pans_from_first_event_in_both_axes(monkeypatch, pixels):
+    monkeypatch.setattr(map_widget.sys, "platform", "linux")
+    monkeypatch.setattr(web_input.QGuiApplication, "platformName", lambda: "wayland")
+    app = QApplication.instance() or QApplication([])
+
+    class View(QWidget, _ForwardViewGestureMixin):
+        def __init__(self):
+            super().__init__()
+            self.scripts = []
+        def page(self): return self
+        def runJavaScript(self, script): self.scripts.append(script)
+
+    view = View()
+    try:
+        x, y = pixels
+        pad = Wheel(y, x=x, pixel=True, angle=y * 12, phase=True,
+                    source=Qt.MouseEventSynthesizedBySystem)
+        assert view._handle_native_camera_input(pad) and pad.accepted
+        assert view.scripts == [f"if (window.applyNativeCameraPan) window.applyNativeCameraPan({-x}, {-y});"]
+        wheel = Wheel(120, touchpad=True)
+        assert view._handle_native_camera_input(wheel) and wheel.accepted
+        assert "applyMouseWheelZoom(-120.00000000)" in view.scripts[-1]
+    finally:
+        view.deleteLater()
+        app.processEvents()
 
 
 def test_2d_and_3d_filters_consume_mouse_wheel_once_without_panning():
@@ -82,8 +267,9 @@ def test_2d_and_3d_filters_consume_mouse_wheel_once_without_panning():
             input_filter._scroll_kind = None
             assert input_filter.eventFilter(view, Wheel(**kwargs))
             assert "panMapByTrackpad" in view.scripts[-1]
-            assert not view._handle_native_camera_input(Wheel(**kwargs))
-        assert len(view.scripts) == 3
+            assert view._handle_native_camera_input(Wheel(**kwargs))
+            assert "applyNativeCameraPan" in view.scripts[-1]
+        assert len(view.scripts) == 5
     finally:
         view.close()
         view.deleteLater()

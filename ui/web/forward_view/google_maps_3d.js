@@ -887,6 +887,11 @@ window.applyMouseWheelZoom = (deltaY) => {
   commitGestureCamera();
 };
 
+window.applyNativeCameraPan = (deltaX, deltaY) => {
+  panByScreenPixels(-safeNumber(deltaX), -safeNumber(deltaY));
+  commitGestureCamera();
+};
+
 function normalizedWheelDeltaY(event) {
   if (event.deltaMode === 1) return event.deltaY * 32;
   if (event.deltaMode === 2) return event.deltaY * Math.max(300, window.innerHeight);

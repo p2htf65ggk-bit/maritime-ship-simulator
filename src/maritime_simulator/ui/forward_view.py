@@ -31,7 +31,8 @@ from maritime_simulator.visual import (
     normalize_visual_quality_mode,
 )
 from ui.webengine_profile import configure_webengine_profile
-from ui.web_input import mouse_wheel_delta
+from ui.web_input import mouse_wheel_delta, scroll_kind, trackpad_pan_pixels
+from ui.windows_scroll import WindowsScrollSource
 
 from .dialogs import OpaqueDialog
 
@@ -177,7 +178,30 @@ class _ForwardViewGestureMixin:
             event.accept()
             return True
         if event.type() == QEvent.Type.Wheel:
+            observer = getattr(self, "_native_scroll_source", None)
+            kind = observer.kind_for(event) if observer is not None else None
+            kind = kind or scroll_kind(event)
+            if kind == "pan" or event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+                pan = trackpad_pan_pixels(event)
+                if pan is None:
+                    angle = event.angleDelta()
+                    pan = (-angle.x() / 8.0, -angle.y() / 8.0)
+                if not any(pan):
+                    event.accept()
+                    return True
+                try:
+                    self.page().runJavaScript(
+                        "if (window.applyNativeCameraPan) "
+                        f"window.applyNativeCameraPan({pan[0]}, {pan[1]});"
+                    )
+                except RuntimeError:
+                    return False
+                event.accept()
+                return True
             delta = mouse_wheel_delta(event)
+            if delta is None and kind == "zoom":
+                angle = event.angleDelta()
+                delta = -float(angle.y() or event.pixelDelta().y())
             if delta is not None:
                 try:
                     self.page().runJavaScript(
@@ -208,6 +232,7 @@ class _ForwardViewInputFilter(QObject):
         super().__init__(view)
         self._view = view
         self._active = True
+        view._native_scroll_source = WindowsScrollSource.for_view(view)
 
     def install_tree(self, root) -> None:
         if not self._active:
@@ -221,6 +246,8 @@ class _ForwardViewInputFilter(QObject):
 
     def disable(self) -> None:
         self._active = False
+        if self._view is not None and self._view._native_scroll_source is not None:
+            self._view._native_scroll_source.close()
         self._view = None
 
     def eventFilter(self, watched, event) -> bool:

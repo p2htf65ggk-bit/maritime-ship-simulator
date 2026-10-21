@@ -7,9 +7,10 @@ import time
 from PySide6.QtWidgets import QLabel, QWidget, QVBoxLayout
 from PySide6.QtWebChannel import QWebChannel
 from PySide6.QtCore import QEvent, QObject, Qt, QTimer, QUrl, Signal, Slot
-from PySide6.QtGui import QInputDevice
 
 from ui.webengine_profile import configure_webengine_profile
+from ui.web_input import scroll_kind as _map_scroll_kind, trackpad_pan_pixels as _trackpad_pan_pixels
+from ui.windows_scroll import WindowsScrollSource
 
 
 def _use_headless_map():
@@ -27,35 +28,6 @@ def _resource_path(*parts):
     return os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", *parts))
 
 
-def _trackpad_pan_pixels(event):
-    """Return browser-style pan deltas for a high-resolution trackpad scroll."""
-    if event.modifiers() & Qt.KeyboardModifier.ControlModifier:
-        return None
-    if sys.platform == "darwin" and _cocoa_precise_scroll(event):
-        # Cocoa preserves half-pixels in angleDelta, but truncates pixelDelta.
-        angle_delta = event.angleDelta()
-        if not angle_delta.isNull():
-            return -angle_delta.x() / 2.0, -angle_delta.y() / 2.0
-    pixel_delta = event.pixelDelta()
-    if pixel_delta.isNull():
-        return None
-    try:
-        is_touchpad = event.device().type() == QInputDevice.DeviceType.TouchPad
-    except (AttributeError, RuntimeError):
-        is_touchpad = False
-    has_scroll_phase = event.phase() != Qt.ScrollPhase.NoScrollPhase
-    if not is_touchpad and not has_scroll_phase and pixel_delta.x() == 0:
-        return None
-    return -int(pixel_delta.x()), -int(pixel_delta.y())
-
-
-def _cocoa_precise_scroll(event):
-    try:
-        return event.source() == Qt.MouseEventSource.MouseEventSynthesizedBySystem
-    except (AttributeError, RuntimeError):
-        return False
-
-
 def _map_wheel_zoom_steps(event, *, mouse_wheel=False):
     angle_delta = event.angleDelta()
     if mouse_wheel and angle_delta.y():
@@ -64,32 +36,6 @@ def _map_wheel_zoom_steps(event, *, mouse_wheel=False):
     if not pixel_delta.isNull():
         return max(-4.0, min(4.0, float(pixel_delta.y()) / 120.0))
     return max(-4.0, min(4.0, float(angle_delta.y()) / 120.0))
-
-
-def _map_scroll_kind(event):
-    pixel, angle = event.pixelDelta(), event.angleDelta()
-    if sys.platform == "darwin":
-        # Cocoa can reuse a device marked TouchPad for a later physical wheel.
-        # Trust per-event precision/phase before that shared device descriptor.
-        if event.phase() == Qt.ScrollPhase.NoScrollPhase:
-            return "pan" if pixel.x() else "zoom"
-        try:
-            if event.source() == Qt.MouseEventSource.MouseEventNotSynthesized:
-                return "zoom"
-        except (AttributeError, RuntimeError):
-            pass
-    try:
-        if event.device().type() == QInputDevice.DeviceType.TouchPad:
-            return "pan"
-    except (AttributeError, RuntimeError):
-        pass
-    if pixel.isNull():
-        return "zoom"
-    if event.phase() == Qt.ScrollPhase.NoScrollPhase:
-        return "pan" if pixel.x() else "zoom"
-    if angle.y() and abs(angle.y()) % 120 == 0:
-        return "zoom"
-    return "pan"
 
 
 def _enforce_map_view_zoom(view):
@@ -125,6 +71,7 @@ class _MapInputFilter(QObject):
         self._scroll_source = None
         self._last_scroll_at = 0.0
         self._install_pending = False
+        self._windows_scroll = WindowsScrollSource.for_view(view)
 
     def install_tree(self, root):
         if not self._active:
@@ -137,6 +84,8 @@ class _MapInputFilter(QObject):
 
     def disable(self):
         self._active = False
+        if self._windows_scroll is not None:
+            self._windows_scroll.close()
         self._view = None
 
     def _refresh_filters(self):
@@ -190,8 +139,11 @@ class _MapInputFilter(QObject):
                     or now - self._last_scroll_at > .35):
                 self._scroll_kind = None
             pixel, angle = event.pixelDelta(), event.angleDelta()
+            native_kind = self._windows_scroll.kind_for(event) if self._windows_scroll is not None else None
             if not pixel.isNull() or not angle.isNull():
-                if self._scroll_kind is None or phase == Qt.ScrollPhase.NoScrollPhase:
+                if native_kind is not None:
+                    self._scroll_kind = native_kind
+                elif self._scroll_kind is None or phase == Qt.ScrollPhase.NoScrollPhase:
                     self._scroll_kind = _map_scroll_kind(event)
                 self._scroll_device, self._last_scroll_at = device, now
                 self._scroll_source = source

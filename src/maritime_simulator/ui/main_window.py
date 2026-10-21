@@ -466,7 +466,7 @@ class V2MainWindow(QMainWindow):
         self.left_panel = frame
         frame.setObjectName("panel")
         frame.setMinimumWidth(300)
-        frame.setMaximumWidth(400)
+        frame.setMaximumWidth(480)
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(0, 0, 0, 0)
         panel_header = QHBoxLayout()
@@ -537,7 +537,7 @@ class V2MainWindow(QMainWindow):
             "Expand all control tabs." if self._left_collapsed else "Collapse to key controls."
         )
         self.left_panel.setMinimumWidth(112 if self._left_collapsed else 300)
-        self.left_panel.setMaximumWidth(124 if self._left_collapsed else 400)
+        self.left_panel.setMaximumWidth(124 if self._left_collapsed else 480)
         sizes = self.workspace.sizes()
         compact_width = 118
         self.workspace.setSizes([

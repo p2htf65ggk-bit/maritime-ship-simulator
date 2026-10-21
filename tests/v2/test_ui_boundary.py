@@ -542,6 +542,30 @@ def test_route_and_left_panels_collapse_without_removing_key_controls():
         app.processEvents()
 
 
+def test_ais_control_panel_can_expand_further_and_still_collapse():
+    app, window, temporary = _temporary_window()
+    try:
+        window.workspace.setMinimumWidth(1280)
+        window.show()
+        window.control_tabs.setCurrentIndex(2)
+        app.processEvents()
+        assert window.control_tabs.tabText(2) == "AIS"
+        assert window.left_panel.maximumWidth() == 480
+        window.workspace.setSizes([480, 800])
+        app.processEvents()
+        assert window.left_panel.width() > 400
+        assert window.ais_controls.width() >= window.ais_controls.minimumSizeHint().width()
+        window._toggle_left_panel()
+        assert window.left_panel.maximumWidth() == 124
+        window._toggle_left_panel()
+        assert window.left_panel.maximumWidth() == 480
+    finally:
+        window.close()
+        window.deleteLater()
+        temporary.cleanup()
+        app.processEvents()
+
+
 def test_complete_configuration_payload_round_trips_route_and_io():
     app, window, temporary = _temporary_window()
     try:

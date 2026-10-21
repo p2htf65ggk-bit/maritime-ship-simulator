@@ -1090,6 +1090,13 @@ window.applyMouseWheelZoom = (deltaY) => {
   updateCamera();
 };
 
+window.applyNativeCameraPan = (deltaX, deltaY) => {
+  markCameraInteraction();
+  panByScreenPixels(-safeNumber(deltaX), -safeNumber(deltaY));
+  syncCameraControls();
+  updateCamera();
+};
+
 function updateFromControls() {
   markCameraInteraction();
   viewMode = "orbit";

@@ -488,10 +488,12 @@ function installTrackpadPan() {
         const horizontal = Math.abs(Number(event.deltaX) || 0);
         const vertical = Math.abs(Number(event.deltaY) || 0);
         const now = performance.now();
+        // Native Qt input retains the device information; a small browser
+        // delta alone can also be a high-resolution physical mouse wheel.
         const looksLikeTrackpad = event.deltaMode === 0 && (horizontal > 0.5
-            || vertical < 50
-            || now < trackpadWheelSessionUntil);
+            || (vertical < 50 && now < trackpadWheelSessionUntil));
         if (!looksLikeTrackpad) {
+            trackpadWheelSessionUntil = 0;
             event.preventDefault();
             event.stopImmediatePropagation();
             forwardWheelZoom(event.deltaY, event.clientX, event.clientY, event.deltaMode);

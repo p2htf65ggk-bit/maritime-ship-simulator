@@ -295,6 +295,11 @@ async function verifyMapEndurance(browser, server) {
     const trackpadPan = await page.evaluate(async () => {
       const before = map.getCenter();
       const zoomBefore = map.getZoom();
+      // Browser-only events carry no device ID. Native vertical-first panning
+      // is checked through panMapByTrackpad and the Qt input tests separately.
+      map.getContainer().dispatchEvent(new WheelEvent("wheel", {
+        deltaX: 2, deltaY: 0, deltaMode: 0, bubbles: true, cancelable: true,
+      }));
       const event = new WheelEvent("wheel", {
         deltaX: 0,
         deltaY: 18,
@@ -455,7 +460,8 @@ async function verifyMapEndurance(browser, server) {
       await page.mouse.up();
     }
     await drawArea(320, 240);
-    await page.locator('.offline-area-tools select').selectOption("13");
+    await page.locator('.offline-area-tools .map-select-trigger').click();
+    await page.getByRole("option", {name: "Overview", exact: true}).click();
     await page.locator('.offline-area-tools [data-mode="navigate"]').click();
     await page.mouse.move(420, 490);
     await page.mouse.down();
@@ -1989,6 +1995,21 @@ async function verifyGoogleMaps3DOverlay(browser, server) {
       }));
       return window.getVisualDiagnostics();
     });
+    const nativePans = await page.evaluate(() => {
+      return [[0, 2], [0, 60], [20, 0], [20, 30], [0, -60]].map(([x, y]) => {
+        const before = window.getVisualDiagnostics();
+        window.applyNativeCameraPan(x, y);
+        const after = window.getVisualDiagnostics();
+        window.applyNativeCameraPan(-x, -y);
+        return { x, y, before, after };
+      });
+    });
+    for (const pan of nativePans) {
+      if (pan.before.viewRangeM !== pan.after.viewRangeM
+          || (pan.before.panEastM === pan.after.panEastM && pan.before.panNorthM === pan.after.panNorthM)) {
+        throw new Error(`Native trackpad pan changed range or failed to move: ${JSON.stringify(pan)}`);
+      }
+    }
     const pinchWheel = await page.evaluate(() => {
       const map = document.querySelector(".google-gesture-surface");
       map.dispatchEvent(new WheelEvent("wheel", {
@@ -2413,7 +2434,7 @@ async function verifyGoogleMaps3DOverlay(browser, server) {
     if (failures.length) throw new Error(`google-maps-3d-overlay: ${failures.join("; ")}`);
     console.error("[forward-view] google-maps-3d-overlay: passed");
     return {
-      initial, nameToggle, aisMotion, dragged, rightPanned, trackpadPanned, wheelZoomed, pinchWheel, mouseControls,
+      initial, nameToggle, aisMotion, dragged, rightPanned, trackpadPanned, wheelZoomed, nativePans, pinchWheel, mouseControls,
       overlayPinch,
       dualMouseZoom, courseAnchor, fullscreenButtonPresent,
       touchPan, touchPinch, sliders, doubleClickReset, top, reset, expandedTargets, lateName,

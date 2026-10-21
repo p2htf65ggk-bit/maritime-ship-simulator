@@ -86,6 +86,29 @@ Actual Windows build completion remains to be confirmed on the build computer.
 
 ## Required before public binaries
 
+### Map input follow-up on 21 October 2026
+
+The shared native scroll classifier distinguishes Wayland wheel/finger sources
+before shared device descriptors and ignores unreliable X11 mouse pixel hints.
+Both 3D providers now receive native pan deltas, including vertical-first swipes.
+Windows scroll identity is observed through GetCurrentInputMessageSource before
+Qt normalizes legacy wheel messages. Records are bounded, expire, match once,
+and the native observer is removed with its view. Unavailable source information
+falls back to Qt metadata; legacy mouse-emulating drivers remain a hardware caveat.
+The 2D browser fallback no longer classifies every small wheel step as a pan.
+Cocoa shared-device wheel detection and fractional pan handling are preserved.
+The Controls/AIS panel can expand to 480 logical pixels instead of 400.
+
+All 122 focused UI/input tests pass, as do 1,015 full source tests, the 60 Track
+baselines and unchanged resource, credential, performance and retained-memory
+gates. Full 2D/Google/Cesium browser checks pass with local provider fixtures;
+additional 100/150/200% browser checks cover smooth wheel zoom, native vertical
+pan, own-ship follow, pinch/page scale and both mouse chords. The native macOS
+QtWebEngine embedded/detached map smoke passes. Windows native-source tests use
+controlled API fixtures; physical Windows/Ubuntu input remains a target check.
+This runtime change requires new native packages, unlike the preceding build-
+prerequisite-only changes. The version remains 2.3.0.
+
 The subsequent Ubuntu build photos identified missing curl, Python 3.14 venv
 support and a partial environment without pip. The Linux build script now
 checks curl before compilation, offers version-matched venv support through
