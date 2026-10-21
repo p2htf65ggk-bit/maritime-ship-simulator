@@ -91,7 +91,8 @@ try {
   await page.screenshot({path:path.join(output,"s57-noaa-desktop.png")});
   await page.locator("#encLayersBtn").click();
   assert.equal(await page.evaluate(() => window.commands.at(-1).action), "s57_layers");
-  await page.locator("#mapSource").selectOption("online");
+  await page.locator("#mapSourceTrigger").click();
+  await page.getByRole("option", {name: "OpenSeaMap (Online)", exact: true}).click();
   assert.deepEqual(await page.evaluate(() => window.commands.at(-1)), {action:"map_source",source:"online"});
   await page.evaluate(source => setMapSource({...source,layers:["DEPARE"]}), source);
   await page.waitForFunction(() => encLayer.getLayers().length === 25);

@@ -88,6 +88,7 @@ def _validate_runtime_resources() -> None:
         bundled_resource_path("assets", "geodata", "osm-simplified-land-polygons-3857.zip"),
         bundled_resource_path("assets", "geodata", "README.txt"),
         bundled_resource_path("ui", "web", "map.html"),
+        bundled_resource_path("ui", "web", "map_select.js"),
         bundled_resource_path("ui", "web", "leaflet", "leaflet.js"),
         bundled_resource_path("ui", "web", "forward_view", "cesium.html"),
         bundled_resource_path("ui", "web", "forward_view", "cesium_simple_view.css"),

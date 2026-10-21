@@ -44,6 +44,28 @@ The curated export adds SPDX notices and GitHub contact links, removes private
 route metadata and preserves all 82 simulator-readable waypoints/parameters.
 SOURCE_SHA256SUMS and archive checksums identify exact snapshot contents.
 
+## Fractional display scaling follow-up on 21 October 2026
+
+The Windows recording showed an oversized blank native HTML select popup at
+150% display scaling. Map-source and offline-detail selectors now use compact
+in-page menus positioned in logical pixels; Windows scaling and map gestures
+are unchanged. Temporary offline menus explicitly release their listeners.
+
+All 15 browser cases passed: device ratios 1, 1.25, 1.5, 1.75 and 2 at three
+viewport sizes, including keyboard/disabled choices and repeated menu disposal.
+Actual QtWebEngine mouse/bridge checks passed on macOS at simulated 125/150%
+scales and the native screen scale, without a second native popup window.
+The native map wheel/trackpad, both mouse chords, detach/restore and editing
+regression also passed. These are not a native Windows display-scale test.
+
+The rebuilt macOS package passed 957 tests in 88.56 seconds, all 60 Track
+baselines, performance/retained-memory gates and packaged startup, dialog,
+S57 import, relocation, signature, DMG and handoff checks. The existing pinned
+environment was used. Source/native packages must include map_select.js;
+previous Windows/Ubuntu builds need rebuilding from this corrected snapshot.
+Confirm the popup on the affected Windows computer at 100, 125 and 150% before
+publication. The guide and simulator/protocol behavior are unchanged.
+
 ## Required before public binaries
 
 Run scripts/prebuild_v2.py --profile full and the native build script on each

@@ -1,6 +1,6 @@
 # Maritime Ship Simulator V2 2.3.0
 
-Prepared 20 October 2026. Unsigned public source baseline under MPL 2.0.
+Prepared 21 October 2026. Unsigned public source baseline under MPL 2.0.
 Native applications still need rebuilding and platform qualification; no assets
 or source have been published by this preparation step.
 
@@ -33,6 +33,8 @@ or source have been published by this preparation step.
   telegraph resets to Stop, not the first detent. External controls stay locked.
 - Slider reset is local to the widget, avoiding an application-wide Python
   event filter that can crash PySide while QtWebEngine constructs native objects.
+- In-page map-source and offline-detail menus avoid oversized native browser
+  popups at fractional Windows display scaling without disabling DPI scaling.
 
 ## Public distribution
 

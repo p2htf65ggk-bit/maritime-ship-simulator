@@ -1,7 +1,9 @@
 # 2.3.0 release handoff
 
 This release stays a private draft until the author approves publication.
-The Windows and two Ubuntu builds are planned for Friday, **30 October 2026**.
+Windows and both Ubuntu build environments are now available for qualification.
+Use the corrected 21 October source snapshot, which fixes fractional-DPI map
+menus. Earlier 2.3.0 Windows/Ubuntu builds need rebuilding for this release.
 Do not use old 2.2.1 or RC1 packages, and do not edit simulator code between
 these builds. Build from a fresh extraction of the supplied 2.3.0 source ZIP.
 
@@ -30,6 +32,8 @@ need to be downloaded to compile the simulator.
 - Install and start with a fresh test profile; About must show 2.3.0. Preserve
   existing operator settings before doing any upgrade test.
 - Check settings/dialog layout at the laptop's recommended display scaling.
+  On Windows, open the map-source and offline-area detail menus at 100, 125
+  and 150%; no blank popup extension should appear below or beside the options.
 - Run Sensor, Ship and Track modes; check rudder, engine and bow-thruster controls.
 - Receive one local UDP/TCP output and test the external input/fallback path used
   by your equipment. A passing unit test does not qualify a real serial adapter.

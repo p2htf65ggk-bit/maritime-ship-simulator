@@ -52,6 +52,7 @@ REQUIRED_RESOURCES = (
     "FREEWARE_LICENSE.txt",
     "assets/app_icon.png",
     "ui/web/map.html",
+    "ui/web/map_select.js",
     "ui/web/s57_portrayal.js",
     "assets/geodata/osm-simplified-land-polygons-3857.zip",
     "assets/geodata/README.txt",

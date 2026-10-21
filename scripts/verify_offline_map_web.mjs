@@ -66,7 +66,8 @@ try {
   assert.equal(await page.locator('[data-action="next"]').isDisabled(), true);
   await page.screenshot({ path: path.join(output, "saved-coverage-desktop.png") });
   await page.locator('[data-mode="draw"]').click();
-  await page.locator(".offline-area-tools select").selectOption("14");
+  await page.locator(".offline-area-tools .map-select-trigger").click();
+  await page.getByRole("option", {name: "Regional detail", exact: true}).click();
   await page.mouse.move(500, 430);
   await page.mouse.down();
   await page.mouse.move(650, 550, { steps: 5 });

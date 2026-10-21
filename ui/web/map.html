@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="leaflet/leaflet.css"/>
 <script src="leaflet/leaflet.js"></script>
 <script src="s57_portrayal.js"></script>
+<script src="map_select.js"></script>
 <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 
 <style>
@@ -44,6 +45,68 @@ html, body, #map {
     height: 32px;
     width: 190px;
 }
+.map-select-control {
+    display: inline-flex;
+    width: 190px;
+    max-width: calc(100vw - 20px);
+    min-width: 0;
+}
+.map-control .map-select-trigger, .offline-area-tools .map-select-trigger {
+    position: relative;
+    width: 100%;
+    height: 32px;
+    padding: 0 24px 0 8px;
+    color: #e8f3f7;
+    background: #172a35;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    font: 13px Arial, sans-serif;
+    text-align: left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.map-select-trigger::after {
+    content: '\25be';
+    position: absolute;
+    right: 8px;
+    top: 7px;
+}
+.map-select-trigger:focus-visible { outline: 2px solid #4ea3cf; outline-offset: 1px; }
+.map-select-menu {
+    position: fixed;
+    z-index: 4000;
+    padding: 3px;
+    box-sizing: border-box;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: #172a35;
+    border: 1px solid #4b6471;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+}
+.map-select-menu[hidden] { display: none; }
+.map-select-menu button {
+    display: block;
+    width: 100%;
+    min-height: 28px;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 2px;
+    background: transparent;
+    color: #e8f3f7;
+    text-align: left;
+    font: 13px Arial, sans-serif;
+    white-space: nowrap;
+}
+.map-select-menu button[aria-selected="true"] { background: #294451; }
+.map-select-menu button:hover:not(:disabled), .map-select-menu button:focus-visible {
+    background: #2f6f94;
+    outline: none;
+}
+.map-select-menu button:disabled { color: #879ba5; }
+.offline-area-tools .map-select-control { width: 156px; }
 .enc-status {
     position: absolute;
     left: 10px;
@@ -602,6 +665,7 @@ function aisPopupHtml(target) {
 }
 
 function initMap() {
+    MapSelect.enhance(document.getElementById('mapSource'));
     map = L.map('map', {
         zoomControl: true,
         scrollWheelZoom: true,
@@ -693,6 +757,7 @@ function setMapSource(source) {
     const selected = source.id || (source.offline ? 'protomaps' : 'online');
     if (selected === 'schematic') select.add(new Option('Offline coastlines', 'schematic'));
     select.value = selected;
+    MapSelect.enhance(select).refresh();
     document.getElementById('encLayersBtn').hidden = selected !== 's57';
     map.getContainer().style.background = selected === 's57' ? '#d0e8ed' : '#1a2633';
     if (selected === 's57') {
@@ -973,6 +1038,7 @@ function beginOfflineAreaSelection(options = {}) {
         + '<span><i class="offline-area-swatch planned"></i>To download</span></div>'
         + '<div class="offline-area-warning" role="status" aria-live="polite" hidden></div>';
     map.getContainer().appendChild(tools);
+    const detailControl = MapSelect.enhance(tools.querySelector('select'));
     const areas = [];
     const downloaded = [];
     for (const area of options.downloadedAreas || []) {
@@ -1031,6 +1097,7 @@ function beginOfflineAreaSelection(options = {}) {
         for (const area of areas) map.removeLayer(area.rectangle);
         for (const layer of downloaded) map.removeLayer(layer);
         capture.remove();
+        detailControl.destroy();
         tools.remove();
         document.removeEventListener('keydown', escape);
         followOwnShip = saved.follow;

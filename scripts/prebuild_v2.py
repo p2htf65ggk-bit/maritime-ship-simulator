@@ -64,6 +64,7 @@ def resource_check() -> None:
         ROOT / "assets" / "geodata" / "osm-simplified-land-polygons-3857.zip",
         ROOT / "assets" / "geodata" / "README.txt",
         ROOT / "ui" / "web" / "map.html",
+        ROOT / "ui" / "web" / "map_select.js",
         ROOT / "ui" / "web" / "s57_portrayal.js",
         ROOT / "ui" / "web" / "forward_view" / "cesium.html",
         ROOT / "ui" / "web" / "forward_view" / "cesium_simple_view.css",
