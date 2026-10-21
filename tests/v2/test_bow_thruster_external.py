@@ -224,12 +224,23 @@ def test_runtime_settings_and_received_values_roundtrip(tmp_path):
         app.processEvents()
 
 
-@pytest.mark.parametrize("transport", ["UDP", "TCP"])
+@pytest.mark.parametrize("transport,start_delay_s", [("UDP", 0), ("UDP", .15), ("TCP", 0)],
+                         ids=["UDP", "UDP-delayed-start", "TCP"])
 @pytest.mark.parametrize("xdr_type", ["A", "G"])
-def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, transport, xdr_type):
+def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, transport, start_delay_s, xdr_type, monkeypatch):
     from PySide6.QtWidgets import QApplication
     from PySide6.QtTest import QTest
     from maritime_simulator.ui.input_runtime import InputRuntime
+    from maritime_simulator.transport.input_manager import IECInputManager
+
+    if start_delay_s:
+        run_udp = IECInputManager._run_udp
+
+        def delayed_udp(manager, *args):
+            time.sleep(start_delay_s)
+            return run_udp(manager, *args)
+
+        monkeypatch.setattr(IECInputManager, "_run_udp", delayed_udp)
 
     app = QApplication.instance() or QApplication([])
     service = SimulatorService()
@@ -252,6 +263,11 @@ def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, tr
         service.submit(SetControlMode(ControlMode.SHIP))
         frame = IEC61162Codec.frame(f"GPXDR,{xdr_type},40,P,BowThrust#0,{xdr_type},-20,P,EngTele#0") + "\r\n"
         if transport == "UDP":
+            # Worker creation is not UDP readiness; send only after bind succeeds.
+            deadline = time.monotonic() + 2
+            while not any(status.connected for status in runtime.statuses()) and time.monotonic() < deadline:
+                QTest.qWait(10)
+            assert any(status.connected for status in runtime.statuses()), runtime.statuses()
             connection = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             connection.sendto(frame.encode("ascii"), ("127.0.0.1", port))
         else:
@@ -268,7 +284,7 @@ def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, tr
         deadline = time.monotonic() + 2
         while not runtime.events() and time.monotonic() < deadline:
             QTest.qWait(10)
-        assert runtime.events()
+        assert runtime.events(), runtime.statuses()
         service.advance_wall_time(.1)
         assert service.snapshot().bow_thruster_order_percent == 40
         assert service.snapshot().speed_order_kn == pytest.approx(service.profiles.get(service.snapshot().vessel_profile_id).speed_from_lever_percent(-20))

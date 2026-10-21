@@ -66,6 +66,24 @@ previous Windows/Ubuntu builds need rebuilding from this corrected snapshot.
 Confirm the popup on the affected Windows computer at 100, 125 and 150% before
 publication. The guide and simulator/protocol behavior are unchanged.
 
+## Windows UDP build-test follow-up on 21 October 2026
+
+The Windows build stopped at the first A/P shared-endpoint UDP test: 952 tests
+passed, four were skipped, and that test received no event. A controlled 150 ms
+delay before the UDP worker binds reproduces the same empty-event failure for
+both A/P and G/P on macOS. The test had sent its only datagram immediately after
+asynchronous worker creation, unlike the existing rudder transport test.
+
+The shared-endpoint test now waits, with the original bounded timeout, for the
+receiver's post-bind connected status before sending exactly one datagram.
+It still checks both actuators, parsed values and accepted control events.
+Two additional delayed-start cases protect against the race. The forced-delay
+reproduction now passes all four UDP cases; the related input/transport suite
+passes 109 tests. No runtime code, build script, input policy or timeout was
+changed. This test-only follow-up does not require rebuilding already qualified
+native applications from the corrected display-menu source.
+Actual Windows build completion remains to be confirmed on the build computer.
+
 ## Required before public binaries
 
 Run scripts/prebuild_v2.py --profile full and the native build script on each
