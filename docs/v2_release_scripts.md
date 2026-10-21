@@ -33,14 +33,31 @@ see `scripts/prepare-v2-windows-wheelhouse.ps1`.
 
 ```bash
 bash scripts/build-v2-ubuntu.sh
-# Run this alternative on Ubuntu 22.04 itself for that compatibility baseline:
-bash scripts/build-v2-ubuntu-22.04.sh
 ```
 
 Output: portable tar.gz, AppImage and `.deb` under the relevant `release-v2/`
 platform directory. The `.deb` declares Qt/XCB runtime dependencies. Apt needs
 internet or a prepared local package source if those system libraries are
 missing. Installing the finished application does not require a Python Venv.
+
+The 2.3.0 binary release uses the maintainer's current Ubuntu LTS build only;
+the actual version and architecture must be recorded from RELEASE_INFO.txt and
+the build computer before publication. No separate 22.04 binary is planned.
+
+### Ubuntu 22.04 self-build
+
+The compatibility wrapper remains available for users building on Ubuntu 22.04
+itself, including a 22.04 VM:
+
+```bash
+bash scripts/build-v2-ubuntu-22.04.sh
+```
+
+This path is not natively qualified for the 2.3.0 release. It requires Python
+3.12+ (the system Python 3.10 is insufficient for pinned dependencies), binutils
+and matching build/runtime dependencies. Review repository/package-install
+prompts rather than replacing system Python or GLIBC. Internet or preinstalled
+prerequisites and a Python-version-matched wheelhouse are needed.
 
 Ubuntu 22.04 packages must be built on that GLIBC baseline and pass the bundled
 ELF ABI gate. A binary built on newer Ubuntu cannot be made compatible simply
@@ -49,7 +66,7 @@ distribution's default is too old; review the package/repository prompts.
 
 A 22.04 amd64 build can serve newer Ubuntu machines when tested there as well;
 two separate Ubuntu builds are not automatically required. CPU architectures
-still need separate packages. Validate both the oldest and newer target systems.
+still need separate packages. Validate every intended target system locally.
 
 ## Gates and signatures
 

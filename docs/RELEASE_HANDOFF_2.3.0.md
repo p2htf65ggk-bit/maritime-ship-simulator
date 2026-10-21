@@ -1,25 +1,29 @@
 # 2.3.0 release handoff
 
 This release stays a private draft until the author approves publication.
-Windows and both Ubuntu build environments are now available for qualification.
-Use the corrected 21 October source snapshot, which fixes fractional-DPI map
-menus. Earlier 2.3.0 Windows/Ubuntu builds need rebuilding for this release.
-Do not use old 2.2.1 or RC1 packages, and do not edit simulator code between
-these builds. Build from a fresh extraction of the supplied 2.3.0 source ZIP.
+The author reports the corrected Windows build working; its artifacts and
+acceptance results still need collecting. The current Ubuntu LTS build is next.
+No Ubuntu 22.04 binary will be built or published for 2.3.0. Its self-build
+wrapper remains in the source and is not a release-blocking requirement.
+Use the corrected 21 October runtime with the map-menu fix. Later test/document
+changes do not require rebuilding completed applications. Do not substitute old
+2.2.1/RC1 packages or edit simulator code between native builds.
 
-## Three build computers/environments still needed
+## Windows and Ubuntu handoff
 
 | Target | Command from the source root | Keep the entire output folder |
 | --- | --- | --- |
 | Windows | `powershell -ExecutionPolicy Bypass -File .\scripts\build-v2-windows.ps1` | `release-v2/windows` |
-| Current Ubuntu | `bash scripts/build-v2-ubuntu.sh` | `release-v2/ubuntu` |
-| Ubuntu 22.04 amd64 | `bash scripts/build-v2-ubuntu-22.04.sh` | `release-v2/ubuntu-22.04-amd64` |
+| Current Ubuntu LTS | `bash scripts/build-v2-ubuntu.sh` | `release-v2/ubuntu` |
 
-These are three build groups, not three individual files: Windows creates an
-installer and portable ZIP; each Ubuntu build creates DEB, AppImage and portable
+These are two artifact groups, not two individual files: Windows creates an
+installer and portable ZIP; Ubuntu creates DEB, AppImage and portable
 tar.gz. Keep `RELEASE_INFO.txt` and `SHA256SUMS` with each folder. Explicit `bash`
 does not require `chmod`. Internet is normally needed for build dependencies.
-Use the dedicated 22.04 build for 22.04 systems, not a newer GLIBC package.
+Record the actual Ubuntu version and architecture from the host/build metadata
+before labelling its release downloads. Do not imply that newer-GLIBC packages
+run on 22.04. The optional 22.04 self-build is documented in
+[the build guide](v2_release_scripts.md#ubuntu-2204-self-build).
 
 All scripts default to unsigned production and run the release test gate.
 They now include the native environment's dependency notices. If a notice or
@@ -56,7 +60,8 @@ notice integrity. It does not replace installation or hardware acceptance.
 
 ## Final maintainer steps
 
-1. Collect those three folders and the acceptance results. Compare platform
+1. Collect these Windows/Ubuntu folders and the acceptance results; the macOS
+   packages are already prepared. Compare platform
    dependency inventories with the prepared upstream source assets; resolve any
    version-specific extra requirements before publishing.
 2. Add all qualified native files to the existing private draft. Generate one

@@ -116,8 +116,11 @@ without an optional GEOS linkage. This build-only follow-up leaves the generated
 macOS notices unchanged. Upstream Qt/PySide
 notices contain 3,576/33 files with all declared LicenseFile references resolved.
 
-Windows and both supported Ubuntu build groups still need their native build,
-installation and brief operator acceptance. The source/API test suite and Mac
+On 21 October the author reported the corrected Windows build working; the
+packages, hashes and detailed operator acceptance have not yet been inspected
+here. The current Ubuntu LTS build and native acceptance remain pending. The
+author will not build Ubuntu 22.04 for 2.3.0; its retained self-build wrapper is
+not a qualified binary target or a release gate. The source/API test suite and Mac
 checks do not establish long-duration, low-RAM or physical-device performance on
 those systems. No independent legal certification is claimed.
 

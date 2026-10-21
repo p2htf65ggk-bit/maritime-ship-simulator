@@ -10,13 +10,14 @@ the developer build scripts.
 | System | Installer | Portable alternative |
 | --- | --- | --- |
 | Windows | Setup EXE | ZIP, fully extracted before starting |
-| Ubuntu | DEB | AppImage or tar.gz |
-| Ubuntu 22.04 amd64 | Explicitly labelled 22.04 DEB | Labelled 22.04 AppImage or tar.gz |
+| Ubuntu LTS release build | DEB | AppImage or tar.gz |
 | macOS Apple silicon | DMG | Application ZIP |
 
-Only assets actually attached to a release are available. A newer Ubuntu build
-is not interchangeable with the 22.04 compatibility build; the current macOS
-downloads do not imply Intel-native support.
+Only assets actually attached to a release are available. Check the release
+notes and RELEASE_INFO.txt for the Ubuntu version and architecture actually
+built and tested. The current macOS downloads do not imply Intel-native support.
+Version 2.3.0 has no prebuilt Ubuntu 22.04 package; 22.04 remains a self-build
+option, not a tested binary target for this release.
 
 ## Verify the download
 
@@ -49,8 +50,9 @@ Install the DEB using APT so its declared dependencies can be resolved:
 sudo apt install ./Maritime-Ship-Simulator-V2-2.3.0-ubuntu-installer.deb
 ```
 
-For 22.04 use the explicitly labelled package. `GLIBC_2.38 not found` indicates
-a platform mismatch; do not replace the system GLIBC manually. An AppImage can
+`GLIBC_2.38 not found` or a similar GLIBC version error indicates a platform
+mismatch; do not replace the system GLIBC manually. AppImage packaging does not
+remove the build's GLIBC baseline. An AppImage can
 need executable permission (`chmod +x downloaded-file.AppImage`). Extract tar.gz
 packages completely and use the supplied launcher.
 
@@ -58,6 +60,22 @@ An offline installation may still need distribution libraries that are not
 installed yet. Arrange those APT packages before disconnecting. Serial access
 needs the appropriate logged-in user's device permissions; do not run the
 simulator as root as a workaround.
+
+### Ubuntu 22.04 self-build
+
+No Ubuntu 22.04 installer is provided for 2.3.0. On Ubuntu 22.04 itself (including
+a 22.04 VM), extract the full source archive and run:
+
+```bash
+bash scripts/build-v2-ubuntu-22.04.sh
+```
+
+The wrapper requires Python 3.12+ and offers a toolchain setup when needed;
+review any prompts to add repositories or install packages. It uses an isolated
+environment and checks bundled ELF libraries against GLIBC 2.35. Full tests and
+native installation checks must pass locally. The script is retained, but a
+successful 22.04 build is not claimed for this release. See the
+[build instructions](docs/v2_release_scripts.md#ubuntu-2204-self-build).
 
 ## macOS
 

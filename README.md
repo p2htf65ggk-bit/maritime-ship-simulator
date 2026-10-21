@@ -67,6 +67,10 @@ a claim of exhaustive platform/hardware qualification; see
 This source tree is **2.3.0**, the public baseline with bow-thruster and external-input controls.
 Installers will be attached to the corresponding GitHub Releases after their
 publication checks. Existing private build archives are not public source packages.
+The planned binary downloads cover Windows, macOS Apple silicon and the Ubuntu
+LTS version recorded in the release's build metadata. No prebuilt Ubuntu 22.04
+package is planned for 2.3.0; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
+remains in the source, without native 22.04 qualification for this release.
 
 For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
@@ -145,7 +149,7 @@ serial, real provider authentication and native GPU behavior need separate tests
 
 [Testing and development](CONTRIBUTING.md) explains focused checks and optional
 browser tooling. [Build instructions](docs/v2_release_scripts.md) cover Windows,
-macOS, Ubuntu and the dedicated Ubuntu 22.04 compatibility build. Build natively
+macOS, Ubuntu and an optional Ubuntu 22.04 self-build. Build natively
 on each target OS; the scripts default to unsigned packages and recognize RC
 versions as prereleases.
 
