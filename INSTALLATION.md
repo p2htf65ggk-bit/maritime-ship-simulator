@@ -9,7 +9,7 @@ the developer build scripts.
 
 | System | Installer | Portable alternative |
 | --- | --- | --- |
-| Windows x64 | Setup EXE | ZIP, fully extracted before starting |
+| Windows x64 (tested on Windows 11) | Setup EXE | ZIP, fully extracted before starting |
 | Ubuntu 26.04.1 LTS amd64 | DEB | AppImage or tar.gz |
 | macOS Apple silicon | DMG | Application ZIP |
 
@@ -21,6 +21,9 @@ option, not a tested binary target for this release.
 The [build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the source revision
 for each platform. The Ubuntu label is the author's confirmed build/test host,
 not a promise of binary compatibility with earlier Ubuntu releases.
+Windows versions other than Windows 11, Intel Macs and older macOS versions
+have not been qualified for these packages. A source build on another platform
+is separate from the compatibility of the supplied binaries.
 
 ## Verify the download
 

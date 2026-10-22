@@ -1,22 +1,25 @@
 # Native build provenance: 2.3.0
 
-Prepared on 22 October 2026. This is a private release draft, not a publication.
+Package verification completed on 22 October 2026 for release `v2.3.0`.
 All application packages are unsigned; original project code uses MPL 2.0.
 
 ## Package and source mapping
 
 | Package family | Build/test platform | Application source |
 | --- | --- | --- |
-| Windows setup EXE and portable ZIP | Windows x64; author acceptance on Windows 11 / Dell P185G | This final source snapshot, including the accepted Windows trackpad follow-up |
+| Windows setup EXE and portable ZIP | Windows x64; author acceptance on Windows 11 / Dell P185G | `57cec00b7a7ad242bdd40980ff8290a04133a79e`, including the accepted Windows trackpad follow-up |
 | Ubuntu DEB, AppImage and portable tar.gz | Ubuntu 26.04.1 LTS amd64, as confirmed by the author | Baseline `ba367908d25bc9ebbce20dee091854b852cc59fd` |
 | macOS DMG and application ZIP | macOS Apple silicon | Baseline `ba367908d25bc9ebbce20dee091854b852cc59fd` |
 
-The final source changes runtime code only in `ui/windows_scroll.py`,
+The release source at `57cec00b7a7ad242bdd40980ff8290a04133a79e` changes runtime code only in `ui/windows_scroll.py`,
 `ui/web_input.py`, `src/maritime_simulator/ui/forward_view.py` and
 `src/maritime_simulator/ui/route_planner.py` relative to the baseline. These are
 the accepted Windows input correction and the route-selection stabilization
 used during pinch gestures. Other follow-up changes are tests, verification
 tools and documentation. No video-only features were added to the application.
+Publication-only documentation updates on `main` do not alter these application
+sources, packaged files or corresponding-source archives. The `v2.3.0` tag and
+normal developer-source downloads identify the release source above.
 
 The release's normal developer-source ZIP/tar.gz contains the final source.
 `Maritime-Ship-Simulator-2.3.0-macos-ubuntu-corresponding-source.zip` preserves
@@ -64,5 +67,5 @@ There is no prebuilt or natively qualified Ubuntu 22.04 package in this release.
 
 New native builds are not required solely to promote the already accepted input
 fix or to update documentation and handoff verification tools. Keep the supplied
-application files unchanged. Obtain author approval before public visibility
-and publication, then verify anonymous downloads and their checksums.
+application files unchanged. Publication was authorized by the author on
+22 October 2026; anonymous downloads and their checksums are checked separately.

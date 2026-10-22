@@ -1,6 +1,9 @@
 # 2.3.0 release handoff
 
-This release stays a private draft until the author approves publication.
+The author approved public release on 22 October 2026. The package/source
+checks below record the completed handoff. The `v2.3.0` tag retains release
+source `57cec00b7a7ad242bdd40980ff8290a04133a79e`; later documentation-only
+publication updates on `main` do not require rebuilding the applications.
 Windows x64 and Ubuntu 26.04.1 LTS amd64 artifacts have been collected and
 checked. The author reports the corrected Windows trackpad behavior working;
 Ubuntu mouse/trackpad behavior was also reported working.

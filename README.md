@@ -1,5 +1,6 @@
 # Maritime Ship Simulator
 
+[Download 2.3.0](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0) |
 [User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.pdf) |
 [User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.docx) |
 [Installation](INSTALLATION.md) |
@@ -11,13 +12,34 @@ Current source snapshot: **2.3.0**, licensed under the **Mozilla Public License 
 project's original code. Third-party software and chart data retain their own
 licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-A desktop ship and sensor simulator for training, demonstrations, integration
+A free, open-source desktop ship and sensor simulator for training, demonstrations, integration
 and test benches. It generates AIS and IEC 61162/NMEA-style data through UDP,
 TCP and serial interfaces. It also provides route following, synthetic traffic,
 fault injection, offline maps/ENCs and optional online Google 3D views.
 
+Useful for bench tests and demonstrations with steering controls, autopilots,
+track-control systems, ECDIS and compatible radar equipment. Integration depends
+on the equipment's supported sentences, inputs and configuration; it is not
+an equipment certification or a guarantee of compatibility with every system.
+
 **Not certified navigation equipment. Do not use it for real navigation or as
 a safety-critical source of vessel, traffic, chart or collision information.**
+
+## Downloads
+
+Version **2.3.0** is the first public release. Get application installers from
+the [release page](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0),
+not GitHub's green Code button. End users do not need Python or build tools.
+
+| Platform | Application packages | Compatibility notes |
+| --- | --- | --- |
+| Windows x64 | Setup EXE or portable ZIP | Author-tested on Windows 11 |
+| Ubuntu 26.04.1 LTS amd64 | DEB, AppImage or portable tar.gz | Built/tested on the named release, not an older-Ubuntu compatibility package |
+| macOS Apple silicon | DMG or application ZIP | Native arm64; Intel Macs are not qualified |
+
+Packages are **unsigned**. Read the [installation notes](INSTALLATION.md) and
+verify `SHA256SUMS` from the release. The User Guide is available as PDF and Word.
+No Google/AIS keys or personal operator configuration are included.
 
 ## Capabilities
 
@@ -65,9 +87,9 @@ The public project is maintained by **Pascal Göllnitz**. Version labels are not
 a claim of exhaustive platform/hardware qualification; see
 [validation](docs/VALIDATION.md) and the release notes.
 This source tree is **2.3.0**, the public baseline with bow-thruster and external-input controls.
-Installers will be attached to the corresponding GitHub Releases after their
-publication checks. Existing private build archives are not public source packages.
-The prepared binary downloads cover Windows x64, macOS Apple silicon and
+Installers and portable packages are attached to
+[release 2.3.0](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0).
+The binary downloads cover Windows x64, macOS Apple silicon and
 **Ubuntu 26.04.1 LTS amd64**. No prebuilt Ubuntu 22.04
 package is planned for 2.3.0; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
 remains in the source, without native 22.04 qualification for this release.
@@ -76,7 +98,7 @@ For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
 [release licensing](docs/RELEASE_LICENSING.md). The
 [native build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the sources
-for each prepared package: Windows includes the accepted trackpad follow-up;
+for each package: Windows includes the accepted trackpad follow-up;
 macOS and Ubuntu retain the previously checked baseline. Exact corresponding
 sources are provided for both. Native checks are described with their limits;
 older private packages are not substitutes for these identified builds.

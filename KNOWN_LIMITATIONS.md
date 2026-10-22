@@ -50,4 +50,6 @@ The release designation is not a claim that every device and
 scenario was tested. New Windows/Ubuntu packages
 have been supplied by the author, but static file checks on macOS cannot replace
 native startup, graphics, serial or extended-running checks on those systems.
-Read the actual release's validation results and known open publication checks.
+Read the actual release's validation results and per-platform source mapping.
+Windows 11, the named Ubuntu release and macOS Apple-silicon packages are the
+identified targets, not a claim of compatibility with every older OS release.

@@ -13,7 +13,9 @@ all 105 frozen first-party modules in each portable application match their
 identified source. See [native build provenance](NATIVE_BUILD_PROVENANCE.md)
 for the per-platform revisions, evidence and remaining limitations. The dated
 sections below are historical checks; earlier "rebuild pending" notes are
-superseded by this handoff record. The repository/release remain private/draft.
+superseded by this handoff record. The author approved public release on
+22 October 2026. Historical private/draft notes below describe preparation,
+not the current publication state.
 The final clean source passes 1,064 V2 tests, all 60 Track golden-master cases,
 resource/credential/compile/startup checks and the performance/retained-memory
 gate (30 simulated minutes). The first sandboxed run denied local socket binds;
