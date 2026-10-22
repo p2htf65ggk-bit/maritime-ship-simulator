@@ -127,7 +127,7 @@ def scroll_kind(event):
         # deltas and no scroll phase. A vertical swipe is still a pan.
         if angle.y() and abs(angle.y()) % 120 == 0:
             return "zoom"
-        if not pixel.isNull() or angle.x():
+        if not pixel.isNull() or not angle.isNull():
             return "pan"
     elif sys.platform.startswith("linux") and phase == Qt.ScrollPhase.NoScrollPhase:
         # X11 mouse-driver pixel deltas are not reliable touchpad evidence.
@@ -142,9 +142,9 @@ def scroll_kind(event):
 
 
 
-def mouse_wheel_delta(event):
+def mouse_wheel_delta(event, *, kind=None):
     """Keep physical wheel steps out of browser trackpad heuristics."""
-    if event.modifiers() & Qt.KeyboardModifier.ControlModifier or scroll_kind(event) != "zoom":
+    if event.modifiers() & Qt.KeyboardModifier.ControlModifier or (kind or scroll_kind(event)) != "zoom":
         return None
     angle = event.angleDelta()
     if angle.y():

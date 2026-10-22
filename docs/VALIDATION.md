@@ -6,6 +6,19 @@ machine-specific route fallbacks, credentials and downloaded chart libraries.
 
 ## Current source checks
 
+**Current handoff, 22 October 2026:** the author has confirmed the Windows
+trackpad correction and supplied Windows x64 and Ubuntu 26.04.1 LTS amd64
+packages. Checksums, credential audits and bundled notices pass for both;
+all 105 frozen first-party modules in each portable application match their
+identified source. See [native build provenance](NATIVE_BUILD_PROVENANCE.md)
+for the per-platform revisions, evidence and remaining limitations. The dated
+sections below are historical checks; earlier "rebuild pending" notes are
+superseded by this handoff record. The repository/release remain private/draft.
+The final clean source passes 1,064 V2 tests, all 60 Track golden-master cases,
+resource/credential/compile/startup checks and the performance/retained-memory
+gate (30 simulated minutes). The first sandboxed run denied local socket binds;
+the successful rerun permits loopback and changes no tests or application code.
+
 On 19 October 2026, the development tree passed 956 tests covering V2 and the
 source/publication tooling, all 60 Track golden-master cases, credential/resource
 checks, compilation and isolated offscreen startup. The existing pinned macOS

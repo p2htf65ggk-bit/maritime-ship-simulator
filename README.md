@@ -67,17 +67,19 @@ a claim of exhaustive platform/hardware qualification; see
 This source tree is **2.3.0**, the public baseline with bow-thruster and external-input controls.
 Installers will be attached to the corresponding GitHub Releases after their
 publication checks. Existing private build archives are not public source packages.
-The planned binary downloads cover Windows, macOS Apple silicon and the Ubuntu
-LTS version recorded in the release's build metadata. No prebuilt Ubuntu 22.04
+The prepared binary downloads cover Windows x64, macOS Apple silicon and
+**Ubuntu 26.04.1 LTS amd64**. No prebuilt Ubuntu 22.04
 package is planned for 2.3.0; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
 remains in the source, without native 22.04 qualification for this release.
 
 For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
-[release licensing](docs/RELEASE_LICENSING.md). New installers must be built from
-the matching public snapshot. Native validation and the bundled dependency/notice
-review must be complete before public release. Older private packages are not
-substitutes for this version.
+[release licensing](docs/RELEASE_LICENSING.md). The
+[native build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the sources
+for each prepared package: Windows includes the accepted trackpad follow-up;
+macOS and Ubuntu retain the previously checked baseline. Exact corresponding
+sources are provided for both. Native checks are described with their limits;
+older private packages are not substitutes for these identified builds.
 
 Maintenance is on a best-effort basis. Issues and pull requests are welcome,
 but response times, acceptance of contributions and future releases are not

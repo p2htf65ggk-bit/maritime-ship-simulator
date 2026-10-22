@@ -188,6 +188,7 @@
     "tests/v2/test_visual_world.py",
     "tests/v2/test_water_mask.py",
     "tests/v2/test_window_geometry.py",
+    "tests/v2/test_windows_raw_scroll.py",
     "ui/__init__.py",
     "ui/app_metadata.py",
     "ui/instrument_cluster.py",
@@ -203,6 +204,7 @@
     "ui/web/map.html",
     "ui/web/s57_portrayal.js",
     "ui/web_input.py",
+    "ui/windows_scroll.py",
     "ui/web_memory.py",
     "ui/webengine_profile.py",
     "ui/widgets/map_widget.py",
@@ -221,6 +223,7 @@
     "ui/web_memory.py",
     "ui/webengine_profile.py",
     "ui/web_input.py",
+    "ui/windows_scroll.py",
     "ui/widgets/map_widget.py",
     "ui/widgets/slider.py"
   ],

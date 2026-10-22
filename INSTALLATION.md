@@ -9,8 +9,8 @@ the developer build scripts.
 
 | System | Installer | Portable alternative |
 | --- | --- | --- |
-| Windows | Setup EXE | ZIP, fully extracted before starting |
-| Ubuntu LTS release build | DEB | AppImage or tar.gz |
+| Windows x64 | Setup EXE | ZIP, fully extracted before starting |
+| Ubuntu 26.04.1 LTS amd64 | DEB | AppImage or tar.gz |
 | macOS Apple silicon | DMG | Application ZIP |
 
 Only assets actually attached to a release are available. Check the release
@@ -18,6 +18,9 @@ notes and RELEASE_INFO.txt for the Ubuntu version and architecture actually
 built and tested. The current macOS downloads do not imply Intel-native support.
 Version 2.3.0 has no prebuilt Ubuntu 22.04 package; 22.04 remains a self-build
 option, not a tested binary target for this release.
+The [build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the source revision
+for each platform. The Ubuntu label is the author's confirmed build/test host,
+not a promise of binary compatibility with earlier Ubuntu releases.
 
 ## Verify the download
 

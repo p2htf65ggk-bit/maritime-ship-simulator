@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import replace
 import math
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import QItemSelectionModel, Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QKeyEvent, QKeySequence
 from PySide6.QtWidgets import (
     QApplication,
@@ -98,6 +98,8 @@ class RoutePlannerPanel(QFrame):
         self._updating = False
         self._scroll_guard = False
         self._collapsed = False
+        self._last_auto_scroll_row = None
+        self._current_leg_row = -1
         self._total_nm = 0.0
         self._pending_seek_nm = 0.0
         self._seek_timer = QTimer(self)
@@ -246,6 +248,7 @@ class RoutePlannerPanel(QFrame):
 
         next_name, leg_bearing, leg_distance = "--", "--", "--"
         index = snapshot.next_waypoint_index
+        self._current_leg_row = index
         if self._route and 0 <= index < len(self._route):
             next_name = self._route[index].name
             if index > 0:
@@ -263,6 +266,7 @@ class RoutePlannerPanel(QFrame):
         )
 
     def _rebuild(self) -> None:
+        self._last_auto_scroll_row = None
         self._updating = True
         self.table.setUpdatesEnabled(False)
         try:
@@ -522,19 +526,28 @@ class RoutePlannerPanel(QFrame):
         self.updateGeometry()
 
     def _auto_scroll_changed(self, active: bool) -> None:
-        if active and self.table.currentRow() >= 0:
-            self._scroll_to_row(self.table.currentRow())
+        self._last_auto_scroll_row = None
+        if active:
+            self._scroll_to_row(self._current_leg_row)
 
     def _scroll_to_row(self, row: int) -> None:
         if not self.auto_scroll.isChecked() or not 0 <= row < self.table.rowCount():
+            return
+        if row == self._last_auto_scroll_row:
             return
         item = self.table.item(row, 0)
         if item is None:
             return
         self._scroll_guard = True
         try:
-            self.table.selectRow(row)
+            # selectRow() consults keyboard modifiers. Windows pinch uses Ctrl,
+            # which otherwise toggles the row selection on successive ticks.
+            index = self.table.model().index(row, 0)
+            selection = self.table.selectionModel()
+            selection.setCurrentIndex(index, QItemSelectionModel.NoUpdate)
+            selection.select(index, QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
             self.table.scrollToItem(item, QAbstractItemView.PositionAtCenter)
+            self._last_auto_scroll_row = row
         finally:
             self._scroll_guard = False
 

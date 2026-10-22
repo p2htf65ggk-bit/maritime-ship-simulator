@@ -218,7 +218,7 @@ class _ForwardViewGestureMixin:
                     return False
                 event.accept()
                 return True
-            delta = mouse_wheel_delta(event)
+            delta = mouse_wheel_delta(event, kind=kind)
             if delta is None and kind == "zoom":
                 angle = event.angleDelta()
                 delta = -float(angle.y() or event.pixelDelta().y())

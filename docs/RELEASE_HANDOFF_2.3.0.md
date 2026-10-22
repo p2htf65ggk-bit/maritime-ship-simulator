@@ -1,27 +1,30 @@
 # 2.3.0 release handoff
 
 This release stays a private draft until the author approves publication.
-The author reports the corrected Windows build working; its artifacts and
-acceptance results still need collecting. The current Ubuntu LTS build is next.
+Windows x64 and Ubuntu 26.04.1 LTS amd64 artifacts have been collected and
+checked. The author reports the corrected Windows trackpad behavior working;
+Ubuntu mouse/trackpad behavior was also reported working.
 No Ubuntu 22.04 binary will be built or published for 2.3.0. Its self-build
 wrapper remains in the source and is not a release-blocking requirement.
-Use the corrected 21 October runtime with the map-menu fix. Later test/document
-changes do not require rebuilding completed applications. Do not substitute old
-2.2.1/RC1 packages or edit simulator code between native builds.
+The tested Windows trackpad follow-up is now the final source snapshot.
+Already accepted packages do not need rebuilding for this promotion or for
+documentation/verification-only changes. See the exact per-platform
+[source mapping and limits](NATIVE_BUILD_PROVENANCE.md). Do not substitute old
+2.2.1/RC1 packages. No video-only features were added to the application.
 
 ## Windows and Ubuntu handoff
 
 | Target | Command from the source root | Keep the entire output folder |
 | --- | --- | --- |
 | Windows | `powershell -ExecutionPolicy Bypass -File .\scripts\build-v2-windows.ps1` | `release-v2/windows` |
-| Current Ubuntu LTS | `bash scripts/build-v2-ubuntu.sh` | `release-v2/ubuntu` |
+| Ubuntu 26.04.1 LTS amd64 | `bash scripts/build-v2-ubuntu.sh` | `release-v2/ubuntu` |
 
 These are two artifact groups, not two individual files: Windows creates an
 installer and portable ZIP; Ubuntu creates DEB, AppImage and portable
 tar.gz. Keep `RELEASE_INFO.txt` and `SHA256SUMS` with each folder. Explicit `bash`
 does not require `chmod`. Internet is normally needed for build dependencies.
-Record the actual Ubuntu version and architecture from the host/build metadata
-before labelling its release downloads. Do not imply that newer-GLIBC packages
+The author confirmed the Ubuntu version above; the archive confirms x86_64.
+Do not imply that newer-GLIBC packages
 run on 22.04. The optional 22.04 self-build is documented in
 [the build guide](v2_release_scripts.md#ubuntu-2204-self-build).
 
@@ -60,11 +63,11 @@ notice integrity. It does not replace installation or hardware acceptance.
 
 ## Final maintainer steps
 
-1. Collect these Windows/Ubuntu folders and the acceptance results; the macOS
-   packages are already prepared. Compare platform
-   dependency inventories with the prepared upstream source assets; resolve any
-   version-specific extra requirements before publishing.
-2. Add all qualified native files to the existing private draft. Generate one
+1. Keep the collected Windows/Ubuntu folders unchanged; macOS packages are also
+   prepared. Their dependency inventories match the prepared upstream sources.
+   Retain exact corresponding sources for the final Windows runtime and the
+   earlier macOS/Ubuntu baseline, as described in the build record.
+2. Add the checked native files to the existing private draft. Generate one
    final `SHA256SUMS` covering the exact release asset set, without name collisions
    between platform-local metadata files.
 3. Verify GitHub asset digests, source commit, guide, notices, all download links
@@ -74,6 +77,6 @@ notice integrity. It does not replace installation or hardware acceptance.
 5. Check the public page/downloads without signing in. Only then post the prepared
    LinkedIn announcement with the four approved screenshots.
 
-The repository and source/docs can be prepared in advance. Native platform
-acceptance, the final combined hashes and anonymous public-link checks cannot
-be completed before the remaining binaries exist and publication is approved.
+The current native verification and operator reports have explicit limits;
+they are not comprehensive GPU, serial-hardware or multi-hour qualification.
+Anonymous public-link checks remain pending until publication is approved.

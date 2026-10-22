@@ -32,6 +32,16 @@ def portable_inventory(path: Path) -> dict:
     archive = zipfile.ZipFile(path) if path.suffix == ".zip" else tarfile.open(path)
     try:
         names = archive.namelist() if isinstance(archive, zipfile.ZipFile) else archive.getnames()
+        original_names = {}
+        for name in names:
+            normalized = name.replace("\\", "/")
+            parts = PurePosixPath(normalized)
+            if parts.is_absolute() or ".." in parts.parts or re.match(r"^[A-Za-z]:", normalized):
+                raise ValueError("Unsafe portable archive path")
+            if normalized in original_names:
+                raise ValueError("Duplicate normalized portable archive path")
+            original_names[normalized] = name
+        names = list(original_names)
         candidates = [name for name in names if name.endswith("/THIRD_PARTY_LICENSES/dependency-inventory.json")]
         if len(candidates) != 1:
             raise ValueError("Portable package must contain exactly one dependency inventory")
@@ -39,8 +49,8 @@ def portable_inventory(path: Path) -> dict:
 
         def read(name):
             if isinstance(archive, zipfile.ZipFile):
-                return archive.read(name)
-            member = archive.getmember(name)
+                return archive.read(original_names[name])
+            member = archive.getmember(original_names[name])
             if not member.isfile():
                 raise ValueError(f"Notice is not a regular archive file: {name}")
             stream = archive.extractfile(member)
@@ -53,10 +63,10 @@ def portable_inventory(path: Path) -> dict:
             raise ValueError("Incomplete bundled dependency inventory")
         for line in checksums:
             digest, relative = line.split("  ", 1)
-            parts = PurePosixPath(relative)
-            if parts.is_absolute() or ".." in parts.parts:
+            parts = PurePosixPath(relative.replace("\\", "/"))
+            if parts.is_absolute() or ".." in parts.parts or re.match(r"^[A-Za-z]:", relative):
                 raise ValueError("Unsafe notice manifest path")
-            if hashlib.sha256(read(prefix + relative)).hexdigest() != digest:
+            if hashlib.sha256(read(prefix + parts.as_posix())).hexdigest() != digest:
                 raise ValueError(f"Changed bundled dependency notice: {relative}")
         sources = json.loads(read(prefix + "upstream-sources.json"))
         required = json.loads((ROOT / "LICENSES/upstream-sources.json").read_text())

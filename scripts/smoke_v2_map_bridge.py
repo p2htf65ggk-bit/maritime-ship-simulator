@@ -27,6 +27,7 @@ from maritime_simulator.domain.enums import ControlMode
 from maritime_simulator.ui.main_window import V2MainWindow
 from ui.style import apply_global_ui_style
 from ui.web_input import NativePinchZoom
+from ui.windows_scroll import WindowsScrollSource
 
 
 def _wait(app: QApplication, predicate, timeout_s: float = 8.0) -> None:
@@ -162,6 +163,74 @@ def _verify_native_map_input(app, window):
     print(f"Native map input passed on {target.metaObject().className()}: shared-device wheel/pad, half-pixel pan, both mouse chords")
 
 
+def _verify_windows_map_input(app, window):
+    """Feed Windows compatibility-wheel fixtures through the actual web widget."""
+    view = window.map.view
+    target = view.focusProxy() or view
+    point = QPointF(target.width() * .5, target.height() * .45)
+    global_point = QPointF(target.mapToGlobal(point.toPoint()))
+    message = [0x020a, 41, 120]
+    observer = WindowsScrollSource(app, lambda address: tuple(message), lambda: 0x02,
+        raw_wheel=lambda handle: (handle, "vertical"))
+    router = window.map._input_filter
+    previous = router._windows_scroll
+    router._windows_scroll = observer
+    changes = []
+    selection = window.route_planner.table.selectionModel()
+    on_selection = lambda *args: changes.append(True)
+    selection.selectionChanged.connect(on_selection)
+
+    def wheel(amount, *, physical=False, pinch=False, horizontal=False):
+        message[1] += 1
+        if physical:
+            message[0], message[2] = 0x00ff, abs(amount)
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        message[0], message[2] = (0x020e if horizontal else 0x020a), amount
+        observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        angle = QPoint(amount, 0) if horizontal else QPoint(0, amount)
+        event = QWheelEvent(point, global_point, QPoint(), angle, Qt.NoButton,
+            Qt.ControlModifier if pinch else Qt.NoModifier, Qt.NoScrollPhase, False)
+        event.setTimestamp(message[1])
+        QApplication.sendEvent(target, event)
+        window.route_planner.update_snapshot(window.service.snapshot())
+        app.processEvents()
+
+    def state():
+        return json.loads(_javascript(window, "JSON.stringify({zoom:map.getZoom(),pixel:map.project(map.getCenter())})"))
+
+    try:
+        _javascript(window, "followOwnShip=false; map.setView([53.54,9.93],14,{animate:false}); true")
+        before = state()
+        for amount in [120, 8, -24, -120]:
+            wheel(amount)
+        for amount in [80, -16]:
+            wheel(amount, horizontal=True)
+        QTest.qWait(100)
+        after = state()
+        if after["zoom"] != before["zoom"] or abs(after["pixel"]["y"] - before["pixel"]["y"] - 2) > 1:
+            raise RuntimeError(f"Windows vertical swipe zoomed or lost distance: {before} -> {after}")
+        if abs(after["pixel"]["x"] - before["pixel"]["x"] + 8) > 1:
+            raise RuntimeError(f"Windows horizontal swipe lost distance: {before} -> {after}")
+        wheel(120, physical=True)
+        QTest.qWait(150)
+        _wait(app, lambda: bool(_javascript(window, "!smoothZoomActive")))
+        if abs(state()["zoom"] - before["zoom"] - 1) > .01:
+            raise RuntimeError("Windows mouse wheel failed immediately after trackpad")
+        selected = [index.row() for index in selection.selectedRows()]
+        changes.clear()
+        for amount in [8] * 50 + [-8] * 50:
+            wheel(amount, pinch=True)
+        QTest.qWait(150)
+        _wait(app, lambda: bool(_javascript(window, "!smoothZoomActive")))
+        if view.zoomFactor() != 1 or selected != [index.row() for index in selection.selectedRows()] or changes:
+            raise RuntimeError("Windows pinch changed page scale or toggled the route row")
+    finally:
+        selection.selectionChanged.disconnect(on_selection)
+        router._windows_scroll = previous
+        observer.close()
+    print("Windows render-widget fixtures passed: angle-only pan, mouse switch, 100 pinch/route updates; page scale 1")
+
+
 def main() -> int:
     app = QApplication.instance() or QApplication([])
     apply_global_ui_style(app)
@@ -185,6 +254,7 @@ def main() -> int:
 
         try:
             _verify_native_map_input(app, window)
+            _verify_windows_map_input(app, window)
         except Exception:
             window.close()
             app.processEvents()
@@ -227,6 +297,7 @@ def main() -> int:
         if window.map_dialog is None or window.map.parentWidget() is not window.map_dialog:
             raise RuntimeError("Map expand command did not move the active map into its dialog")
         _verify_native_map_input(app, window)
+        _verify_windows_map_input(app, window)
         window._restore_map()
         _wait(
             app,

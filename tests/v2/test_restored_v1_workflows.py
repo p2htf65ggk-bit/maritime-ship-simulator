@@ -5,6 +5,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 os.environ.setdefault("SHIP_SIMULATOR_HEADLESS_MAP", "1")
 
 from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QItemSelectionModel
+from dataclasses import replace
 
 from maritime_simulator.application.service import SimulatorService
 from maritime_simulator.domain.commands import (
@@ -20,6 +22,7 @@ from maritime_simulator.protocols.sensors import SensorProjector
 from maritime_simulator.simulation.clock import SimulationClock
 from maritime_simulator.ui.controls import EngineTelegraphControl
 from maritime_simulator.ui.route_planner import RoutePlannerPanel
+import maritime_simulator.ui.route_planner as route_planner_module
 
 
 def app():
@@ -123,6 +126,62 @@ def test_route_planner_apply_to_all_publishes_one_atomic_update():
 
     assert len(commands) == 1
     assert all(waypoint.speed_kn == 12.5 for waypoint in commands[0].waypoints)
+
+
+def test_route_follow_does_not_toggle_selection_under_windows_pinch_modifiers(monkeypatch):
+    qt_app = app()
+
+    class CtrlPinchTable(route_planner_module.RoutePlanTable):
+        def selectionCommand(self, index, event=None):
+            # QTableView.selectRow consults this with Ctrl held on Windows.
+            return QItemSelectionModel.Toggle
+
+    monkeypatch.setattr(route_planner_module, "RoutePlanTable", CtrlPinchTable)
+    service = SimulatorService()
+    service.submit(SetRoute(tuple(RouteWaypoint(str(i), 52 + i * .01, 3) for i in range(3))))
+    service.submit(SetControlMode(ControlMode.TRACK))
+    service.advance_wall_time(0)
+    panel = RoutePlannerPanel()
+    selections, scrolls = [], []
+    panel.table.selectionModel().selectionChanged.connect(lambda *_: selections.append(True))
+    monkeypatch.setattr(panel.table, "scrollToItem", lambda item, hint: scrolls.append(item.row()))
+    try:
+        snapshot = service.snapshot()
+        for _ in range(100):
+            panel.update_snapshot(snapshot)
+            assert {i.row() for i in panel.table.selectionModel().selectedIndexes()} == {1}
+        assert selections == [True] and scrolls == [1]
+        panel.update_snapshot(replace(snapshot, next_waypoint_index=2))
+        assert {i.row() for i in panel.table.selectionModel().selectedIndexes()} == {2}
+        assert len(selections) == 2 and scrolls == [1, 2]
+    finally:
+        panel.deleteLater()
+        service.close()
+        qt_app.processEvents()
+
+
+def test_route_follow_can_be_reenabled_and_does_not_steal_manual_selection():
+    qt_app = app()
+    service = SimulatorService()
+    service.submit(SetRoute(tuple(RouteWaypoint(str(i), 52 + i * .01, 3) for i in range(3))))
+    service.submit(SetControlMode(ControlMode.TRACK))
+    service.advance_wall_time(0)
+    panel = RoutePlannerPanel()
+    try:
+        snapshot = service.snapshot()
+        panel.update_snapshot(snapshot)
+        panel.auto_scroll.setChecked(False)
+        panel.table.selectRow(2)
+        panel.update_snapshot(snapshot)
+        assert panel.table.currentRow() == 2
+        panel.auto_scroll.setChecked(True)
+        assert panel.table.currentRow() == 1
+        panel.update_snapshot(snapshot)
+        assert panel.table.currentRow() == 1
+    finally:
+        panel.deleteLater()
+        service.close()
+        qt_app.processEvents()
 
 
 def test_sensor_noise_is_projection_only_and_deterministic():

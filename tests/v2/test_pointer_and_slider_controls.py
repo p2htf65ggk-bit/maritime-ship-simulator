@@ -169,6 +169,8 @@ def test_wayland_pinch_routes_zoom_out_first_resets_and_suppresses_duplicate_whe
     ("win32", "windows", Wheel(120), "zoom"),
     ("win32", "windows", Wheel(2, pixel=True, angle=120), "zoom"),
     ("win32", "windows", Wheel(8, pixel=True, angle=24), "pan"),
+    ("win32", "windows", Wheel(8), "pan"),
+    ("win32", "windows", Wheel(-24), "pan"),
     ("win32", "windows", Wheel(8, pixel=True, x=4, angle=24), "pan"),
     ("win32", "windows", Wheel(120, touchpad=True), "pan"),
     ("win32", "windows", Wheel(0, x=16), "pan"),
@@ -252,6 +254,78 @@ def test_windows_native_source_failure_falls_back_without_eating_event():
         observer.close()
 
 
+@pytest.mark.parametrize("actuator", ["map", "forward"])
+def test_windows_angle_only_pan_and_physical_wheels_switch_without_delay(monkeypatch, actuator):
+    monkeypatch.setattr(web_input.sys, "platform", "win32")
+    app = QApplication.instance() or QApplication([])
+
+    class View(QWidget, _ForwardViewGestureMixin):
+        def __init__(self):
+            super().__init__()
+            self.scripts = []
+        def page(self): return self
+        def runJavaScript(self, script): self.scripts.append(script)
+
+    host = NativeFilterHost()
+    message = [0x020a, 42, 8]
+    observer = WindowsScrollSource(host, lambda _address: tuple(message), lambda: 0x02,
+        raw_wheel=lambda handle: (handle, "vertical"))
+    view = View()
+    router = _MapInputFilter(view)
+    router._windows_scroll = observer
+    view._native_scroll_source = observer
+    handle = (lambda event: router.eventFilter(view, event)) if actuator == "map" else view._handle_native_camera_input
+    pan = "panMapByTrackpad" if actuator == "map" else "applyNativeCameraPan"
+    zoom = "zoomMapByNativeGesture" if actuator == "map" else "applyMouseWheelZoom"
+    try:
+        # Precision scrolling arrives as angle-only, generic-mouse messages.
+        for stamp, amount in ((42, 120), (43, 8), (44, -24)):
+            message[:] = [0x020a, stamp, amount]
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+            assert handle(Wheel(amount, stamp=stamp))
+            assert pan in view.scripts[-1]
+        # A physical wheel is confirmed by WM_INPUT, even with tiny deltas.
+        for stamp, amount in ((45, 8), (46, 120), (47, -120)):
+            message[:] = [0x00ff, stamp, abs(amount)]
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+            message[:] = [0x020a, stamp, amount]
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+            assert handle(Wheel(amount, stamp=stamp))
+            assert zoom in view.scripts[-1]
+        # Ctrl-wheel remains pinch zoom, irrespective of the scroll classifier.
+        assert handle(Wheel(-24, ctrl=True))
+        assert ("zoomMapByNativeGesture" if actuator == "map" else "applyNativeCameraZoom") in view.scripts[-1]
+    finally:
+        router.disable()
+        view.deleteLater()
+        app.processEvents()
+
+
+def test_windows_raw_wheel_evidence_is_bounded_consumed_and_expires(monkeypatch):
+    import ui.windows_scroll as windows_scroll
+    now = [10.0]
+    monkeypatch.setattr(windows_scroll.time, "monotonic", lambda: now[0])
+    host = NativeFilterHost()
+    message = [0x00ff, 42, 8]
+    observer = WindowsScrollSource(host, lambda _address: tuple(message), lambda: 0x02,
+        raw_wheel=lambda handle: (handle, "vertical"))
+    try:
+        for _ in range(1000):
+            observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        assert len(observer._physical) == 64
+        message[:] = [0x020a, 42, 8]
+        observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        assert observer.kind_for(Wheel(8)) == "zoom"
+        assert len(observer._physical) == 63
+        now[0] += .3
+        observer.nativeEventFilter(b"windows_generic_MSG", 1)
+        assert observer.kind_for(Wheel(8)) == "pan"
+        assert not observer._physical
+    finally:
+        observer.close()
+    assert not observer._pending and not observer._physical
+
+
 def test_windows_native_legacy_touchpad_wheel_and_mouse_get_different_actions():
     app = QApplication.instance() or QApplication([])
     host = NativeFilterHost()
@@ -311,7 +385,7 @@ def test_2d_platform_wheel_pan_and_pinch_are_routed_once(monkeypatch, platform, 
 
 @pytest.mark.parametrize("y,pixel", [(1, False), (8, False), (120, False), (-120, False)])
 def test_mouse_wheel_is_explicit_zoom_even_for_small_steps(y, pixel):
-    assert mouse_wheel_delta(Wheel(y, pixel=pixel)) == -y
+    assert mouse_wheel_delta(Wheel(y, pixel=pixel), kind="zoom") == -y
 
 
 @pytest.mark.parametrize("platform,backend,expected", [
@@ -369,13 +443,13 @@ def test_2d_and_3d_filters_consume_mouse_wheel_once_without_panning():
     view = View()
     input_filter = _MapInputFilter(view)
     try:
-        event = Wheel()
+        event = Wheel(120)
         assert input_filter.eventFilter(view, event) and event.accepted
-        assert len(view.scripts) == 1 and "zoomMapByNativeGesture(0.06666667)" in view.scripts[0]
+        assert len(view.scripts) == 1 and "zoomMapByNativeGesture(1.00000000)" in view.scripts[0]
         view.scripts.clear()
-        event = Wheel()
+        event = Wheel(120)
         assert view._handle_native_camera_input(event) and event.accepted
-        assert view.scripts == ["if (window.applyMouseWheelZoom) window.applyMouseWheelZoom(-8.00000000);"]
+        assert view.scripts == ["if (window.applyMouseWheelZoom) window.applyMouseWheelZoom(-120.00000000);"]
         for kwargs in ({"pixel": True, "touchpad": True, "phase": True}, {"pixel": True, "phase": True}):
             input_filter._scroll_kind = None
             assert input_filter.eventFilter(view, Wheel(**kwargs))
