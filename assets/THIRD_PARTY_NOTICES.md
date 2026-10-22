@@ -52,7 +52,7 @@ Native builds include `THIRD_PARTY_LICENSES`, with full installed-package
 license files, Python's license, version-verified Qt/PySide upstream license and
 attribution archives (including Chromium), and a platform-specific inventory.
 The build rejects missing notices and mismatched Qt/GEOS versions. Separate
-upstream-source release assets and [library replacement instructions](docs/LIBRARY_REPLACEMENT.md)
+upstream-source release assets and [library replacement instructions](../docs/LIBRARY_REPLACEMENT.md)
 accompany the application. `LICENSES/upstream-sources.json` records their hashes.
 The PMTiles 3.8.1 wheel omits its BSD license file; its official upstream text
 is retained under `LICENSES/python-packages`. The Python PSF fallback is the
