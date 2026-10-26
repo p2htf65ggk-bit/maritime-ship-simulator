@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 
 from maritime_simulator.application.service import SimulatorService
 from maritime_simulator.ui.instruments import SnapshotInstrumentCluster
+from ui.instrument_cluster import ACCENT, BowThrusterInstrument
 
 
 def test_instrument_cluster_is_a_pure_snapshot_consumer():
@@ -55,3 +56,32 @@ def test_bow_instrument_uses_manual_sensor_values_in_sensor_mode():
     service.close()
     cluster.deleteLater()
     app.processEvents()
+
+
+def test_bow_instrument_fill_is_blue_in_both_directions():
+    app = QApplication.instance() or QApplication([])
+    instrument = BowThrusterInstrument()
+    instrument.resize(240, 200)
+    instrument.show()
+    try:
+        for response in (-100, -50, 0, 50, 100):
+            instrument.set_values(response, response, 1.0)
+            app.processEvents()
+            image = instrument.grab().toImage()
+            ratio = image.devicePixelRatio()
+
+            def pixel(x, y):
+                return image.pixelColor(round(x * ratio), round(y * ratio)).name()
+
+            sign = -1 if response < 0 else 1
+            if response:
+                assert pixel(120 + sign * 20, 104) == ACCENT.name()
+                assert pixel(120 - sign * 20, 104) == "#0b151e"
+            else:
+                assert pixel(100, 104) == pixel(140, 104) == "#0b151e"
+            order_x = 120 + 96 * response / 100
+            assert pixel(order_x, 87) == "#ffcc66"
+    finally:
+        instrument.close()
+        instrument.deleteLater()
+        app.processEvents()

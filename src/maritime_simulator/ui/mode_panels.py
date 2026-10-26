@@ -1,17 +1,23 @@
 # SPDX-License-Identifier: MPL-2.0
 from __future__ import annotations
 
-from PySide6.QtCore import QRect, QSize, Qt, QTimer, Signal
+from PySide6.QtCore import QEvent, QRect, QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDoubleSpinBox,
+    QDialog,
     QFormLayout,
     QGridLayout,
     QHBoxLayout,
     QLabel,
     QSlider,
+    QSizePolicy,
+    QStyle,
+    QStyleOptionComboBox,
+    QStylePainter,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -22,6 +28,8 @@ from maritime_simulator.domain.commands import (
     SetAuxiliarySensors,
     SeekRoute,
     SetEnvironment,
+    SetDepthSource,
+    SetEnvironmentSource,
     SetRudderOrder,
     SetSensorValues,
     SetSensorCoupling,
@@ -38,6 +46,7 @@ from .controls import CompassDial, CoordinateSpinBox, EngineTelegraphControl
 from .bow_thruster import BowThrusterControl
 from .dialogs import reserve_label_lines
 from .control_sources import SOURCE_LABELS
+from .online_environment import OpenMeteoAccessDialog
 
 
 EDITOR_WIDTH = 116
@@ -74,11 +83,12 @@ def _slider_field(
     *,
     scale: int,
     changed,
+    stacked: bool = False,
 ) -> tuple[QWidget, QSlider]:
     """Pair a precise editor with a live slider without creating signal loops."""
 
     container = QWidget()
-    row = QHBoxLayout(container)
+    row = QVBoxLayout(container) if stacked else QHBoxLayout(container)
     row.setContentsMargins(0, 0, 0, 0)
     row.setSpacing(6)
     slider = ResetSlider(Qt.Horizontal)
@@ -101,8 +111,45 @@ def _slider_field(
     slider.valueChanged.connect(from_slider)
     field.valueChanged.connect(from_field)
     row.addWidget(slider, 1)
-    row.addWidget(field)
+    if stacked:
+        row.addWidget(field, 0, Qt.AlignHCenter)
+    else:
+        row.addWidget(field)
     return container, slider
+
+
+class _EnvironmentSourceComboBox(QComboBox):
+    """Keep full menu/accessibility labels while fitting the closed control."""
+
+    def __init__(self):
+        super().__init__()
+        self.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.setMinimumContentsLength(6)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+    def display_text(self):
+        option = QStyleOptionComboBox()
+        self.initStyleOption(option)
+        rect = self.style().subControlRect(QStyle.CC_ComboBox, option, QStyle.SC_ComboBoxEditField, self)
+        text = self.currentText()
+        if self.currentData() == "open-meteo" and self.fontMetrics().horizontalAdvance(text) > rect.width():
+            return "Online"
+        return text
+
+    def showPopup(self):
+        if not self.count():
+            return
+        width = max(self.fontMetrics().horizontalAdvance(self.itemText(i)) for i in range(self.count())) + 36
+        self.view().setMinimumWidth(width)
+        super().showPopup()
+
+    def paintEvent(self, _event):
+        painter = QStylePainter(self)
+        option = QStyleOptionComboBox()
+        self.initStyleOption(option)
+        option.currentText = self.display_text()
+        painter.drawComplexControl(QStyle.CC_ComboBox, option)
+        painter.drawControl(QStyle.CE_ComboBoxLabel, option)
 
 
 class ModeControlStack(QWidget):
@@ -704,86 +751,238 @@ class EnvironmentPanel(QWidget):
 
     command_submitted = Signal(object)
     weather_source_changed = Signal(str)
+    api_key_changed = Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
         layout.setSpacing(8)
-        layout.addWidget(_section("Wind"))
-        self.wind_direction = CompassDial("TRUE WIND FROM")
-        self.wind_speed = _spin(0.0, 150.0, 1, " kn")
-        self.wind_direction.value_changed.connect(lambda _value: self._environment_changed())
-        self.wind_speed.editingFinished.connect(self._environment_changed)
-        wind_speed_row, self.wind_speed_slider = _slider_field(
-            self.wind_speed, scale=10, changed=self._environment_changed
-        )
-        wind_form = QFormLayout()
-        _configure_form(wind_form)
-        wind_form.addRow("Direction", self.wind_direction)
-        wind_form.addRow("Speed", wind_speed_row)
-        layout.addLayout(wind_form)
+        self.open_meteo_api_key = ""
+        self.vector_grid = QGridLayout()
+        self.vector_grid.setContentsMargins(0, 0, 0, 0)
+        self.vector_grid.setSpacing(12)
+        self._vector_columns = 1
+        self._vector_viewport = None
+        self._vector_headers = {}
+        self._vector_speed_rows = {}
+        self.wind_section = self._vector_section("wind", "Wind", "TRUE WIND FROM", 150)
+        self.current_section = self._vector_section("current", "Current", "CURRENT FROM", 20)
+        self.vector_grid.addWidget(self.wind_section, 0, 0)
+        self.vector_grid.addWidget(self.current_section, 1, 0)
+        self.vector_grid.setColumnStretch(0, 1)
+        layout.addLayout(self.vector_grid)
+        self.feedback = QLabel("")
+        self.feedback.setObjectName("secondaryText")
+        self.feedback.setToolTip("Apparent wind relative to the bow, calculated from true wind and vessel motion.")
+        reserve_label_lines(self.feedback, 1)
+        layout.addWidget(self.feedback)
 
-        layout.addWidget(_section("Current"))
-        self.current_direction = CompassDial("CURRENT FROM")
-        self.current_speed = _spin(0.0, 20.0, 1, " kn")
-        self.current_direction.value_changed.connect(lambda _value: self._environment_changed())
-        self.current_speed.editingFinished.connect(self._environment_changed)
-        current_speed_row, self.current_speed_slider = _slider_field(
-            self.current_speed, scale=10, changed=self._environment_changed
+        depth_header = QHBoxLayout()
+        depth_header.addWidget(_section("Depth"))
+        self.depth_source = QComboBox()
+        self.depth_source.addItem("Manual", "manual")
+        self.depth_source.addItem("Chart-based", "chart")
+        self.depth_source.setToolTip(
+            "Prefers installed S57 cells, then GEBCO online, then Manual. "
+            "Offline Mode skips GEBCO. "
+            "Keeps the last depth when data are unavailable and returns automatically."
         )
-        current_form = QFormLayout()
-        _configure_form(current_form)
-        current_form.addRow("Direction", self.current_direction)
-        current_form.addRow("Speed", current_speed_row)
-        layout.addLayout(current_form)
-
-        layout.addWidget(_section("Depth"))
-        self.depth = _spin(0.0, 2000.0, 1, " m")
+        self.depth_source.currentIndexChanged.connect(lambda: self.command_submitted.emit(
+            SetDepthSource(str(self.depth_source.currentData() or "manual"))
+        ))
+        depth_header.addWidget(self.depth_source, 1)
+        layout.addLayout(depth_header)
+        self.depth = _spin(0.0, 12000.0, 1, " m")
+        self.depth.setToolTip("Depth below keel/transducer. Chart depth subtracts the vessel's Draft.")
         self.depth.editingFinished.connect(self._depth_changed)
         depth_row, self.depth_slider = _slider_field(
             self.depth, scale=10, changed=self._depth_changed
         )
         layout.addWidget(depth_row)
+        self.depth_status = QLabel("Manual depth below keel")
+        self.depth_status.setObjectName("secondaryText")
+        self.depth_status.setWordWrap(True)
+        reserve_label_lines(self.depth_status, 1)
+        layout.addWidget(self.depth_status)
 
-        layout.addWidget(_section("Atmospheric data"))
-        self.weather_source = QComboBox()
-        self.weather_source.addItem("Manual sensor values", "manual")
-        self.weather_source.addItem("Live at own ship - Open-Meteo", "open-meteo")
+        self.weather_header = QGridLayout()
+        self.weather_header.setContentsMargins(0, 0, 0, 0)
+        self.weather_header.setSpacing(6)
+        self._weather_title = _section("Atmospheric data")
+        self.weather_header.addWidget(self._weather_title, 0, 0, 1, 2)
+        self._weather_inline = False
+        self.weather_source = _EnvironmentSourceComboBox()
+        self.weather_source.addItem("Manual", "manual")
+        self.weather_source.addItem("Online - Open-Meteo", "open-meteo")
         self.weather_source.setToolTip(
-            "Manual uses the XDR values below. Live retrieves air temperature, "
+            "Manual uses the XDR values below. Online retrieves air temperature, "
             "relative humidity, dew point and surface pressure for the current "
-            "own-ship position without an API key. MDA and MTW remain manual in Sensors."
+            "own-ship position. Free access is non-commercial only. MDA and MTW remain manual in Other."
         )
         self.weather_source.currentIndexChanged.connect(self._weather_source_changed)
-        layout.addWidget(self.weather_source)
+        self.weather_header.addWidget(self.weather_source, 1, 0, 1, 3)
+        self.online_access = QToolButton()
+        self.online_access.setText("Open-Meteo access...")
+        self.online_access.setAccessibleName("Open-Meteo access")
+        self.online_access.setToolTip("Open-Meteo access: optional API key for wind, current and atmospheric data")
+        self.online_access.setIcon(self.style().standardIcon(QStyle.SP_FileDialogDetailedView))
+        self.online_access.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        self.online_access.setFixedSize(28, 28)
+        self.online_access.clicked.connect(self._open_online_access)
+        self.weather_header.addWidget(self.online_access, 0, 2, Qt.AlignRight)
+        self.weather_header.setColumnStretch(0, 1)
+        layout.addLayout(self.weather_header)
         self.xdr_fields: dict[str, QDoubleSpinBox] = {}
-        xdr_form = QFormLayout()
-        _configure_form(xdr_form)
-        for name, label, minimum, maximum, decimals, suffix in (
+        self.xdr_grid = QGridLayout()
+        self.xdr_grid.setContentsMargins(0, 0, 0, 0)
+        self.xdr_grid.setHorizontalSpacing(12)
+        self.xdr_grid.setVerticalSpacing(8)
+        for index, (name, label, minimum, maximum, decimals, suffix) in enumerate((
             ("xdr_air_temperature_c", "Air temperature", -60.0, 80.0, 1, " °C"),
             ("xdr_relative_humidity_percent", "Relative humidity", 0.0, 100.0, 1, " %"),
             ("xdr_dew_point_c", "Dew point", -60.0, 60.0, 1, " °C"),
             ("xdr_surface_pressure_bar", "Surface pressure", 0.8, 1.2, 3, " bar"),
-        ):
+        )):
             field = _spin(minimum, maximum, decimals, suffix)
             field.editingFinished.connect(self._xdr_environment_changed)
             self.xdr_fields[name] = field
-            xdr_form.addRow(label, field)
-        layout.addLayout(xdr_form)
-        self.weather_status = QLabel("Manual weather values")
+            cell = QWidget()
+            cell_layout = QVBoxLayout(cell)
+            cell_layout.setContentsMargins(0, 0, 0, 0)
+            cell_layout.setSpacing(3)
+            caption = QLabel(label)
+            caption.setWordWrap(True)
+            caption.setBuddy(field)
+            field.setAccessibleName(label)
+            cell_layout.addWidget(caption)
+            cell_layout.addWidget(field)
+            self.xdr_grid.addWidget(cell, index//2, index%2)
+        self.xdr_grid.setColumnStretch(0, 1)
+        self.xdr_grid.setColumnStretch(1, 1)
+        layout.addLayout(self.xdr_grid)
+        self.weather_status = QLabel("Manual")
         self.weather_status.setObjectName("secondaryText")
         self.weather_status.setWordWrap(True)
-        reserve_label_lines(self.weather_status, 2)
+        reserve_label_lines(self.weather_status, 1)
         layout.addWidget(self.weather_status)
-        self.feedback = QLabel("True and relative wind are derived from vessel motion.")
-        self.feedback.setObjectName("secondaryText")
-        self.feedback.setWordWrap(True)
-        reserve_label_lines(self.feedback, 2)
-        layout.addWidget(self.feedback)
         layout.addStretch(1)
 
+    def _vector_section(self, channel, title, dial_title, maximum):
+        section = QWidget()
+        column = QVBoxLayout(section)
+        column.setContentsMargins(0, 0, 0, 0)
+        column.setSpacing(6)
+        header = QGridLayout()
+        header.setSpacing(8)
+        header.addWidget(_section(title), 0, 0)
+        source = self._online_source(channel)
+        header.addWidget(source, 0, 1)
+        header.setColumnStretch(1, 1)
+        self._vector_headers[channel] = header
+        column.addLayout(header)
+        direction = CompassDial(dial_title, compact=True)
+        direction.setAccessibleName(f"{title} direction from")
+        direction.value_changed.connect(lambda _value: self._environment_changed())
+        column.addWidget(direction, 0, Qt.AlignHCenter)
+        speed = _spin(0.0, maximum, 1, " kn")
+        speed.setAccessibleName(f"{title} speed")
+        speed.setToolTip(f"{title} speed")
+        speed.editingFinished.connect(self._environment_changed)
+        row, slider = _slider_field(speed, scale=10, changed=self._environment_changed, stacked=True)
+        self._vector_speed_rows[channel] = row
+        slider.setToolTip(f"{title} speed")
+        slider.setAccessibleName(f"{title} speed")
+        column.addWidget(row)
+        status = self._source_status(column)
+        for name, control in (("source", source), ("direction", direction), ("speed", speed),
+                              ("speed_slider", slider), ("status", status)):
+            setattr(self, f"{channel}_{name}", control)
+        return section
+
+    def _layout_vector_columns(self, width):
+        margins = self.layout().contentsMargins()
+        minimum = max(max(getattr(self, f"{channel}_source").minimumSizeHint().width(),
+                          getattr(self, f"{channel}_direction").minimumWidth(),
+                          self._vector_speed_rows[channel].minimumSizeHint().width())
+                      for channel in ("wind", "current"))
+        available = width - margins.left() - margins.right()
+        columns = 2 if available >= 2*minimum + self.vector_grid.horizontalSpacing() else 1
+        if columns != self._vector_columns:
+            self._vector_columns = columns
+            for channel, header in self._vector_headers.items():
+                source = getattr(self, f"{channel}_source")
+                header.addWidget(source, 1 if columns == 2 else 0, 0 if columns == 2 else 1,
+                                 1, 2 if columns == 2 else 1)
+                header.setColumnStretch(0, 1 if columns == 2 else 0)
+                header.setColumnStretch(1, 0 if columns == 2 else 1)
+            self.vector_grid.addWidget(self.current_section, 0 if columns == 2 else 1, 1 if columns == 2 else 0)
+            self.vector_grid.setColumnStretch(1, 1 if columns == 2 else 0)
+            self.updateGeometry()
+        if hasattr(self, "weather_header"):
+            needed = (self._weather_title.minimumSizeHint().width() + self.weather_source.minimumSizeHint().width()
+                      + self.online_access.width() + 2*self.weather_header.horizontalSpacing())
+            inline = available >= needed
+            if inline != self._weather_inline:
+                self._weather_inline = inline
+                self.weather_header.addWidget(self._weather_title, 0, 0, 1, 1 if inline else 2)
+                self.weather_header.addWidget(self.weather_source, 0 if inline else 1, 1 if inline else 0,
+                                             1, 1 if inline else 3)
+                self.weather_header.setColumnStretch(0, 0 if inline else 1)
+                self.weather_header.setColumnStretch(1, 1 if inline else 0)
+                self.updateGeometry()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        parent = self.parentWidget()
+        if parent is not self._vector_viewport:
+            if self._vector_viewport is not None:
+                self._vector_viewport.removeEventFilter(self)
+            self._vector_viewport = parent
+            if parent is not None:
+                parent.installEventFilter(self)
+        self._layout_vector_columns(parent.width() if parent is not None else self.width())
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, "vector_grid"):
+            width = min(event.size().width(), self._vector_viewport.width()) if self._vector_viewport is not None else event.size().width()
+            self._layout_vector_columns(width)
+
+    def eventFilter(self, watched, event):
+        # Observe the scroll viewport too: a two-column minimum must not prevent
+        # the content from folding back when the surrounding pane gets narrower.
+        if watched is self._vector_viewport and event.type() == QEvent.Resize:
+            self._layout_vector_columns(event.size().width())
+        return super().eventFilter(watched, event)
+
     def update_snapshot(self, snapshot: SimulationSnapshot) -> None:
+        for channel in ("wind", "current"):
+            source = getattr(self, f"{channel}_source")
+            requested = getattr(snapshot, f"{channel}_source")
+            active = getattr(snapshot, f"active_{channel}_source") == "open-meteo"
+            source.blockSignals(True)
+            source.setCurrentIndex(max(0, source.findData(requested)))
+            source.blockSignals(False)
+            for control in (getattr(self, f"{channel}_direction"), getattr(self, f"{channel}_speed"),
+                            getattr(self, f"{channel}_speed_slider")):
+                control.setEnabled(not active)
+            getattr(self, f"{channel}_status").setText(
+                "Open-Meteo" if active else "Manual fallback" if requested == "open-meteo" else "Manual"
+            )
+        self.depth_source.blockSignals(True)
+        self.depth_source.setCurrentIndex(max(0, self.depth_source.findData(snapshot.depth_source)))
+        self.depth_source.blockSignals(False)
+        chart_active = snapshot.active_depth_source in {"gebco", "s57"}
+        self.depth.setEnabled(not chart_active)
+        self.depth_slider.setEnabled(not chart_active)
+        if chart_active:
+            label = "GEBCO" if snapshot.active_depth_source == "gebco" else "S57"
+            self.depth_status.setText(f"{label} - depth below keel")
+        else:
+            self.depth_status.setText("Manual fallback"
+                                      if snapshot.depth_source == "chart" else "Manual depth below keel")
+        self.depth_status.setToolTip("Depth below keel/transducer. When chart depth is unavailable, the last depth is held.")
         for field, value in (
             (self.wind_speed, snapshot.wind_speed_kn),
             (self.current_speed, snapshot.current_speed_kn),
@@ -810,8 +1009,7 @@ class EnvironmentPanel(QWidget):
                 field.setValue(float(getattr(snapshot, name)))
                 field.blockSignals(False)
         self.feedback.setText(
-            f"True wind {snapshot.true_wind_from_deg:05.1f}° / {snapshot.true_wind_speed_kn:.1f} kn\n"
-            f"Relative {snapshot.relative_wind_from_bow_deg:05.1f}° / {snapshot.relative_wind_speed_kn:.1f} kn"
+            f"Apparent wind {snapshot.relative_wind_from_bow_deg:05.1f}° / {snapshot.relative_wind_speed_kn:.1f} kn"
         )
 
     def _environment_changed(self) -> None:
@@ -824,6 +1022,32 @@ class EnvironmentPanel(QWidget):
             )
         )
 
+    def _online_source(self, channel):
+        source = _EnvironmentSourceComboBox()
+        source.addItem("Manual", "manual")
+        source.addItem("Online - Open-Meteo", "open-meteo")
+        source.setToolTip("Open-Meteo at own ship; last values held on loss, automatic recovery. "
+                          "Free API: non-commercial only. Customer key: Open-Meteo access."
+                          + (" Coarse current data; limited harbour/river accuracy." if channel == "current" else ""))
+        source.currentIndexChanged.connect(lambda: self.command_submitted.emit(
+            SetEnvironmentSource(channel, str(source.currentData() or "manual"))
+        ))
+        return source
+
+    @staticmethod
+    def _source_status(layout):
+        status = QLabel("Manual")
+        status.setObjectName("secondaryText")
+        status.setWordWrap(True)
+        reserve_label_lines(status, 1)
+        layout.addWidget(status)
+        return status
+
+    def _open_online_access(self):
+        dialog = OpenMeteoAccessDialog(self.open_meteo_api_key, self)
+        if dialog.exec() == QDialog.Accepted:
+            self.api_key_changed.emit(dialog.api_key)
+
     def _depth_changed(self) -> None:
         self.command_submitted.emit(SetEnvironment(depth_m=self.depth.value()))
 
@@ -835,7 +1059,19 @@ class EnvironmentPanel(QWidget):
         self._update_weather_editability()
 
     def set_weather_status(self, status: str) -> None:
-        self.weather_status.setText(str(status))
+        message = str(status)
+        self.weather_status.setToolTip(message)
+        if message.startswith("Open-Meteo"):
+            short = "Open-Meteo (cached)" if "cached" in message else "Open-Meteo"
+        elif message.startswith("Offline"):
+            short = "Offline - last values held"
+        elif "unavailable" in message.lower():
+            short = "Weather unavailable"
+        elif message.startswith(("Loading", "Online")):
+            short = "Loading online weather..."
+        else:
+            short = "Manual" if message.startswith("Manual") else "Weather status"
+        self.weather_status.setText(short)
 
     def _weather_source_changed(self) -> None:
         self._update_weather_editability()

@@ -1,4 +1,4 @@
-# 3D Navigation View - 2.3.0
+# 3D Navigation View - 2.3.1
 
 The optional 3D view displays Google scenery plus simulator-authoritative own
 ship/AIS overlays. Google 3D Maps uses Maps JavaScript API; Photorealistic Tiles

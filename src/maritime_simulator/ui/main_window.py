@@ -51,6 +51,10 @@ from maritime_simulator.domain.commands import (
     SetAuxiliarySensors,
     SetControlMode,
     SetEnvironment,
+    SetDepthSource,
+    SetChartDepth,
+    SetEnvironmentSource,
+    SetOnlineEnvironment,
     SetPosition,
     SetRudderOrder,
     SetRoute,
@@ -67,7 +71,9 @@ from maritime_simulator.domain.enums import ControlMode
 from maritime_simulator.domain.state import RouteWaypoint, sensor_noise_settings
 from maritime_simulator.simulation.route_geometry import RouteGeometry, bearing_deg
 from maritime_simulator.simulation.route_io import load_rtz
-from maritime_simulator.transport.live_weather import LiveWeatherClient, LiveWeatherReading
+from maritime_simulator.transport.live_weather import LiveWeatherClient, LiveWeatherReading, validate_api_key
+from maritime_simulator.transport.live_environment import LiveWindClient, LiveCurrentClient
+from maritime_simulator.transport.chart_depth import ChartDepthClient
 from maritime_simulator.protocols.sensors import SensorProjector
 from maritime_simulator.visual.water_mask import OSMNavigableWaterMask
 from maritime_simulator.visual.offline import MBTiles, OfflineSettings, OfflineTileServer
@@ -138,6 +144,8 @@ class _DetachedMapDialog(OpaqueDialog):
 class V2MainWindow(QMainWindow):
     """Responsive V2 command/snapshot shell with mode-specific workflows."""
 
+    EXPANDED_CONTROLS_MAX_WIDTH = 720
+
     def __init__(self, service: SimulatorService | None = None, *, config_dir: Path | None = None):
         super().__init__()
         self.config_dir = config_dir or user_config_dir()
@@ -183,7 +191,15 @@ class V2MainWindow(QMainWindow):
             fault_injector=self.fault_injector,
         )
         self.input_runtime = InputRuntime(self.service, self.config_dir / "ror_input.json", self)
-        self.live_weather = LiveWeatherClient(self)
+        allow_network = QApplication.platformName().lower() != "offscreen"
+        self.live_weather = LiveWeatherClient(self, allow_network=allow_network)
+        self.live_wind = LiveWindClient(self, allow_network=allow_network)
+        self.live_current = LiveCurrentClient(self, allow_network=allow_network)
+        self.chart_depth = ChartDepthClient(
+            self.s57_store, self,
+            allow_network=QApplication.platformName().lower() != "offscreen",
+        )
+        self.chart_depth.reading_received.connect(self._apply_chart_depth)
         self.setWindowTitle("Maritime Ship Simulator V2")
         self.setMinimumSize(960, 640)
         self._fit_to_screen()
@@ -466,7 +482,7 @@ class V2MainWindow(QMainWindow):
         self.left_panel = frame
         frame.setObjectName("panel")
         frame.setMinimumWidth(300)
-        frame.setMaximumWidth(480)
+        frame.setMaximumWidth(self.EXPANDED_CONTROLS_MAX_WIDTH)
         layout = QVBoxLayout(frame)
         layout.setContentsMargins(0, 0, 0, 0)
         panel_header = QHBoxLayout()
@@ -491,8 +507,13 @@ class V2MainWindow(QMainWindow):
         self.environment_controls = EnvironmentPanel()
         self.environment_controls.command_submitted.connect(self._submit_ui_command)
         self.environment_controls.weather_source_changed.connect(self._set_weather_source)
+        self.environment_controls.api_key_changed.connect(self._set_open_meteo_api_key)
         self.live_weather.status_changed.connect(self.environment_controls.set_weather_status)
         self.live_weather.reading_received.connect(self._apply_live_weather)
+        for channel, client in (("wind", self.live_wind), ("current", self.live_current)):
+            client.reading_received.connect(lambda reading, name=channel: self._apply_online_vector(name, reading))
+            client.unavailable.connect(lambda name=channel: self.service.submit(SetOnlineEnvironment(name)))
+            client.status_changed.connect(getattr(self.environment_controls, f"{channel}_status").setToolTip)
         self.ais_controls = AISControlPanel(
             self.ais,
             self.service.snapshot,
@@ -526,9 +547,13 @@ class V2MainWindow(QMainWindow):
         self.compact_controls.hide()
         layout.addWidget(self.compact_controls, 1)
         self._left_collapsed = False
+        self._left_expanded_width = 340
         return frame
 
     def _toggle_left_panel(self) -> None:
+        sizes = self.workspace.sizes()
+        if not self._left_collapsed:
+            self._left_expanded_width = max(300, self.left_panel.width())
         self._left_collapsed = not self._left_collapsed
         self.control_tabs.setVisible(not self._left_collapsed)
         self.compact_controls.setVisible(self._left_collapsed)
@@ -537,12 +562,11 @@ class V2MainWindow(QMainWindow):
             "Expand all control tabs." if self._left_collapsed else "Collapse to key controls."
         )
         self.left_panel.setMinimumWidth(112 if self._left_collapsed else 300)
-        self.left_panel.setMaximumWidth(124 if self._left_collapsed else 480)
-        sizes = self.workspace.sizes()
-        compact_width = 118
+        self.left_panel.setMaximumWidth(124 if self._left_collapsed else self.EXPANDED_CONTROLS_MAX_WIDTH)
+        target_width = 118 if self._left_collapsed else self._left_expanded_width
         self.workspace.setSizes([
-            compact_width if self._left_collapsed else 340,
-            max(440, sum(sizes) - compact_width),
+            target_width,
+            max(440, sum(sizes) - target_width),
         ])
 
     @staticmethod
@@ -640,6 +664,9 @@ class V2MainWindow(QMainWindow):
                 end_action=str(data.get("route_end_action", snapshot.route_end_action)),
             ))
             environment = simulation.get("environment", {})
+            self.service.submit(SetDepthSource("manual"))
+            for channel in ("wind", "current"):
+                self.service.submit(SetEnvironmentSource(channel, "manual"))
             if environment:
                 weather_source = str(environment.get("weather_source", "manual"))
                 self._submit_ui_command(SetEnvironment(
@@ -698,7 +725,8 @@ class V2MainWindow(QMainWindow):
                 self._submit_ui_command(SetControlMode(ControlMode.SENSOR))
                 allowed = SetSensorValues.__dataclass_fields__
                 self._submit_ui_command(SetSensorValues(**{
-                    name: value for name, value in sensor_values.items() if name in allowed
+                    name: value for name, value in sensor_values.items()
+                    if name in allowed and (name != "depth_m" or "depth_m" not in environment)
                 }))
             auxiliary = simulation.get("auxiliary_sensors", {})
             if isinstance(auxiliary, dict) and auxiliary:
@@ -720,7 +748,18 @@ class V2MainWindow(QMainWindow):
             fault_state = data.get("fault_injection")
             if isinstance(fault_state, dict):
                 self.fault_panel.apply_state(fault_state)
+            try:
+                self._set_open_meteo_api_key(environment.get("open_meteo_api_key", ""))
+            except ValueError:
+                self._set_open_meteo_api_key("")
+            for channel in ("wind", "current"):
+                self._submit_ui_command(SetEnvironmentSource(
+                    channel, "open-meteo" if environment.get(f"{channel}_source") == "open-meteo" else "manual"
+                ))
             self._set_weather_source(weather_source)
+            self._submit_ui_command(SetDepthSource(
+                "chart" if environment.get("depth_source") == "chart" else "manual"
+            ))
             self._submit_ui_command(SetControlMode(desired_mode))
             self.service.advance_wall_time(0.0)
         except (KeyError, TypeError, ValueError):
@@ -803,6 +842,30 @@ class V2MainWindow(QMainWindow):
         if self.offline_settings.enabled and live:
             self.environment_controls.set_weather_status("Offline: live weather paused; current values retained")
 
+    def _set_open_meteo_api_key(self, key):
+        key = validate_api_key(key)
+        self.environment_controls.open_meteo_api_key = key
+        for client in (self.live_weather, self.live_wind, self.live_current):
+            client.set_api_key(key)
+
+    def _sync_online_vectors(self, *, replay_channel=None):
+        snapshot = self.service.snapshot()
+        for channel, client in (("wind", self.live_wind), ("current", self.live_current)):
+            wanted = getattr(snapshot, f"{channel}_source") == "open-meteo"
+            enabled = wanted and not self.offline_settings.enabled
+            was_enabled = client.enabled
+            client.update_position(snapshot.latitude_deg, snapshot.longitude_deg)
+            client.set_enabled(enabled)
+            if enabled and was_enabled and replay_channel == channel:
+                client.refresh(force=True)
+            if not enabled:
+                self.service.submit(SetOnlineEnvironment(channel))
+
+    def _apply_online_vector(self, channel, reading):
+        client = self.live_wind if channel == "wind" else self.live_current
+        if client.enabled and not self.offline_settings.enabled:
+            self.service.submit(SetOnlineEnvironment(channel, reading.direction_from_deg, reading.speed_kn))
+
     def _apply_offline_settings(self, settings: OfflineSettings) -> None:
         settings = OfflineSettings.from_payload(settings.payload())
         if settings.enc_cells is not None and settings.enc_cells != self.offline_settings.enc_cells:
@@ -821,6 +884,7 @@ class V2MainWindow(QMainWindow):
             except (OSError, ValueError, sqlite3.Error):
                 pass
         self.offline_settings = settings
+        self.chart_depth.set_offline(settings.enabled)
         self.water_mask.set_offline(settings.enabled, water)
         if QApplication.platformName().lower() == "offscreen":
             self.water_mask.allow_network = False
@@ -828,6 +892,7 @@ class V2MainWindow(QMainWindow):
         self.ais_controls.client.set_offline(settings.enabled)
         weather = self.environment_controls.weather_source.currentData() or "manual"
         self._set_weather_source(weather)
+        self._sync_online_vectors()
         package = None
         if settings.map_file:
             try:
@@ -1202,7 +1267,7 @@ class V2MainWindow(QMainWindow):
         active = self.service.snapshot().vessel_profile_id
         available = {profile.profile_id for profile in self.service.profiles.all_profiles()}
         selected = active if active in available else profile_id
-        if selected != active:
+        if selected != active or self.service.snapshot().depth_source == "chart":
             self._submit_ui_command(SelectVesselProfile(selected))
             self.service.advance_wall_time(0.0)
         controller = self.service.track_controller
@@ -1235,6 +1300,16 @@ class V2MainWindow(QMainWindow):
 
     def _submit_ui_command(self, command) -> None:
         self.service.submit(command)
+        if isinstance(command, SetEnvironmentSource):
+            self.service.advance_wall_time(0.0)
+            self._sync_online_vectors(replay_channel=command.channel)
+            self.service.advance_wall_time(0.0)
+        if isinstance(command, SetDepthSource):
+            self.service.advance_wall_time(0.0)
+            snapshot = self.service.snapshot()
+            self.chart_depth.update_position(snapshot.latitude_deg, snapshot.longitude_deg,
+                                             time_scale=snapshot.time_scale, sog_kn=snapshot.sog_kn)
+            self.chart_depth.set_enabled(command.source == "chart", force=True)
         if isinstance(command, (SeekRoute, SetPosition)):
             self._history_reset_token += 1
         if isinstance(command, SeekRoute):
@@ -1242,11 +1317,22 @@ class V2MainWindow(QMainWindow):
         if isinstance(command, (SetRoute, UpdateRoute)):
             self._populate_route_table(command.waypoints)
             self._last_route_signature = None
-        if isinstance(command, (SeekRoute, SetPosition, SetRoute, UpdateRoute, SetRouteOptions, SetControlMode, SetTimeScale)):
+        position_reset = (isinstance(command, (SeekRoute, SetPosition, SetRoute)) or
+                          isinstance(command, SetSensorValues) and
+                          (command.latitude_deg is not None or command.longitude_deg is not None))
+        if position_reset or isinstance(command, (UpdateRoute, SetRouteOptions, SetControlMode, SetTimeScale)):
             self.service.advance_wall_time(0.0)
+            if position_reset:
+                snapshot = self.service.snapshot()
+                self.chart_depth.update_position(snapshot.latitude_deg, snapshot.longitude_deg,
+                                                 time_scale=snapshot.time_scale, sog_kn=snapshot.sog_kn, reset=True)
             if isinstance(command, (SeekRoute, SetPosition)):
                 self.ais_controls.client.own_ship_position_changed()
             self._refresh()
+
+    def _apply_chart_depth(self, reading) -> None:
+        if self.service.snapshot().depth_source == "chart":
+            self.service.submit(SetChartDepth(reading.water_depth_m, reading.source))
 
     def _map_command(self, command: dict) -> None:
         action = str(command.get("action", ""))
@@ -1495,6 +1581,10 @@ class V2MainWindow(QMainWindow):
             self.compact_controls.update_snapshot(display_snapshot)
             self.environment_controls.update_snapshot(display_snapshot)
             self.live_weather.update_position(snapshot.latitude_deg, snapshot.longitude_deg)
+            self.live_wind.update_position(snapshot.latitude_deg, snapshot.longitude_deg)
+            self.live_current.update_position(snapshot.latitude_deg, snapshot.longitude_deg)
+            self.chart_depth.update_position(snapshot.latitude_deg, snapshot.longitude_deg,
+                                             time_scale=snapshot.time_scale, sog_kn=snapshot.sog_kn)
             self.advanced_sensors.update_snapshot(display_snapshot)
             self.sensor_noise.update_snapshot(snapshot)
             self.fault_panel.refresh()
@@ -1618,6 +1708,9 @@ class V2MainWindow(QMainWindow):
         if self.forward_view_dialog is not None:
             self.forward_view_dialog.shutdown()
         self.live_weather.close()
+        self.live_wind.close()
+        self.live_current.close()
+        self.chart_depth.close()
         if self.settings_dialog is not None and self.settings_dialog.offline_panel is not None:
             self.settings_dialog.offline_panel.shutdown()
         if self.offline_tiles is not None:
@@ -1680,7 +1773,7 @@ class V2MainWindow(QMainWindow):
                     "rudder_order_port_deg": snapshot.rudder_order_port_deg,
                     "rudder_response_port_deg": snapshot.rudder_response_port_deg,
                     "dual_rudder": snapshot.dual_rudder,
-                    "depth_m": snapshot.depth_m,
+                    "depth_m": snapshot.manual_depth_m,
                 },
                 "auxiliary_sensors": {
                     "dual_rudder": snapshot.dual_rudder,
@@ -1712,7 +1805,11 @@ class V2MainWindow(QMainWindow):
                     "wind_speed_kn": snapshot.wind_speed_kn,
                     "current_from_deg": snapshot.current_from_deg,
                     "current_speed_kn": snapshot.current_speed_kn,
-                    "depth_m": snapshot.depth_m,
+                    "depth_m": snapshot.manual_depth_m,
+                    "depth_source": snapshot.depth_source,
+                    "wind_source": snapshot.wind_source,
+                    "current_source": snapshot.current_source,
+                    "open_meteo_api_key": self.environment_controls.open_meteo_api_key,
                     "xdr_air_temperature_c": snapshot.xdr_air_temperature_c,
                     "xdr_relative_humidity_percent": snapshot.xdr_relative_humidity_percent,
                     "xdr_dew_point_c": snapshot.xdr_dew_point_c,

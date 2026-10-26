@@ -228,9 +228,38 @@ class UserGuideDialog(OpaqueDialog):
             <h2>Environment, AIS and sensors</h2>
             <p>Simulation time is selected in the upper status row; accelerated values are highlighted red.
             Environment contains compass dials for wind
-            and current plus speed and depth controls. Atmospheric data owns the standard XDR values for air
+            and current plus speed and depth controls. Depth can be Manual or Chart-based: installed S57
+            cells are preferred, independently of the visible map source and zoom. If local depth is missing,
+            GEBCO is used online; if neither source is available, the last depth is held as Manual.
+            Offline Mode skips GEBCO. The higher-priority source resumes automatically when it is available.
+            Chart depth subtracts the vessel model's Draft; the transducer is assumed to be at keel level.
+            Nearby depth points are interpolated. When data are unavailable the last effective depth becomes
+            the manual value, avoiding a jump; chart-based operation resumes automatically when data return.
+            Selecting Manual explicitly stops automatic depth queries. Depth and source are saved with the
+            Environment Start-up group and configuration exports. GEBCO is a coarse global grid, not harbour
+            survey data; no live tide correction or grounding protection is provided.
+            Accelerated depth sampling uses real time: at most once per second below 10x,
+            every two seconds from 10x, three seconds from 30x and five seconds from 100x.
+            Stationary checks remain 30 seconds. High acceleration samples the route more
+            coarsely; protocol transmission rates are unchanged. Expected movement during a
+            bounded query delay is allowed, but explicit position changes invalidate old results.
+            Wind, Current and Atmospheric data consistently offer Manual or Online - Open-Meteo.
+            Wind/Current share two columns at normal sidebar width, with each speed slider above its
+            numeric value; very narrow panes stack them vertically. Atmospheric values use a two-column grid.
+            A narrow source field shows Online; its menu retains Online - Open-Meteo.
+            Online uses 10 m wind and surface
+            current at own ship. The existing Current From direction is preserved through conversion.
+            On loss or Offline Mode the last direction/speed are held and manual controls unlock;
+            Online resumes automatically unless Manual is selected. Sources and held values are saved
+            in Environment Start-up and configuration exports. Current data are coarse, not a detailed
+            harbour or river model. Normal polling is ten minutes or five nautical miles of movement,
+            with caching and bounded retries. The Open-Meteo access icon beside Atmospheric data
+            opens the optional customer API-key setting.
+            Without a key the free API is non-commercial only; commercial use requires suitable API access.
+            Exported configurations include that key and must be kept private.
+            Atmospheric data owns the standard XDR values for air
             temperature in Celsius, relative humidity, dew point and surface pressure. These can use editable manual
-            values or no-key Open-Meteo values for the current own-ship position. Live updates are asynchronous and
+            values or Open-Meteo values for the current own-ship position. Live updates are asynchronous and
             refresh after a significant position jump; failures retain the previous XDR values without blocking
             simulation or output. MDA and MTW remain separate manual sensors. The selected source is stored in
             complete configurations and the Environment Start-up group. Sensor Noise provides independent deterministic noise for

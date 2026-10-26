@@ -50,6 +50,19 @@ This allows land crossings deliberately. A coarse world outline is not harbour
 detail. Live AIS/weather are Internet services; use generated/synthetic traffic
 and manual Environment values for a reproducible disconnected demonstration.
 
+## Environmental data offline
+
+With **Depth > Chart-based**, enabled installed S57 cells at own ship supply
+depth even when another basemap or zoom level is displayed. Offline Mode does
+not request GEBCO data. If local S57 depth is unavailable, the last effective
+depth becomes the manual fallback; the requested chart source recovers when
+usable data return. Vessel Draft is subtracted from chart water depth only.
+
+Online wind/current/weather requests pause in Offline Mode. Their last valid
+values are retained and wind/current allow manual adjustment. Select Manual
+explicitly to keep a fixed test environment rather than automatically recovering
+the requested online source after reconnecting.
+
 ## Manage and transfer maps
 
 The Protomaps table supports rename, renew, detail changes, deletion and
@@ -69,5 +82,5 @@ Generated mask data is cached under `geodata-cache` and can be regenerated from
 saved geometry. Back up maps and operator configuration separately; exported
 configuration can contain provider credentials.
 
-The [illustrated guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.0.pdf)
+The [illustrated guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf)
 contains the complete offline management workflow and screenshots.

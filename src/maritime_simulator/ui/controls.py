@@ -113,12 +113,13 @@ class CompassDial(QWidget):
     value_changed = Signal(float)
     reset_requested = Signal()
 
-    def __init__(self, title: str, parent=None):
+    def __init__(self, title: str, parent=None, *, compact: bool = False):
         super().__init__(parent)
         self.title = title
+        self._compact = compact
         self._value = 0.0
         self._dragging = False
-        self.setMinimumSize(132, 150)
+        self.setMinimumSize(132, 136 if compact else 150)
         self.setToolTip(f"Set {title} by dragging around the compass dial. Double-click to reset its coupling offset.")
 
     def value(self) -> float:
@@ -149,12 +150,18 @@ class CompassDial(QWidget):
             self.reset_requested.emit()
 
     def _set_from_position(self, position: QPointF) -> None:
-        center = QPointF(self.width() / 2.0, self.height() * 0.51)
+        center, _radius = self._dial_geometry()
         dx = position.x() - center.x()
         dy = position.y() - center.y()
         self._value = math.degrees(math.atan2(dx, -dy)) % 360.0
         self.value_changed.emit(self._value)
         self.update()
+
+    def _dial_geometry(self):
+        if self._compact:
+            available = max(1.0, self.height() - 54.0)
+            return QPointF(self.width()/2.0, 24.0+available/2.0), min(self.width()*.40, available/2.0)
+        return QPointF(self.width()/2.0, self.height()*.51), min(self.width()*.40, self.height()*.34)
 
     def paintEvent(self, _event) -> None:
         painter = QPainter(self)
@@ -162,8 +169,7 @@ class CompassDial(QWidget):
         accent = QColor("#18b8dd")
         muted = QColor("#587583")
         text = QColor("#dbe8ee")
-        center = QPointF(self.width() / 2.0, self.height() * 0.51)
-        radius = min(self.width() * 0.40, self.height() * 0.34)
+        center, radius = self._dial_geometry()
 
         painter.setPen(QPen(muted, 2.0))
         painter.drawEllipse(center, radius, radius)

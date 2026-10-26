@@ -33,8 +33,10 @@ certify the remaining bundled components. An upstream link alone is not a
 completed compliance review. See
 `THIRD_PARTY_NOTICES.md` and the version-specific publication audit.
 
-The release's separate upstream-source downloads must remain available with
-the native downloads. Verify each platform's inventory against these sources;
+The separate upstream-source downloads must remain available with the native
+downloads. 2.3.1 links the unchanged matching library-source assets retained in
+release 2.3.0; `LICENSES/upstream-sources.json` intentionally identifies that shared
+source set. Verify each platform's inventory against these sources;
 one platform's notice collection is not evidence about another platform's wheels.
 Build-time checks support this review; they are not a legal certification.
 

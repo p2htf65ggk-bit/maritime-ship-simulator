@@ -483,9 +483,10 @@ def _summary(group: str, payload: dict) -> str:
         )
         return (
             f"Wind {_number(environment.get('wind_speed_kn'), ' kn')} / "
-            f"{_number(environment.get('wind_from_deg'), '°')}; current "
+            f"{_number(environment.get('wind_from_deg'), '°')} ({environment.get('wind_source', 'manual')}); current "
             f"{_number(environment.get('current_speed_kn'), ' kn')} / "
-            f"{_number(environment.get('current_from_deg'), '°')}; {weather_source}"
+            f"{_number(environment.get('current_from_deg'), '°')} ({environment.get('current_source', 'manual')}); {weather_source}; "
+            f"depth {environment.get('depth_source', 'manual')}"
         )
     if group == "ais":
         ais = app_state.get("ais", {})
@@ -652,7 +653,7 @@ def _details(group: str, payload: dict) -> str:
         return STARTUP_GROUP_LABELS[group] + "\n" + _summary(group, payload)
     relevant = simulation.get("environment", {}) if group == "environment" else payload
     if group == "environment":
-        keys = ("wind_speed_kn", "wind_from_deg", "current_speed_kn", "current_from_deg", "depth_m", "weather_source",
+        keys = ("depth_source", "depth_m", "wind_source", "current_source", "wind_speed_kn", "wind_from_deg", "current_speed_kn", "current_from_deg", "weather_source",
                 "air_temperature_c", "relative_humidity_percent", "surface_pressure_hpa")
         relevant = {key: relevant[key] for key in keys if key in relevant}
     lines: list[str] = []
@@ -691,6 +692,7 @@ def _append_detail_lines(value, path: tuple[str, ...], lines: list[str]) -> None
             )
             if (
                 normalized in _SENSITIVE_FIELDS
+                or normalized.endswith("_api_key")
                 or sensitive_parts
                 & {
                     "authorization",

@@ -72,7 +72,7 @@ if [[ "${SKIP_DEPENDENCY_INSTALL:-0}" != "1" ]]; then
 fi
 
 VERSION="$(PYTHONPATH=src "${VENV_PYTHON}" -c 'from maritime_simulator import __version__; print(__version__)')"
-if [[ "${VERSION}" == *-rc* ]]; then
+if [[ "${VERSION}" == *-rc* || "${VERSION}" == *-beta* ]]; then
   PRODUCTION_RELEASE=0
   export PRODUCTION_RELEASE
 fi

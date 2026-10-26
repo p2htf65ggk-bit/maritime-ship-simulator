@@ -1,4 +1,4 @@
-# Architecture - 2.3.0
+# Architecture - 2.3.1
 
 ## Ownership and data flow
 

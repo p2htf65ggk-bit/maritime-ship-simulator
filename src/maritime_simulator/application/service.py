@@ -24,6 +24,7 @@ from maritime_simulator.domain.profiles import VesselProfileStore
 from maritime_simulator.domain.state import SimulationSnapshot, SimulationState
 from maritime_simulator.simulation.clock import ClockAdvance, SimulationClock
 from maritime_simulator.simulation.dynamics import VesselDynamics
+from maritime_simulator.simulation.environment import calculate_wind
 
 from .arbitration import CommandArbitrator
 from .metrics import PerformanceMonitor
@@ -150,6 +151,7 @@ class SimulatorService:
             now = self._monotonic()
             if not advance.fixed_steps_s:
                 self.arbitrator.resolve(self._state, profile, now)
+                calculate_wind(self._state)
                 self._state.revision += 1
                 return
 
@@ -240,6 +242,7 @@ class SimulatorService:
             motion.heading_deg = (motion.heading_deg + motion.rate_of_turn_deg_min * dt_s / 60.0) % 360.0
             if sensor.cog_follows_heading:
                 motion.cog_deg = (motion.heading_deg + sensor.cog_heading_offset_deg) % 360.0
+        calculate_wind(self._state)
 
     def _apply_route_end_action(self) -> None:
         route = self._state.route

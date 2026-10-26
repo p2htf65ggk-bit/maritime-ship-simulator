@@ -16,7 +16,7 @@ the developer build scripts.
 Only assets actually attached to a release are available. Check the release
 notes and RELEASE_INFO.txt for the Ubuntu version and architecture actually
 built and tested. The current macOS downloads do not imply Intel-native support.
-Version 2.3.0 has no prebuilt Ubuntu 22.04 package; 22.04 remains a self-build
+Version 2.3.1 has no prebuilt Ubuntu 22.04 package; 22.04 remains a self-build
 option, not a tested binary target for this release.
 The [build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the source revision
 for each platform. The Ubuntu label is the author's confirmed build/test host,
@@ -32,12 +32,12 @@ or incomplete file, not a trusted developer signature. Check the download source
 as well. Substitute the actual filename, including version and compatibility label.
 
 ```powershell
-Get-FileHash .\Maritime-Ship-Simulator-V2-2.3.0-windows-setup.exe -Algorithm SHA256
+Get-FileHash .\Maritime-Ship-Simulator-V2-2.3.1-windows-setup.exe -Algorithm SHA256
 ```
 
 ```bash
-shasum -a 256 Maritime-Ship-Simulator-V2-2.3.0-macos.dmg
-sha256sum Maritime-Ship-Simulator-V2-2.3.0-ubuntu-installer.deb
+shasum -a 256 Maritime-Ship-Simulator-V2-2.3.1-macos.dmg
+sha256sum Maritime-Ship-Simulator-V2-2.3.1-ubuntu-installer.deb
 ```
 
 ## Windows
@@ -48,12 +48,19 @@ are unsigned. Where policy permits, SmartScreen can offer More info > Run anyway
 for a verified, trusted download. Do not disable Windows security globally.
 Allow only the required traffic on the intended trusted network profile.
 
+SmartScreen's unknown-publisher warning and a Defender threat detection are
+different. If Defender quarantines a file, record its detection name and check
+the exact download hash. Do not disable protection or restore it solely because
+this release is unsigned. Report the detection through GitHub and, where
+appropriate, [Microsoft's file-submission portal](https://www.microsoft.com/en-us/wdsi/filesubmission).
+The portable ZIP is not a guaranteed workaround if its application EXE is flagged.
+
 ## Ubuntu
 
 Install the DEB using APT so its declared dependencies can be resolved:
 
 ```bash
-sudo apt install ./Maritime-Ship-Simulator-V2-2.3.0-ubuntu-installer.deb
+sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-installer.deb
 ```
 
 `GLIBC_2.38 not found` or a similar GLIBC version error indicates a platform
@@ -69,7 +76,7 @@ simulator as root as a workaround.
 
 ### Ubuntu 22.04 self-build
 
-No Ubuntu 22.04 installer is provided for 2.3.0. On Ubuntu 22.04 itself (including
+No Ubuntu 22.04 installer is provided for 2.3.1. On Ubuntu 22.04 itself (including
 a 22.04 VM), extract the full source archive and run:
 
 ```bash
@@ -94,6 +101,13 @@ application; never disable Gatekeeper globally. See
 access when needed for configured network inputs/outputs.
 
 ## Existing settings and first start
+
+Close the previous version and back up user configuration before upgrading.
+Install/extract 2.3.1, check About, and review outputs before connecting equipment.
+The existing user-data location is retained. Older configurations without the
+new environment selectors remain Manual; online sources are opt-in. Configuration
+exports can contain provider keys, including an entered Open-Meteo customer key.
+Do not post those exports publicly.
 
 User settings/maps are stored separately from the application. Check Start-up,
 mode, output endpoints and installed map sources before connecting equipment.

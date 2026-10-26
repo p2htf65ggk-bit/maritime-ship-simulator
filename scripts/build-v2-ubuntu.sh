@@ -293,7 +293,7 @@ fi
 dependencies_healthy || { echo "ERROR: The pinned V2 dependency set is incomplete after installation." >&2; exit 1; }
 
 VERSION="$(PYTHONPATH=src "${VENV_PYTHON}" -c 'from maritime_simulator import __version__; print(__version__)')"
-if [[ "${VERSION}" == *-rc* ]]; then
+if [[ "${VERSION}" == *-rc* || "${VERSION}" == *-beta* ]]; then
   PRODUCTION_RELEASE=0
   export PRODUCTION_RELEASE
 fi
@@ -556,7 +556,8 @@ if [[ "${SKIP_DEB:-0}" != "1" ]]; then
       *) echo "ERROR: Unsupported Debian package architecture: $(uname -m)" >&2; exit 1 ;;
     esac
   fi
-  DEB_VERSION="${VERSION/-rc/~rc}"
+  # Keep Debian's prerelease separator literal on all supported Bash versions.
+  DEB_VERSION=${VERSION/-/\~}
   mkdir -p \
     "${DEB_ROOT}/DEBIAN" \
     "${DEB_APP_DIR}" \

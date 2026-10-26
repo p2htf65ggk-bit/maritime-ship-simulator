@@ -4,7 +4,7 @@ Start with local simulation, then add external equipment or online services.
 No Google API key or Internet connection is needed for the first five steps.
 
 1. Install the matching [unsigned package](../INSTALLATION.md). Start the
-   application and check **About** for version **2.3.0**. Existing installations
+   application and check **About** for version **2.3.1**. Existing installations
    retain their user settings; review these before connecting a receiver.
 2. Open **Settings > Start-up** and review the saved defaults. Do not enable
    automatic output to a real equipment network until its destination is known.
@@ -30,6 +30,24 @@ For Google 3D, open the small **API KEY** control in the 3D view, choose the
 provider, and supply your own appropriately enabled/restricted key. Provider
 terms, billing and quotas are separate from this free application. Do not share
 exported configurations publicly if they contain credentials.
+
+## Choose environmental sources
+
+Under **Environment**, choose **Manual** to set values yourself. **Depth >
+Chart-based** prefers installed S57 cells at own ship, then GEBCO online, then
+the last effective manual depth. Import a local ENC first for offline chart
+depth. Set the vessel model's **Draft**; the transducer is at keel level and
+Draft is subtracted once from chart water depth, never from a manual depth.
+
+Wind, Current and Atmospheric data independently offer **Online - Open-Meteo**.
+They retain their last values on data loss, allow manual fallback edits and
+recover automatically. Explicit Manual stops automatic queries for that channel.
+The Open-Meteo access icon opens optional customer credentials. Free endpoint
+access is non-commercial only; commercial use needs suitable provider access.
+
+With **Offline Mode**, depth uses installed S57 or its held manual fallback;
+online environmental requests stop. GEBCO and model currents are coarse data,
+not local harbour surveys or a navigation-safety guarantee.
 
 ## Connect a test receiver
 
@@ -57,7 +75,7 @@ To stop sending data, disable the output endpoint or stop the simulation.
 - **Configuration export:** keep a reproducible test setup, but treat the file
   as sensitive when it contains provider credentials.
 
-The [illustrated User Guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.0.pdf)
+The [illustrated User Guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf)
 covers modes, menus, context actions, offline maps and troubleshooting.
 Support is best effort. For a problem report, include OS/version, application
 version, steps to reproduce and a redacted diagnostic log. Never include keys,

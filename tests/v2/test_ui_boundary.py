@@ -391,7 +391,7 @@ def test_environment_uses_direction_dials_depth_limit_and_separate_tabs():
     try:
         assert window.environment_controls.wind_direction.__class__.__name__ == "CompassDial"
         assert window.environment_controls.current_direction.__class__.__name__ == "CompassDial"
-        assert window.environment_controls.depth.maximum() == 2000.0
+        assert window.environment_controls.depth.maximum() == 12000.0
         labels = [window.control_tabs.tabText(index) for index in range(window.control_tabs.count())]
         assert labels == ["Control", "Environment", "AIS", "Noise", "Other", "Fault Injection"]
         assert window.control_tabs.tabToolTip(3) == "Sensor Noise"
@@ -550,7 +550,7 @@ def test_ais_control_panel_can_expand_further_and_still_collapse():
         window.control_tabs.setCurrentIndex(2)
         app.processEvents()
         assert window.control_tabs.tabText(2) == "AIS"
-        assert window.left_panel.maximumWidth() == 480
+        assert window.left_panel.maximumWidth() == 720
         window.workspace.setSizes([480, 800])
         app.processEvents()
         assert window.left_panel.width() > 400
@@ -558,7 +558,7 @@ def test_ais_control_panel_can_expand_further_and_still_collapse():
         window._toggle_left_panel()
         assert window.left_panel.maximumWidth() == 124
         window._toggle_left_panel()
-        assert window.left_panel.maximumWidth() == 480
+        assert window.left_panel.maximumWidth() == 720
     finally:
         window.close()
         window.deleteLater()

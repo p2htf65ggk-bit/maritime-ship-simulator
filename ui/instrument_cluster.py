@@ -62,7 +62,7 @@ class BowThrusterInstrument(FramedInstrument):
         painter.setBrush(QColor("#0b151e"))
         painter.drawRoundedRect(bar, 3, 3)
         painter.setPen(Qt.NoPen)
-        painter.setBrush(ACCENT if self.response >= 0 else SECONDARY)
+        painter.setBrush(ACCENT)
         painter.drawRect(QRectF(min(center, actual_x), bar.top(), abs(actual_x - center), bar.height()))
         painter.setPen(QPen(SCALE, 1))
         painter.drawLine(QPointF(center, bar.top() - 4), QPointF(center, bar.bottom() + 4))

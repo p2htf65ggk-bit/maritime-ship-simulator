@@ -6,4 +6,4 @@ from maritime_simulator.domain.enums import ControlMode
 
 __all__ = ["ControlMode", "SimulatorService"]
 
-__version__ = "2.3.0"
+__version__ = "2.3.1"

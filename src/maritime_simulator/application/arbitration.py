@@ -10,6 +10,10 @@ from maritime_simulator.domain.commands import (
     SeekRoute,
     SelectVesselProfile,
     SetControlMode,
+    SetDepthSource,
+    SetChartDepth,
+    SetEnvironmentSource,
+    SetOnlineEnvironment,
     SetAuxiliarySensors,
     SetEnvironment,
     SetExternalRudderInputType,
@@ -66,6 +70,44 @@ class CommandArbitrator:
         profile = profiles.get(state.vessel_profile_id)
         if isinstance(command, SetControlMode):
             state.control_mode = command.mode
+        elif isinstance(command, SetEnvironmentSource):
+            if command.channel not in {"wind", "current"} or command.source not in {"manual", "open-meteo"}:
+                raise ValueError("Invalid environment source")
+            setattr(state.environment, f"{command.channel}_source", command.source)
+            setattr(state.environment, f"active_{command.channel}_source", "manual")
+        elif isinstance(command, SetOnlineEnvironment):
+            if command.channel in {"wind", "current"} and getattr(state.environment, f"{command.channel}_source") == "open-meteo":
+                direction, speed = command.direction_from_deg, command.speed_kn
+                maximum = 150.0 if command.channel == "wind" else 20.0
+                valid = (isinstance(direction, (int, float)) and not isinstance(direction, bool)
+                         and isinstance(speed, (int, float)) and not isinstance(speed, bool)
+                         and math.isfinite(direction) and math.isfinite(speed)
+                         and 0 <= direction <= 360 and 0 <= speed <= maximum)
+                if valid:
+                    setattr(state.environment, f"{command.channel}_from_deg", normalize_angle(direction))
+                    setattr(state.environment, f"{command.channel}_speed_kn", float(speed))
+                # Held environment values become editable on loss; never replace them with zero.
+                setattr(state.environment, f"active_{command.channel}_source", "open-meteo" if valid else "manual")
+        elif isinstance(command, SetDepthSource):
+            if command.source not in {"manual", "chart"}:
+                raise ValueError("Depth source must be manual or chart")
+            if state.depth_source.requested == "manual" or command.source == "manual":
+                state.depth_source.manual_depth_m = state.auxiliary.depth_m
+            elif state.depth_source.active != "manual":
+                state.depth_source.manual_depth_m = state.auxiliary.depth_m
+            state.depth_source.requested = command.source
+            state.depth_source.water_depth_m = None
+            self._resolve_depth(state, profile)
+        elif isinstance(command, SetChartDepth):
+            if state.depth_source.requested == "chart":
+                value = command.water_depth_m
+                valid = (command.source in {"gebco", "s57"} and value is not None
+                         and math.isfinite(value) and 0.0 <= value <= 12000.0)
+                if not valid and state.depth_source.active != "manual":
+                    state.depth_source.manual_depth_m = state.auxiliary.depth_m
+                state.depth_source.water_depth_m = float(value) if valid else None
+                state.depth_source.active = command.source if valid else "manual"
+                self._resolve_depth(state, profile)
         elif isinstance(command, SetSpeedOrder):
             if math.isfinite(command.speed_kn) and state.external_engine.manual_available:
                 state.engine.user_speed_order_kn = self._clamp_speed(command.speed_kn, profile)
@@ -131,19 +173,22 @@ class CommandArbitrator:
                 state.motion.heading_deg = normalize_angle(command.heading_deg)
             self._project_route_state(state, phase="position_set")
         elif isinstance(command, SetEnvironment):
-            if command.wind_from_deg is not None:
-                state.environment.wind_from_deg = normalize_angle(command.wind_from_deg)
-            if command.wind_speed_kn is not None:
-                state.environment.wind_speed_kn = max(0.0, float(command.wind_speed_kn))
-            if command.current_from_deg is not None:
-                state.environment.current_from_deg = normalize_angle(command.current_from_deg)
-            if command.current_speed_kn is not None:
-                state.environment.current_speed_kn = max(0.0, float(command.current_speed_kn))
+            for channel in ("wind", "current"):
+                if getattr(state.environment, f"active_{channel}_source") != "manual":
+                    continue
+                direction = getattr(command, f"{channel}_from_deg")
+                speed = getattr(command, f"{channel}_speed_kn")
+                if direction is not None and math.isfinite(direction):
+                    setattr(state.environment, f"{channel}_from_deg", normalize_angle(direction))
+                if speed is not None and math.isfinite(speed):
+                    setattr(state.environment, f"{channel}_speed_kn", max(0.0, float(speed)))
             if command.depth_m is not None:
-                state.auxiliary.depth_m = max(0.0, float(command.depth_m))
+                self._set_manual_depth(state, command.depth_m, profile)
         elif isinstance(command, SelectVesselProfile):
             selected = profiles.get(command.profile_id)
             state.vessel_profile_id = selected.profile_id
+            if state.depth_source.requested == "chart":
+                self._resolve_depth(state, selected)
             state.engine.user_speed_order_kn = self._clamp_speed(state.engine.user_speed_order_kn, selected)
             self._user_rudder_starboard_deg = self._clamp_rudder(self._user_rudder_starboard_deg, selected)
             self._user_rudder_port_deg = self._clamp_rudder(self._user_rudder_port_deg, selected)
@@ -533,7 +578,23 @@ class CommandArbitrator:
                 profile,
             )
         if command.depth_m is not None:
-            state.auxiliary.depth_m = max(0.0, float(command.depth_m))
+            self._set_manual_depth(state, command.depth_m, profile)
+
+    @staticmethod
+    def _resolve_depth(state: SimulationState, profile: VesselProfile) -> None:
+        depth = state.depth_source
+        if depth.requested == "chart" and depth.water_depth_m is not None:
+            state.auxiliary.depth_m = max(0.0, depth.water_depth_m - profile.draft_m)
+            depth.manual_depth_m = state.auxiliary.depth_m
+        else:
+            depth.active = "manual"
+            state.auxiliary.depth_m = depth.manual_depth_m
+
+    @classmethod
+    def _set_manual_depth(cls, state: SimulationState, value: float, profile: VesselProfile) -> None:
+        if math.isfinite(value):
+            state.depth_source.manual_depth_m = max(0.0, min(12000.0, float(value)))
+            cls._resolve_depth(state, profile)
 
     def _apply_auxiliary_values(
         self,

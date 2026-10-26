@@ -83,7 +83,6 @@ _GROUP_PATHS = {
         ("app_state", "simulation", "sensor_values", "rudder_order_port_deg"),
         ("app_state", "simulation", "sensor_values", "rudder_response_port_deg"),
         ("app_state", "simulation", "sensor_values", "dual_rudder"),
-        ("app_state", "simulation", "sensor_values", "depth_m"),
         ("app_state", "simulation", "sensor_coupling"),
         ("app_state", "simulation", "auxiliary_sensors"),
     ),

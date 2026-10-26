@@ -31,13 +31,23 @@ file manifest. The historical import hash above must not be used for that ZIP.
 
 ## Repository presentation
 
+Version 2.3.1 is a normal update on this public history, not a second import of
+private development history. The current tracked-file `SOURCE_SHA256SUMS` is
+refreshed for the reviewed source/docs. Release archives add their exact commit
+in `RELEASE_SNAPSHOT.json` and regenerate the manifest for the archive contents.
+The historical import's manifest remains available at the initial commit above.
+The 2.3.1 tag and source archives retain the same application code as the native
+packages; subsequent build/test/docs-only corrections are identified in
+[native provenance](NATIVE_BUILD_PROVENANCE.md).
+
 Subsequent repository-preparation commits add the generic English PDF/Word
 guide, a control-panel screenshot, README navigation and issue templates.
 Later preparation also adds a four-image gallery, first-start/handoff guides,
 complete dependency notices, library-source/replacement information and native
 license validation. These packaging changes do not change simulator logic.
 See the commit diff for the exact documentation changes. The guide screenshot
-shows the 2.3.0 controls; unchanged UI screenshots inside the guide may originate
+shows the 2.3.0 controls; the 2.3.1 guide adds the current Environment panel.
+Unchanged UI screenshots inside the guide may originate
 from an earlier version, as explained in the guide.
 
 Native packages remain subject to the release licensing and platform validation

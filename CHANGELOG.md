@@ -1,5 +1,21 @@
 # Releases
 
+## 2.3.1
+
+- Chart-based depth from installed S57 cells, then GEBCO online, then the held
+  manual value. Vessel Draft is subtracted once with the transducer at keel level.
+- Independent Manual/Online - Open-Meteo wind, surface-current and atmospheric
+  sources, with last-value fallback, automatic recovery and saved configuration.
+- Compact responsive Environment controls and cyan bow-thruster response in
+  both directions. Real-time depth-query limits adapt to simulation acceleration.
+- Windows build transcripts, per-step logs, JUnit reports and correct installed
+  font discovery for offscreen tests. Debian prerelease version conversion fixed.
+- Updated English illustrated User Guide, source/data notices and public docs.
+
+Unsigned packages for Windows 11 x64, Ubuntu 26.04.1 LTS amd64 and macOS Apple
+silicon. See [changes](docs/v2_release_notes_2.3.1.md),
+[validation](docs/VALIDATION.md) and [build provenance](docs/NATIVE_BUILD_PROVENANCE.md).
+
 ## 2.3.0
 
 Initial public baseline under MPL 2.0. Tunnel bow-thruster dynamics, independent

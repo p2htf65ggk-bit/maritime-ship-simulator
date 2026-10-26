@@ -1,20 +1,39 @@
 # SPDX-License-Identifier: MPL-2.0
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-$ProductionRelease = if ([string]::IsNullOrWhiteSpace($env:PRODUCTION_RELEASE)) {
-  $true
-} elseif ($env:PRODUCTION_RELEASE -in @("0", "1")) {
-  $env:PRODUCTION_RELEASE -eq "1"
-} else {
-  throw "PRODUCTION_RELEASE must be '0' or '1'."
+$script:CurrentBuildStep = "Initialization"
+$script:BuildLogPath = $null
+$script:BuildRunDirectory = $null
+$script:BuildTranscriptStarted = $false
+
+function Start-BuildDiagnostics([string]$Root) {
+  $stamp = Get-Date -Format "yyyyMMdd-HHmmss-fff"
+  $preferred = if ($env:V2_BUILD_LOG_DIR) { $env:V2_BUILD_LOG_DIR } else { Join-Path $Root "artifacts\build-logs" }
+  $fallback = Join-Path ([System.IO.Path]::GetTempPath()) "MaritimeShipSimulatorBuildLogs"
+  foreach ($directory in @($preferred, $fallback) | Select-Object -Unique) {
+    try {
+      $runDirectory = Join-Path $directory "windows-$stamp-$PID"
+      New-Item -ItemType Directory -Force -Path $runDirectory -ErrorAction Stop | Out-Null
+      $logPath = Join-Path $runDirectory "build.log"
+      Start-Transcript -LiteralPath $logPath -NoClobber -IncludeInvocationHeader -ErrorAction Stop | Out-Null
+      $script:BuildRunDirectory = $runDirectory
+      $script:BuildLogPath = $logPath
+      $script:BuildTranscriptStarted = $true
+      break
+    } catch {
+      Write-Warning "Could not start the build log in '$directory': $($_.Exception.Message)"
+    }
+  }
+  if (-not $script:BuildTranscriptStarted) { throw "Cannot create a build log. Set V2_BUILD_LOG_DIR to a writable local folder." }
+  Write-Host "Build log: $script:BuildLogPath"
+  Write-Host "Source: $Root"
+  Write-Host "PowerShell: $($PSVersionTable.PSVersion); OS: $([Environment]::OSVersion.VersionString); 64-bit process: $([Environment]::Is64BitProcess)"
 }
-$ReleaseSigning = if ([string]::IsNullOrWhiteSpace($env:RELEASE_SIGNING)) { "unsigned" } else { $env:RELEASE_SIGNING.Trim().ToLowerInvariant() }
-if ($ReleaseSigning -notin @("unsigned", "signed")) { throw "RELEASE_SIGNING must be 'unsigned' or 'signed'." }
-$SignedRelease = ($ReleaseSigning -eq "signed")
 
 function Write-Step([string]$Message) {
+  $script:CurrentBuildStep = $Message
   Write-Host ""
-  Write-Host "==> $Message" -ForegroundColor Cyan
+  Write-Host "==> [$(Get-Date -Format 'HH:mm:ss')] $Message" -ForegroundColor Cyan
 }
 
 function Test-NonInteractive {
@@ -82,7 +101,9 @@ function Invoke-External {
     [Parameter(Mandatory = $true)][scriptblock]$Command
   )
   Write-Step $Description
-  & $Command
+  # PowerShell-only steps must not inherit an earlier native command's status.
+  $global:LASTEXITCODE = 0
+  & $Command | Out-Default
   if ($LASTEXITCODE -ne 0) {
     throw "$Description failed (exit code $LASTEXITCODE)."
   }
@@ -357,9 +378,30 @@ function Sign-WindowsArtifact {
   if ($LASTEXITCODE -ne 0) { throw "Authenticode verification failed for $Path." }
 }
 
+try {
+Start-BuildDiagnostics -Root ([System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot "..")))
+$ProductionRelease = if ([string]::IsNullOrWhiteSpace($env:PRODUCTION_RELEASE)) {
+  $true
+} elseif ($env:PRODUCTION_RELEASE -in @("0", "1")) {
+  $env:PRODUCTION_RELEASE -eq "1"
+} else {
+  throw "PRODUCTION_RELEASE must be '0' or '1'."
+}
+$ReleaseSigning = if ([string]::IsNullOrWhiteSpace($env:RELEASE_SIGNING)) { "unsigned" } else { $env:RELEASE_SIGNING.Trim().ToLowerInvariant() }
+if ($ReleaseSigning -notin @("unsigned", "signed")) { throw "RELEASE_SIGNING must be 'unsigned' or 'signed'." }
+$SignedRelease = ($ReleaseSigning -eq "signed")
+
 Set-Location (Join-Path $PSScriptRoot "..")
 if ($env:OS -ne "Windows_NT") { throw "This script must run on Windows 11/Windows." }
 Assert-ReleaseSource -Root (Get-Location).Path
+# The Windows offscreen plugin does not use the native Windows font database.
+if ([string]::IsNullOrWhiteSpace($env:QT_QPA_FONTDIR)) {
+  $env:QT_QPA_FONTDIR = Join-Path $env:SystemRoot "Fonts"
+}
+if (-not (Test-Path -LiteralPath $env:QT_QPA_FONTDIR -PathType Container)) {
+  throw "Qt's offscreen checks need installed Windows fonts. Set QT_QPA_FONTDIR to the Windows Fonts directory."
+}
+Write-Host "Offscreen font directory: $env:QT_QPA_FONTDIR"
 
 $python = Select-Python
 if (-not $python -and ($env:AUTO_INSTALL_TOOLS -ne "0") -and (Get-Command winget -ErrorAction SilentlyContinue)) {
@@ -375,7 +417,7 @@ if (-not $python) {
 }
 
 Write-Step "Using interpreter: $($python.Label)"
-Run-SelectedPython -Selection $python -Arguments @("-c", "import sys; print(sys.version)")
+Run-SelectedPython -Selection $python -Arguments @("-c", "import sys; print(sys.version); print(sys.executable)") | Out-Default
 if ($LASTEXITCODE -ne 0) { throw "Selected Python could not be started." }
 $pythonTag = ((Run-SelectedPython -Selection $python -Arguments @("-c", "import sys; print(f'py{sys.version_info.major}{sys.version_info.minor}')")) | Select-Object -Last 1).Trim()
 $selectedMinor = ((Run-SelectedPython -Selection $python -Arguments @("-c", "import sys; print(sys.version_info.minor)")) | Select-Object -Last 1).Trim()
@@ -461,9 +503,12 @@ V2 dependency installation failed. Check DNS, proxy/firewall and PyPI access. To
 if (-not (Test-V2Dependencies -PythonPath $venvPython)) {
   throw "The V2 dependency set is incomplete after installation; PySide6, PyInstaller and pytest are required."
 }
+Invoke-External -Description "Recording installed build dependencies" -Command {
+  & $venvPython -m pip list --format=freeze
+}
 
 $version = (& $venvPython -c "import sys; sys.path.insert(0, 'src'); from maritime_simulator import __version__; print(__version__)").Trim()
-if ($version -match '-rc') {
+if ($version -match '-(rc|beta)') {
   $ProductionRelease = $false
   $env:PRODUCTION_RELEASE = '0'
 }
@@ -488,7 +533,9 @@ if ($SignedRelease) {
   Write-Warning "Building an unsigned production release. Windows SmartScreen may require explicit user approval."
 }
 
-Invoke-External -Description "Running the complete V2 release gate" -Command { & $venvPython scripts\prebuild_v2.py --profile full }
+Invoke-External -Description "Running the complete V2 release gate" -Command {
+  & $venvPython scripts\prebuild_v2.py --profile full --log-dir (Join-Path $script:BuildRunDirectory "checks")
+}
 
 $workRoot = Join-Path $env:TEMP "MaritimeShipSimulatorV2Build-$PID"
 Remove-PathRobust -Path $workRoot
@@ -637,4 +684,21 @@ Get-FileHash -Algorithm SHA256 $artifacts | ForEach-Object {
 
 if ($env:KEEP_BUILD_WORK -ne "1") { Remove-PathRobust -Path $workRoot }
 Write-Step "Windows V2 release completed"
-Get-ChildItem -Force $releaseDir
+Get-ChildItem -Force $releaseDir | Out-Default
+Write-Host "Build log: $script:BuildLogPath"
+} catch {
+  $failure = $_
+  Write-Host "BUILD FAILED during: $script:CurrentBuildStep" -ForegroundColor Red
+  Write-Host ($failure | Format-List * -Force | Out-String)
+  Write-Host $failure.InvocationInfo.PositionMessage
+  Write-Host $failure.ScriptStackTrace
+  $work = Get-Variable -Name workRoot -ErrorAction SilentlyContinue
+  if ($work) { Write-Host "Build work retained for diagnosis: $($work.Value)" }
+  if ($script:BuildLogPath) { Write-Host "Send this log folder for diagnosis: $script:BuildRunDirectory" }
+  throw
+} finally {
+  if ($script:BuildTranscriptStarted) {
+    Write-Host "Build log closed: $script:BuildLogPath"
+    try { Stop-Transcript -ErrorAction Stop | Out-Null } catch { Write-Warning "Could not close the build transcript: $($_.Exception.Message)" }
+  }
+}

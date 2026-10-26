@@ -8,6 +8,30 @@ from .state import RouteWaypoint
 
 
 @dataclass(frozen=True, slots=True)
+class SetDepthSource:
+    source: str
+
+
+@dataclass(frozen=True, slots=True)
+class SetChartDepth:
+    water_depth_m: float | None
+    source: str = "manual"
+
+
+@dataclass(frozen=True, slots=True)
+class SetEnvironmentSource:
+    channel: str
+    source: str
+
+
+@dataclass(frozen=True, slots=True)
+class SetOnlineEnvironment:
+    channel: str
+    direction_from_deg: float | None = None
+    speed_kn: float | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class SetControlMode:
     mode: ControlMode
 
@@ -188,6 +212,10 @@ class SetExternalRudderInputType:
 
 Command = (
     SetControlMode
+    | SetDepthSource
+    | SetChartDepth
+    | SetEnvironmentSource
+    | SetOnlineEnvironment
     | SetSpeedOrder
     | SetBowThrusterOrder
     | SetExternalActuatorPolicy

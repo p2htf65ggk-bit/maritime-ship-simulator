@@ -5,9 +5,7 @@
 The project's original Python/JavaScript/CSS, documentation and other original
 source material are offered under the root MPL 2.0 license by Pascal Göllnitz.
 The exceptions below retain their upstream terms. The source archive does not
-vendor installed Python/Qt/GDAL environments or Google tile datasets. UI
-screenshots in the documentation contain attributed Google/OSM/OpenSeaMap/NOAA
-imagery or chart data, which is not relicensed under MPL.
+vendor installed Python/Qt/GDAL environments or Google imagery.
 
 `FREEWARE_LICENSE.txt` is an exact copy of the root MPL 2.0 license, retained only
 because the existing PyInstaller scripts and application resources use that
@@ -71,6 +69,18 @@ corresponding-source access and library replacement information before public
 distribution. The first-party MPL label is not a binary compliance certification.
 
 ## External online services
+
+Chart-based depth uses locally installed S57 data first and GEBCO numeric elevation
+samples online when needed. GEBCO Compilation Group / BODC and the original chart
+producers retain their data rights and attribution. See the
+[GEBCO service](https://www.gebco.net/data-products/gebco-web-services/web-map-service).
+No operator chart library or downloaded bathymetry grid is included.
+
+Wind, surface current and atmospheric feeds use Open-Meteo and its upstream model
+providers. Free API access is for non-commercial use only; commercial access requires
+appropriate provider credentials. See [Open-Meteo terms](https://open-meteo.com/en/terms).
+No provider key or downloaded feed/cache is included. These data/service conditions
+are separate from the software's MPL-2.0 license.
 
 Google Maps, aisstream.io, BarentsWatch, Open-Meteo, OpenStreetMap/OpenSeaMap tile
 services and Protomaps data/services have separate authentication, usage, quota,

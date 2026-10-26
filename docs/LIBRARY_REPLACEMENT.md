@@ -17,9 +17,13 @@ and Virtual Keyboard families. See `THIRD_PARTY_NOTICES.md` for chart/service te
 
 ## Sources
 
-The matching 2.3.0 release provides the simulator source and unmodified upstream
-source archives for Qt 6.11.0 (including WebEngine/Chromium), PySide/shiboken
-6.11.0 and GEOS, plus the certifi source. Source archive hashes and original
+The 2.3.1 release provides the current simulator source. Its unchanged upstream
+library sources remain available in the public
+[2.3.0 library-source downloads](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0):
+Qt 6.11.0 (including WebEngine/Chromium), PySide/shiboken 6.11.0, GEOS 3.14.1
+and certifi 2026.7.22. These exact library versions are shared by both releases;
+the earlier source assets must remain accessible alongside the current binaries.
+Source archive hashes and original
 download locations are listed in `LICENSES/upstream-sources.json`. These are
 separate downloads, not required to run the application. Retain these assets
 when redistributing the corresponding binary release. Source links alone are

@@ -20,6 +20,10 @@
   portrayal, not the complete IHO Presentation Library. S63 is unsupported.
 - Depth colours and safety contours do not provide under-keel clearance or a
   grounding guarantee. Chart/source data accuracy remains outside the simulator.
+- Chart-based depth interpolates available S57/GEBCO data and subtracts Draft.
+  GEBCO is a coarse global grid, not a harbour survey. No live tide correction
+  or chart-datum reconciliation is performed. Missing data hold the last value.
+  Accelerated sampling covers coarser distances; no continuous bottom survey is implied.
 - Avoid Land needs classified water for the traffic area. First preparation can
   take time; unresolved coverage is not confirmed water. Disable Avoid Land only
   when unrestricted movement across land is acceptable.
@@ -34,6 +38,10 @@
 
 - Live AIS/provider report rates, names, geographic coverage, authentication and
   outages are not controlled by the simulator. A connection is not proof of data.
+- Open-Meteo wind, current and weather are model values, not onboard measurements.
+  Surface currents may not represent narrow channels, harbour currents or local
+  tidal streams. The free API is non-commercial only; commercial service access
+  requires suitable provider credentials, independently of the software license.
 - Live position prediction is bounded to 300 seconds and targets are retained
   for up to six minutes without provider updates. Rapid local VDM output does
   not mean an equally current real-world upstream position.

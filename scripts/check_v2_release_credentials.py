@@ -24,6 +24,7 @@ CREDENTIAL_ENVIRONMENT_NAMES = (
 SENSITIVE_KEYS = {
     "apikey",
     "googletilesapikey",
+    "openmeteoapikey",
     "barentswatchclientid",
     "barentswatchclientsecret",
     "clientid",
@@ -31,6 +32,7 @@ SENSITIVE_KEYS = {
 }
 SENSITIVE_RUNTIME_FILES = {
     ".env",
+    "app_state_v2.json",
     "last_configuration_v2.json",
     "live_ais_v2.json",
     "startup_profile_v2.json",
@@ -38,7 +40,7 @@ SENSITIVE_RUNTIME_FILES = {
 }
 GOOGLE_API_KEY = re.compile(rb"AIza[0-9A-Za-z_-]{30,}")
 NAMED_CREDENTIAL = re.compile(
-    rb"(?i)(?:google(?:_3d_tiles)?_api_key|aisstream(?:_api)?_key|"
+    rb"(?i)(?:google(?:_3d_tiles)?_api_key|aisstream(?:_api)?_key|open_meteo_api_key|"
     rb"barentswatch_client_(?:id|secret))['\"]?\s*[:=]\s*['\"]([^'\"\s,;}]{8,})"
 )
 ARCHIVE_SUFFIXES = (".zip", ".tar", ".tar.gz", ".tgz")
@@ -152,6 +154,7 @@ def _local_credential_fingerprints() -> dict[bytes, str]:
 
     config_dir = _default_config_dir()
     for name in (
+        "app_state_v2.json",
         "live_ais_v2.json",
         "visual_settings_v2.json",
         "startup_profile_v2.json",

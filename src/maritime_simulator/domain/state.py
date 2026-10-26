@@ -103,6 +103,18 @@ class EnvironmentState:
     true_wind_speed_kn: float = 0.0
     relative_wind_from_bow_deg: float = 0.0
     relative_wind_speed_kn: float = 0.0
+    wind_source: str = "manual"
+    active_wind_source: str = "manual"
+    current_source: str = "manual"
+    active_current_source: str = "manual"
+
+
+@dataclass(slots=True)
+class DepthSourceState:
+    requested: str = "manual"
+    active: str = "manual"
+    manual_depth_m: float = 18.0
+    water_depth_m: float | None = None
 
 
 @dataclass(slots=True)
@@ -220,6 +232,7 @@ class SimulationState:
     environment: EnvironmentState = field(default_factory=EnvironmentState)
     external_rudder: ExternalRudderState = field(default_factory=ExternalRudderState)
     auxiliary: AuxiliarySensorState = field(default_factory=AuxiliarySensorState)
+    depth_source: DepthSourceState = field(default_factory=DepthSourceState)
     route: RouteState = field(default_factory=RouteState)
     sensor_control: SensorControlState = field(default_factory=SensorControlState)
     control_mode: ControlMode = ControlMode.SENSOR
@@ -285,6 +298,15 @@ class SimulationState:
             heading_follows_rot=self.sensor_control.heading_follows_rot,
             sensor_noise=tuple(sorted(self.sensor_control.noise.items())),
             depth_m=self.auxiliary.depth_m,
+            depth_source=self.depth_source.requested,
+            active_depth_source=self.depth_source.active,
+            manual_depth_m=(self.auxiliary.depth_m if self.depth_source.requested == "manual"
+                            else self.depth_source.manual_depth_m),
+            chart_water_depth_m=self.depth_source.water_depth_m,
+            wind_source=self.environment.wind_source,
+            active_wind_source=self.environment.active_wind_source,
+            current_source=self.environment.current_source,
+            active_current_source=self.environment.active_current_source,
             barometric_pressure_bar=self.auxiliary.barometric_pressure_bar,
             air_temperature_c=self.auxiliary.air_temperature_c,
             water_temperature_c=self.auxiliary.water_temperature_c,
@@ -413,3 +435,11 @@ class SimulationSnapshot:
     engine_manual_enabled: bool = True
     external_rudder_manual_enabled: bool = False
     external_rudder_active_source: str = ""
+    depth_source: str = "manual"
+    active_depth_source: str = "manual"
+    manual_depth_m: float = 18.0
+    chart_water_depth_m: float | None = None
+    wind_source: str = "manual"
+    active_wind_source: str = "manual"
+    current_source: str = "manual"
+    active_current_source: str = "manual"

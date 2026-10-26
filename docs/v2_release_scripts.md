@@ -1,4 +1,4 @@
-# Native builds - 2.3.0
+# Native builds - 2.3.1
 
 Use `run_v2.py`, `build_v2.py` and the scripts containing `build-v2-`.
 This snapshot contains no earlier application or release archive. Python 3.12+
@@ -29,6 +29,19 @@ identify its compiler explicitly. Output: portable ZIP and installer EXE under
 `release-v2/windows/`. The script can use a Python-version-matched wheelhouse;
 see `scripts/prepare-v2-windows-wheelhouse.ps1`.
 
+Each Windows run automatically creates `artifacts/build-logs/windows-.../`.
+Its `build.log` records console output, Windows/PowerShell/Python/dependency
+versions, the current step and complete error location/stack. `checks/` contains
+per-gate output and `v2-tests.xml`. The log location is printed before work starts
+and after failure. `V2_BUILD_LOG_DIR` selects another parent directory; an
+unwritable source folder uses a temporary-directory fallback.
+
+Attach a reviewed copy of that log folder for build problems instead of
+photographs of truncated output. The script does not dump environment variables
+or operator configurations, but local paths or external-tool output can still
+be sensitive. Windows offscreen checks use installed system fonts, respecting
+an existing `QT_QPA_FONTDIR` override. This changes checks, not runtime UI scaling.
+
 ## Ubuntu
 
 ```bash
@@ -54,9 +67,10 @@ network/DNS problem. Noninteractive builds fail early with manual instructions
 unless package installation was explicitly approved. These are build-time
 requirements; application users do not need curl, pip or Python venv tooling.
 
-The 2.3.0 binary release uses the maintainer's current Ubuntu LTS build only;
-the actual version and architecture must be recorded from RELEASE_INFO.txt and
-the build computer before publication. No separate 22.04 binary is planned.
+The 2.3.1 Linux packages were built on the author-confirmed Ubuntu 26.04.1 LTS
+amd64 computer. That identifies the build/test host, not older-GLIBC compatibility.
+No separate 22.04 binary is planned. Debian prerelease versions preserve a
+literal `~` separator across Bash versions; do not work around failed tests.
 
 ### Ubuntu 22.04 self-build
 
@@ -67,7 +81,7 @@ itself, including a 22.04 VM:
 bash scripts/build-v2-ubuntu-22.04.sh
 ```
 
-This path is not natively qualified for the 2.3.0 release. It requires Python
+This path is not natively qualified for the 2.3.1 release. It requires Python
 3.12+ (the system Python 3.10 is insufficient for pinned dependencies), binutils
 and matching build/runtime dependencies. Review repository/package-install
 prompts rather than replacing system Python or GLIBC. Internet or preinstalled
@@ -99,3 +113,6 @@ project code, not every dependency in a frozen application.
 Do not disable a failing release gate. `artifacts/performance-v2-build.log`
 contains performance subprocess details; Unix signals and Windows process
 statuses are reported separately.
+
+Standalone `prebuild_v2.py` also saves per-gate output and JUnit results under
+its printed diagnostic directory. Use `--log-dir PATH` to choose it explicitly.

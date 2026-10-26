@@ -1,6 +1,79 @@
 # Maritime Ship Simulator V2 User Guide
 
-This guide describes V2 `2.3.0`, including tunnel bow-thruster control and independent external inputs, offline area downloads, the optional 3D Navigation View, Synthetic Traffic encounter setup and event-driven serial IEC input.
+This guide describes V2 `2.3.1`. It includes chart-based depth, online wind and current, tunnel bow-thruster control and independent external inputs, offline area downloads, the optional 3D Navigation View, Synthetic Traffic encounter setup and event-driven serial IEC input.
+
+## Chart-Based Depth
+
+Environment > Depth selects **Manual** or **Chart-based**. Chart-based depth first
+uses enabled, locally installed S57 cells at own ship, regardless of the visible map
+source, layers or zoom. If no usable local depth is available, online mode falls back
+to numeric GEBCO data without an API key. If neither source is available, the last
+effective depth is retained as the manual value. Offline Mode skips GEBCO entirely.
+Neighbouring depth samples are interpolated; sparse S57 areas use their encoded
+minimum depth. A local chart must contain usable depth data at that position.
+
+The transducer is at keel level. The vessel model's editable **Draft** is subtracted
+from chart water depth, with output limited to zero or greater. The resulting
+depth is shared by the instruments and depth protocols. Manual depth means depth
+below keel/transducer and is not reduced by Draft a second time. The input range
+is 0-12,000 m.
+
+If chart data are missing or fail to load, the **last effective depth automatically
+becomes the manual fallback value**. This prevents an unnecessary jump to an older
+saved value. Chart-based operation resumes automatically when data return. Before
+the first reading, the saved manual depth is used. The source selector retains
+Chart-based during fallback; the status beneath it shows the source actually in use.
+Selecting Manual explicitly stops chart queries. Source and fallback value are
+included in configuration exports and the Environment Start-up group.
+
+Depth Noise remains available in either mode and does not feed back into the
+stored baseline. GEBCO's coarse global grid cannot resolve every harbour channel.
+The simulator applies no live tide correction, automatic grounding physics or
+navigation-safety guarantees. Queries run asynchronously with bounded caches and
+work limits; no whole-region bathymetry download is needed.
+
+During normal travel, S57 depth is sampled after roughly 5 m of movement, at most
+once per real second. At 10x acceleration the moving-sample interval is two seconds,
+at 30x three seconds, and at 100x or more five seconds. The distance threshold grows
+with accelerated travel, instead of triggering a query every 5 m. Stationary checks
+remain every 30 seconds. Response validation allows expected motion during a bounded
+query delay; an explicit position change or route-position seek discards old results.
+High acceleration therefore uses coarser depth samples along the route.
+
+GEBCO completes one four-point sample before moving to the latest position. Cached
+data can still be interpolated at four updates per real second. Network latency can
+reduce the delivered update rate; the last depth is held between samples. Sensor noise
+and configured protocol transmission rates are independent of this sampling rate.
+
+## Online Wind And Current
+
+Environment > Wind, Current and Atmospheric data each use the same **Manual / Online - Open-Meteo**
+source labels. Wind and Current sit side by side at the normal sidebar width, with each
+speed slider above its numeric value. They stack vertically on very narrow panes.
+Atmospheric values use a compact two-column grid. Sources may show the short caption
+**Online** when space is limited; their menus retain **Online - Open-Meteo**.
+Online uses current model data at own ship: 10 m wind and surface current.
+Current direction is converted to the existing **Current From** display. The simulator
+still calculates apparent wind and vessel drift from the same shared environment.
+Atmospheric XDR values retain their separate source selector.
+
+When data are missing or the application is offline, the last valid direction and speed
+are held, and the controls unlock for manual adjustment. The selector retains Online
+and resumes automatically when data return. Select Manual to stop automatic updates.
+The active source is shown beneath each control group; its tooltip contains the feed
+status. Sources and current fallback values are saved in Environment Start-up and exports.
+
+The feeds are asynchronous, cached, and normally refresh every ten minutes or after
+moving five nautical miles, with a minimum of one minute between requests per feed.
+Current data are coarse (about 8 km), not a detailed harbour or river tidal-stream model.
+Invalid or excessively distant marine grid cells are rejected. Use Manual for controlled
+local-current test scenarios.
+
+The **Open-Meteo access** icon beside Atmospheric data opens the shared optional API-key setting. Without a key the
+free service is for non-commercial use only. Commercial use requires an appropriate
+customer API key. See the provider's [terms](https://open-meteo.com/en/terms) and
+[API access](https://open-meteo.com/en/pricing). Keys are included in configuration exports;
+keep such files private. No key is built into the application.
 
 ## Bow Thruster And External Input
 
@@ -82,7 +155,27 @@ venv/bin/python run_v2.py
 - **External** uses ROR or XDR Order before the steering gear, or RSA or XDR Response as measured rudder response. Select main, optional fallback and loss action in External Input. PORT and STBD always come from one complete source frame. Engine and bow sources remain independently selectable.
 - **Simulation Time** changes simulation time only. Protocol output rates remain wall-clock rates and map prediction remains six simulated minutes. Any value above `1x` is highlighted red in the status strip.
 
-The left panel has separate **Control**, **Environment**, **AIS**, **Noise** and **Other** tabs and scrolls on small screens. Other is deliberately the rightmost tab. Wind and current use circular compass controls; depth covers 0–2000 m. **Atmospheric data** owns the four standard XDR environment values: air temperature in Celsius, relative humidity, dew point and surface pressure. Select editable **Manual sensor values** or **Live at own ship - Open-Meteo**. Live mode uses the current own-ship latitude/longitude, refreshes immediately after a significant position jump and otherwise at a bounded interval, and needs no API key. A network/provider error retains the last XDR values and never blocks simulation or output. The source and values are stored in complete configurations and the Environment Start-up group. MDA/MTW values remain separate and manual under Other. Other also contains dual-rudder, response/RSA, transversal speeds and propulsion/thruster values. Protocol enable checkboxes are deliberately not duplicated there: all UDP, TCP, Serial and additional-path output states are controlled only in Settings. Manual model-derived values are disabled outside Sensor Control. Noise is intentionally applied only to projected protocol output and never feeds back into vessel dynamics. Every channel has its own amplitude and **Cycle time** slider from `0.1` to `60.0 s`; the cycle defines one complete deterministic noise oscillation. Linked wind direction and speed noise uses the same sample and cycle for MWD true wind, MWV relative wind and MWV true-theoretical wind. Noise amplitudes and cycle times are retained in complete configurations and in the Noise Start-up group. The panel can be collapsed to narrow vertical key controls; Track mode shows the active ROT or Radius control directly.
+The left panel has separate **Control**, **Environment**, **AIS**, **Noise** and **Other**
+tabs and scrolls on small screens. Wind and current use circular compass controls.
+**Atmospheric data** owns the four standard XDR environment values: air temperature
+in Celsius, relative humidity, dew point and surface pressure. Select editable
+**Manual** or **Online - Open-Meteo**. Online mode uses the current
+own-ship latitude/longitude, refreshes immediately after a significant position jump
+and otherwise at a bounded interval, and needs no API key. A network/provider error
+retains the last XDR values and never blocks simulation or output. The source and
+values are stored in complete configurations and the Environment Start-up group.
+MDA/MTW values remain separate and manual under Other. Other also contains dual-rudder,
+response/RSA, transversal speeds and propulsion/thruster values. Protocol enable
+checkboxes are deliberately not duplicated there: all UDP, TCP, Serial and additional-path
+output states are controlled only in Settings. Manual model-derived values are disabled
+outside Sensor Control. Noise is intentionally applied only to projected protocol output
+and never feeds back into vessel dynamics. Every channel has its own amplitude and
+**Cycle time** slider from `0.1` to `60.0 s`; the cycle defines one complete deterministic
+noise oscillation. Linked wind direction and speed noise uses the same sample and cycle
+for MWD true wind, MWV relative wind and MWV true-theoretical wind. Noise amplitudes and
+cycle times are retained in complete configurations and in the Noise Start-up group.
+The panel can be collapsed to narrow vertical key controls; Track mode shows the active
+ROT or Radius control directly.
 
 **Fault Injection** is placed directly behind Other. It applies realistic sensor and transmission failures after the vessel model. Available scenarios include GNSS jamming/intermittency/drift/spoofing, heading/speed/rudder/wind freezes, sensor biases, GNSS sentence loss, packet loss, checksum corruption and output latency. This changes instrument indications and protocol output but never the true vessel dynamics. Scenario selections can be saved in configurations and Start-up, but all faults are deliberately inactive after loading or restarting and must be enabled by the operator.
 
@@ -243,4 +336,4 @@ Release packages bundle Python, PySide6, QtWebEngine, Qt plugins and application
 
 On Ubuntu, use the supplied `.deb` for a normal registered installation with application-menu entry and icon. AppImage and tar.gz remain portable launch options and do not require installation. Closing the interactive application always opens an opaque confirmation window; Save and Save As are added when the current configuration differs from the last saved state.
 
-For KVM/autostart setups, a monitor recognized after startup triggers window-geometry recovery. Unreachable visible application windows are moved onto an available display; intentionally minimized or hidden windows and valid second-monitor positions are retained. A running graphical desktop session is required even when no physical monitor is initially connected. See [Display and KVM Recovery](DISPLAY_RECOVERY.md) for checks and limitations.
+For KVM/autostart setups, a monitor recognized after startup triggers window-geometry recovery. Unreachable visible application windows are moved onto an available display; intentionally minimized or hidden windows and valid second-monitor positions are retained. A running graphical desktop session is required even when no physical monitor is initially connected. This correction requires a rebuilt package; see [KVM Window Recovery](v2_kvm_window_recovery_2026-10-12.md) for validation and limitations.

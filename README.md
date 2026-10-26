@@ -1,14 +1,14 @@
 # Maritime Ship Simulator
 
-[Download 2.3.0](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0) |
-[User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.pdf) |
-[User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.0.docx) |
+[Download 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1) |
+[User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf) |
+[User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.docx) |
 [Installation](INSTALLATION.md) |
 [First start](docs/FIRST_START.md) |
 [Releases](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases) |
 [Report a bug](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/issues/new/choose)
 
-Current source snapshot: **2.3.0**, licensed under the **Mozilla Public License 2.0** for the
+Current source snapshot: **2.3.1**, licensed under the **Mozilla Public License 2.0** for the
 project's original code. Third-party software and chart data retain their own
 licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -27,8 +27,8 @@ a safety-critical source of vessel, traffic, chart or collision information.**
 
 ## Downloads
 
-Version **2.3.0** is the first public release. Get application installers from
-the [release page](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0),
+Version **2.3.1** is the latest stable release. Get application installers from
+the [release page](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1),
 not GitHub's green Code button. End users do not need Python or build tools.
 
 | Platform | Application packages | Compatibility notes |
@@ -40,6 +40,27 @@ not GitHub's green Code button. End users do not need Python or build tools.
 Packages are **unsigned**. Read the [installation notes](INSTALLATION.md) and
 verify `SHA256SUMS` from the release. The User Guide is available as PDF and Word.
 No Google/AIS keys or personal operator configuration are included.
+
+### New in 2.3.1
+
+- Chart-based depth prefers installed S57 cells, then GEBCO online, then the
+  last effective manual depth. Vessel Draft is subtracted once; manual depth
+  already means depth below keel/transducer. The transducer is at keel level.
+- Wind, surface current and atmospheric data independently select Manual or
+  Online - Open-Meteo, with last-value fallback and automatic recovery.
+- A compact Environment panel places wind/current side by side when space permits.
+  Bow-thruster instrument response is cyan in both directions.
+- Accelerated depth sampling is bounded in real time. Offline Mode uses local
+  S57 depth or the held manual value and pauses online environmental feeds.
+- Windows builds retain automatic error/test logs and use installed fonts for
+  offscreen checks; Ubuntu prerelease version handling is corrected.
+
+Software use remains governed by MPL 2.0. Open-Meteo's free endpoint is for
+non-commercial use only; commercial service access requires appropriate
+provider credentials. GEBCO needs no API key. These are model/chart samples,
+not live onboard measurements or a navigation-safety service.
+See the [2.3.1 changes](docs/v2_release_notes_2.3.1.md) and
+[Environment instructions](docs/v2_user_guide.md).
 
 ## Capabilities
 
@@ -53,6 +74,7 @@ No Google/AIS keys or personal operator configuration are included.
 | Maps | Online 2D maps, offline Protomaps areas and experimental S57/NOAA ENCs |
 | Visual view | Optional online Google 3D maps with simulator overlays |
 | Test scenarios | Sensor noise, fault injection, environment values and saved configurations |
+| Environmental sources | Manual or chart-based depth; optional online wind, current and weather |
 
 Local simulation and local protocol output do not require Internet or a Google
 API key. Download/import detailed charts before going offline. See the
@@ -86,21 +108,23 @@ Provider attribution is retained in the images. S57 portrayal is experimental.
 The public project is maintained by **Pascal Göllnitz**. Version labels are not
 a claim of exhaustive platform/hardware qualification; see
 [validation](docs/VALIDATION.md) and the release notes.
-This source tree is **2.3.0**, the public baseline with bow-thruster and external-input controls.
+This source tree is **2.3.1**, extending the public baseline with chart-based depth
+and online environmental sources.
 Installers and portable packages are attached to
-[release 2.3.0](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.0).
+[release 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1).
 The binary downloads cover Windows x64, macOS Apple silicon and
 **Ubuntu 26.04.1 LTS amd64**. No prebuilt Ubuntu 22.04
-package is planned for 2.3.0; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
+package is planned for 2.3.1; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
 remains in the source, without native 22.04 qualification for this release.
 
 For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
 [release licensing](docs/RELEASE_LICENSING.md). The
 [native build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the sources
-for each package: Windows includes the accepted trackpad follow-up;
-macOS and Ubuntu retain the previously checked baseline. Exact corresponding
-sources are provided for both. Native checks are described with their limits;
+for each package. All three platforms contain the 2.3.1 application; the final
+source also includes build/test/documentation-only corrections added after
+some native builds. Application code remains equivalent. Native checks are
+described with their limits;
 older private packages are not substitutes for these identified builds.
 
 Maintenance is on a best-effort basis. Issues and pull requests are welcome,
@@ -207,9 +231,10 @@ earlier private development history has not been imported. Application binaries,
 virtual environments and installation-specific integration guides are not part
 of this repository.
 `DEVELOPER_SOURCE_MANIFEST.json` records the original exported scope and reviewed
-export-only adjustments. `SOURCE_SHA256SUMS` at the initial commit covers that
-import; the final release archive regenerates the file manifest for its exact
-snapshot. Later source, packaging and documentation changes are recorded in Git.
+export-only adjustments. `SOURCE_SHA256SUMS` covers the reviewed tracked files.
+The release archive regenerates that manifest and adds `RELEASE_SNAPSHOT.json`
+with its exact source commit. Later source, packaging and documentation changes
+are recorded in Git.
 See [source provenance](docs/SOURCE_PROVENANCE.md) to verify the baseline.
 
 The MPL 2.0 license is in `LICENSE`. `FREEWARE_LICENSE.txt` contains the same MPL

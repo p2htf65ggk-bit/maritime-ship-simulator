@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_v2_production_version_and_documentation_are_consistent():
-    assert __version__ == "2.3.0"
+    assert __version__ == "2.3.1"
     for relative in (
         "README.md",
         "docs/v2_architecture.md",
@@ -35,10 +35,32 @@ def test_v2_production_version_and_documentation_are_consistent():
         assert __version__ in (ROOT / relative).read_text(encoding="utf-8"), relative
     about = (ROOT / "src/maritime_simulator/ui/about_dialog.py").read_text(encoding="utf-8")
     assert 'release_label = "Production release"' in about
-    assert "19 October 2026" in about
+    assert "26 October 2026" in about
     release_notes = ROOT / f"docs/v2_release_notes_{__version__}.md"
     assert release_notes.is_file()
     assert __version__ in release_notes.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("version,expected", [("2.3.1", "2.3.1"), ("2.3.1-rc1", "2.3.1~rc1"),
+                                             ("2.3.1-beta.1", "2.3.1~beta.1")])
+def test_debian_prerelease_versions_sort_before_the_final_version(version, expected):
+    script = (ROOT / "scripts/build-v2-ubuntu.sh").read_text()
+    assignments = re.findall(r"^\s*(DEB_VERSION=.+)$", script, re.MULTILINE)
+    assert len(assignments) == 1
+    assert assignments[0] == r'DEB_VERSION=${VERSION/-/\~}'
+    if shutil.which("bash"):
+        result = subprocess.run(
+            ["bash", "-c", assignments[0] + '\nprintf "%s" "$DEB_VERSION"'],
+            env={**os.environ, "VERSION": version, "HOME": "/tmp/build user"},
+            capture_output=True, text=True, check=True,
+        )
+        assert result.stdout == expected
+
+
+def test_beta_is_recognized_as_a_preview_by_all_native_build_entrypoints():
+    for relative in ("scripts/build-v2-ubuntu.sh", "scripts/build-v2-macos.sh"):
+        assert '"${VERSION}" == *-beta*' in (ROOT / relative).read_text()
+    assert "'-(rc|beta)'" in (ROOT / "scripts/build-v2-windows.ps1").read_text()
 
 
 def test_public_bundle_excludes_unused_qt_families_and_keeps_licenses():

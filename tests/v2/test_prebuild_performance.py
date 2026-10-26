@@ -108,6 +108,7 @@ def test_prebuild_failure_logs_stdout_and_stderr_and_enables_fault_handler(tmp_p
 ])
 def test_prebuild_reports_native_process_failure_without_losing_its_status(monkeypatch, platform, returncode, reason):
     monkeypatch.setattr(prebuild.sys, "platform", platform)
+    monkeypatch.setenv("QT_QPA_FONTDIR", str(prebuild.ROOT))
 
     def posix_signal(number):
         # Make the POSIX branch testable even on a Windows host without SIGKILL.
@@ -138,3 +139,27 @@ def test_ui_smoke_uses_temporary_settings_and_an_explicit_shutdown(monkeypatch):
     assert "window.close()" in command[-1]
     assert "QEvent.DeferredDelete" in command[-1]
     assert kwargs["environment"]["QT_QPA_PLATFORM"] == "offscreen"
+
+
+@pytest.mark.parametrize("explicit", [False, True])
+@pytest.mark.parametrize("root_key", ["SYSTEMROOT", "SystemRoot", "WINDIR"])
+def test_windows_headless_checks_use_installed_fonts_without_overriding_a_custom_directory(tmp_path, monkeypatch, explicit, root_key):
+    monkeypatch.setattr(prebuild.sys, "platform", "win32")
+    fonts = tmp_path / ("Custom fonts" if explicit else "Windows/Fonts")
+    fonts.mkdir(parents=True)
+    environment = {root_key: str(tmp_path / "Windows")}
+    if explicit:
+        environment["QT_QPA_FONTDIR"] = str(fonts)
+    prebuild.configure_headless_fonts(environment)
+    assert environment["QT_QPA_FONTDIR"] == str(fonts)
+
+
+def test_windows_headless_font_setup_reports_missing_fonts_and_leaves_other_platforms_alone(tmp_path, monkeypatch):
+    environment = {"QT_QPA_FONTDIR": str(tmp_path / "missing")}
+    monkeypatch.setattr(prebuild.sys, "platform", "linux")
+    prebuild.configure_headless_fonts(environment)
+    monkeypatch.setattr(prebuild.sys, "platform", "win32")
+    with pytest.raises(SystemExit, match="Offscreen font directory is missing"):
+        prebuild.configure_headless_fonts(environment)
+    with pytest.raises(SystemExit, match="Windows Fonts directory not found"):
+        prebuild.configure_headless_fonts({})

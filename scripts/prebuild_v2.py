@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import os
 from pathlib import Path
 import signal
@@ -14,10 +15,27 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 
 
+def configure_headless_fonts(environment: dict) -> None:
+    if sys.platform != "win32":
+        return
+    # Qt's Windows offscreen plugin uses FreeType, not the native font database.
+    directory = environment.get("QT_QPA_FONTDIR")
+    if not directory:
+        system_root = environment.get("SYSTEMROOT") or environment.get("SystemRoot") or environment.get("WINDIR")
+        if not system_root:
+            raise SystemExit("Windows Fonts directory not found. Set QT_QPA_FONTDIR before running UI checks.")
+        directory = str(Path(system_root) / "Fonts")
+    if not Path(directory).is_dir():
+        raise SystemExit(f"Offscreen font directory is missing: {directory}. Set QT_QPA_FONTDIR to installed Windows fonts.")
+    environment["QT_QPA_FONTDIR"] = directory
+
+
 def run(label: str, command: list[str], *, environment: dict | None = None, log_path: Path | None = None) -> None:
     print(f"[v2-prebuild] {label}", flush=True)
     environment = dict(os.environ if environment is None else environment)
     environment.setdefault("PYTHONFAULTHANDLER", "1")
+    environment.setdefault("PYTHONUNBUFFERED", "1")
+    configure_headless_fonts(environment)
     if log_path is None:
         result = subprocess.run(command, cwd=ROOT, env=environment, check=False)
     else:
@@ -82,7 +100,7 @@ def resource_check() -> None:
         raise SystemExit("Missing V2 migration/build resources:\n" + "\n".join(missing))
 
 
-def ui_smoke() -> None:
+def ui_smoke(*, log_path: Path | None = None) -> None:
     environment = os.environ.copy()
     environment["PYTHONPATH"] = os.pathsep.join((str(SRC), str(ROOT), environment.get("PYTHONPATH", "")))
     environment["QT_QPA_PLATFORM"] = "offscreen"
@@ -91,12 +109,16 @@ def ui_smoke() -> None:
         "from pathlib import Path\n"
         "from tempfile import TemporaryDirectory\n"
         "from PySide6.QtCore import QEvent\n"
+        "from PySide6.QtGui import QFontDatabase\n"
         "from PySide6.QtWidgets import QApplication\n"
         "import run_v2\n"
         "from ui.style import apply_global_ui_style\n"
         "from maritime_simulator.ui import V2MainWindow\n"
         "app=QApplication.instance() or QApplication([])\n"
         "apply_global_ui_style(app)\n"
+        "families=QFontDatabase.families()\n"
+        "print(f'Qt platform: {app.platformName()}; UI font: {app.font().family()}; font families: {len(families)}', flush=True)\n"
+        "assert families, 'Qt found no fonts; check QT_QPA_FONTDIR before running layout tests'\n"
         "with TemporaryDirectory(prefix='maritime-v2-smoke-') as directory:\n"
         "    window=V2MainWindow(config_dir=Path(directory))\n"
         "    try:\n"
@@ -109,23 +131,32 @@ def ui_smoke() -> None:
         "        window.deleteLater(); app.processEvents()\n"
         "        app.sendPostedEvents(None, QEvent.DeferredDelete)\n"
     )
-    run("headless UI smoke", [sys.executable, "-c", code], environment=environment)
+    run("headless UI smoke", [sys.executable, "-c", code], environment=environment, log_path=log_path)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run Maritime Ship Simulator V2 migration/build gates")
     parser.add_argument("--profile", choices=("quick", "full"), default="full")
+    parser.add_argument("--log-dir", type=Path, default=None)
     args = parser.parse_args()
+    log_dir = args.log_dir or ROOT / "artifacts" / "build-logs" / ("prebuild-" + datetime.now().strftime("%Y%m%d-%H%M%S-%f"))
+    log_dir = log_dir.resolve()
+    log_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[v2-prebuild] Diagnostic logs: {log_dir}", flush=True)
     resource_check()
     run(
         "release credential audit",
         [sys.executable, "scripts/check_v2_release_credentials.py", "--source-tree"],
+        log_path=log_dir / "01-credentials.log",
     )
-    run("compile", [sys.executable, "-m", "compileall", "-q", "src/maritime_simulator", "run_v2.py", "build_v2.py"])
-    ui_smoke()
+    run("compile", [sys.executable, "-m", "compileall", "-q", "src/maritime_simulator", "run_v2.py", "build_v2.py"],
+        log_path=log_dir / "02-compile.log")
+    ui_smoke(log_path=log_dir / "03-ui-smoke.log")
     if args.profile == "full":
-        run("V2 tests", [sys.executable, "-m", "pytest", "-q", "tests/v2"])
-        run("Track golden master", [sys.executable, "scripts/compare_v2_track_golden_master.py", "--strict"])
+        run("V2 tests", [sys.executable, "-m", "pytest", "-q", "tests/v2", f"--junitxml={log_dir / 'v2-tests.xml'}"],
+            log_path=log_dir / "04-v2-tests.log")
+        run("Track golden master", [sys.executable, "scripts/compare_v2_track_golden_master.py", "--strict"],
+            log_path=log_dir / "05-track.log")
         run(
             "performance gate",
             [
