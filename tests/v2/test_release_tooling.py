@@ -206,15 +206,11 @@ def test_ubuntu_release_script_rejects_a_physically_trashed_source(tmp_path):
     scripts = root / "scripts"
     scripts.mkdir(parents=True)
     shutil.copy2(ROOT / "scripts/build-v2-ubuntu.sh", scripts / "build-v2-ubuntu.sh")
-    fake_bin = tmp_path / "bin"
-    fake_bin.mkdir()
-    uname = fake_bin / "uname"
-    uname.write_text("#!/bin/sh\nprintf 'Linux\\n'\n", encoding="utf-8")
-    uname.chmod(uname.stat().st_mode | stat.S_IXUSR)
     environment = os.environ.copy()
-    environment["PATH"] = f"{fake_bin}{os.pathsep}{environment.get('PATH', '')}"
     result = subprocess.run(
-        (shutil.which("bash"), str(scripts / "build-v2-ubuntu.sh")),
+        (shutil.which("bash"), "-c",
+         'uname() { printf "Linux\\n"; }\nsource "$1"',
+         "test-source-guard", (scripts / "build-v2-ubuntu.sh").as_posix()),
         cwd=root,
         env=environment,
         text=True,

@@ -3,44 +3,51 @@ name: Unsigned native builds
 
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Platform to build
+        type: choice
+        default: all
+        options:
+          - all
+          - windows-x64
+          - ubuntu-26.04-amd64
+          - ubuntu-22.04-amd64
+          - macos-arm64
 
 permissions:
   contents: read
 
 concurrency:
-  group: native-builds-${{ github.ref }}
+  group: native-builds-${{ github.ref }}-${{ inputs.target || 'all' }}
   cancel-in-progress: false
 
 jobs:
+  select:
+    name: Select build targets
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Check out the selected source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Select all platforms or one target
+        id: matrix
+        env:
+          BUILD_TARGET: ${{ inputs.target }}
+        run: python3 scripts/ci_build_matrix.py
+
   build:
+    needs: select
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 120
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - target: windows-x64
-            runner: windows-2025
-            architecture: x64
-            release_dir: release-v2/windows
-          - target: ubuntu-26.04-amd64
-            runner: ubuntu-26.04
-            architecture: x64
-            ubuntu_version: '26.04'
-            release_dir: release-v2/ubuntu-26.04-amd64
-            script: scripts/build-v2-ubuntu.sh
-          - target: ubuntu-22.04-amd64
-            runner: ubuntu-22.04
-            architecture: x64
-            ubuntu_version: '22.04'
-            release_dir: release-v2/ubuntu-22.04-amd64
-            script: scripts/build-v2-ubuntu-22.04.sh
-          - target: macos-arm64
-            runner: macos-15
-            architecture: arm64
-            release_dir: release-v2/macos
-            script: scripts/build-v2-macos.sh
+      matrix: ${{ fromJSON(needs.select.outputs.matrix) }}
     env:
       CI: 'true'
       NONINTERACTIVE: '1'

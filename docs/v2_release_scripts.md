@@ -100,9 +100,10 @@ still need separate packages. Validate every intended target system locally.
 
 ## GitHub Actions test builds
 
-Open **Actions > Unsigned native builds > Run workflow** on GitHub. The selected
-branch is built on Windows x64, Ubuntu 26.04 amd64, Ubuntu 22.04 amd64 and macOS
-Apple Silicon. The workflow uses Python 3.13.15 and the existing full release
+Open **Actions > Unsigned native builds > Run workflow** on GitHub. Select
+`all` or one platform in **Platform to build**. Supported targets are Windows
+x64, Ubuntu 26.04 amd64, Ubuntu 22.04 amd64 and macOS Apple Silicon. The selected
+branch is built with Python 3.13.15 and the existing full release
 gates. Ubuntu 22.04 must additionally pass the GLIBC 2.35 ABI check. A successful
 cloud build is not a hardware or desktop-compatibility certification.
 

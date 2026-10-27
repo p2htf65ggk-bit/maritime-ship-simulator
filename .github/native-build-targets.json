@@ -1,0 +1,31 @@
+[
+  {
+    "target": "windows-x64",
+    "runner": "windows-2025",
+    "architecture": "x64",
+    "release_dir": "release-v2/windows"
+  },
+  {
+    "target": "ubuntu-26.04-amd64",
+    "runner": "ubuntu-26.04",
+    "architecture": "x64",
+    "ubuntu_version": "26.04",
+    "release_dir": "release-v2/ubuntu-26.04-amd64",
+    "script": "scripts/build-v2-ubuntu.sh"
+  },
+  {
+    "target": "ubuntu-22.04-amd64",
+    "runner": "ubuntu-22.04",
+    "architecture": "x64",
+    "ubuntu_version": "22.04",
+    "release_dir": "release-v2/ubuntu-22.04-amd64",
+    "script": "scripts/build-v2-ubuntu-22.04.sh"
+  },
+  {
+    "target": "macos-arm64",
+    "runner": "macos-15",
+    "architecture": "arm64",
+    "release_dir": "release-v2/macos",
+    "script": "scripts/build-v2-macos.sh"
+  }
+]
