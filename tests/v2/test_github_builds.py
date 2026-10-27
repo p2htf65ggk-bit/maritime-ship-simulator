@@ -27,6 +27,8 @@ def test_native_workflow_has_four_explicit_unsigned_targets_and_no_publication()
     assert "secrets." not in workflow
     assert "contents: write" not in workflow
     assert "gh release" not in workflow
+    assert "VersionInfo.FileVersion" not in workflow
+    assert "Compiler engine version 6" in workflow
     for action in re.findall(r"uses: (\S+)", workflow):
         assert re.fullmatch(r"actions/[a-z-]+@[0-9a-f]{40}", action)
 

@@ -104,11 +104,13 @@ jobs:
           if (-not (Test-Path -LiteralPath $compiler)) {
             throw 'The Windows runner is missing Inno Setup 6.'
           }
-          $version = (Get-Item -LiteralPath $compiler).VersionInfo.FileVersion
-          if (-not $version.StartsWith('6.')) {
-            throw "Unsupported Inno Setup compiler: $version"
+          $help = (& $compiler '/?' 2>&1 | Out-String)
+          $helpStatus = $LASTEXITCODE
+          if ($helpStatus -notin @(0, 1) -or $help -notmatch '(?im)^(Inno Setup 6\s|Compiler engine version 6\.)') {
+            throw "Unsupported or unusable Inno Setup compiler: $help"
           }
-          Write-Host "Inno Setup: $version"
+          Write-Host $help
+          $global:LASTEXITCODE = 0
           "INNO_ISCC=$compiler" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
 
       - name: Build and verify the Windows packages

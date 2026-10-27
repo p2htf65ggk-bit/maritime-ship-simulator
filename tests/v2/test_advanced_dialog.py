@@ -2,8 +2,11 @@
 import os
 import socket
 import sys
-from threading import Event, Thread
+from threading import Event, RLock, Thread
 import time
+from types import SimpleNamespace
+
+import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -23,6 +26,7 @@ from maritime_simulator.ui.output_runtime import OutputRuntime
 class _RecordingPumpService:
     def __init__(self, **_kwargs):
         self.pump_times = []
+        self.pumped = Event()
         self.output_manager = self
 
     def register(self, _registration, *, now_s=None):
@@ -39,6 +43,7 @@ class _RecordingPumpService:
 
     def pump(self, _snapshot, *, now_s=None):
         self.pump_times.append(time.monotonic() if now_s is None else now_s)
+        self.pumped.set()
         return 0
 
     def next_delay_s(self, *, now_s=None, default=0.05):
@@ -51,6 +56,18 @@ class _RecordingPumpService:
 class _SlowDeadlinePumpService(_RecordingPumpService):
     def next_delay_s(self, *, now_s=None, default=0.05):
         return 1.0
+
+
+def _wait_for_pumps(service, count, timeout=3.0):
+    # Wait for worker progress without processing Qt events or assuming a VM CPU slice.
+    deadline = time.monotonic() + timeout
+    while len(service.pump_times) < count:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        service.pumped.wait(remaining)
+        service.pumped.clear()
+    return tuple(service.pump_times)
 
 
 def test_advanced_dialog_supports_multiple_protocols_and_free_text_playback():
@@ -277,10 +294,8 @@ def test_output_scheduler_continues_without_qt_event_processing(tmp_path, monkey
         runtime.timer.stop()
         worker_service = runtime._service
         assert isinstance(worker_service, _RecordingPumpService)
-        time.sleep(0.35)
-        pump_times = tuple(worker_service.pump_times)
+        pump_times = _wait_for_pumps(worker_service, 8)
         assert len(pump_times) >= 8
-        assert max(b - a for a, b in zip(pump_times, pump_times[1:])) < 0.20
     finally:
         runtime.close()
         simulation.close()
@@ -305,12 +320,46 @@ def test_output_scheduler_watchdog_stays_responsive_for_slow_protocol_deadlines(
         runtime.timer.stop()
         worker_service = runtime._service
         assert isinstance(worker_service, _SlowDeadlinePumpService)
-        time.sleep(0.28)
-        pump_times = tuple(worker_service.pump_times)
+        pump_times = _wait_for_pumps(worker_service, 4)
         assert len(pump_times) >= 4
-        assert max(b - a for a, b in zip(pump_times, pump_times[1:])) < 0.12
     finally:
         runtime.close()
+        simulation.close()
+
+
+@pytest.mark.parametrize("requested_delay,expected_wait", [(0.02, 0.02), (1.0, 0.05), (-1.0, 0.001)])
+def test_output_scheduler_waits_are_bounded_without_wall_clock_assumptions(
+    requested_delay, expected_wait, monkeypatch,
+):
+    import maritime_simulator.ui.output_runtime as module
+
+    simulation = SimulatorService()
+    stop = Event()
+    waits = []
+    service = _RecordingPumpService()
+    service.next_delay_s = lambda **_kwargs: requested_delay
+
+    def record_wait(timeout):
+        waits.append(timeout)
+        if len(waits) == 3:
+            stop.set()
+
+    runtime = SimpleNamespace(
+        simulation=simulation,
+        _worker_stop=stop,
+        _worker_wake=SimpleNamespace(wait=record_wait, clear=lambda: None),
+        _service_lock=RLock(),
+        _service=service,
+        _last_pump_s=None,
+        _maximum_pump_gap_s=0.0,
+        latest_snapshot=simulation.snapshot,
+    )
+    monkeypatch.setattr(module, "_configure_output_worker_timing", module._WindowsWorkerTiming)
+    try:
+        OutputRuntime._pump_loop(runtime)
+        assert waits == pytest.approx([expected_wait] * 3)
+        assert len(service.pump_times) == 3
+    finally:
         simulation.close()
 
 
@@ -341,10 +390,9 @@ def test_output_scheduler_does_not_wait_for_simulation_snapshot_lock(tmp_path, m
     try:
         runtime.start()
         runtime.timer.stop()
-        time.sleep(0.20)
         worker_service = runtime._service
         assert isinstance(worker_service, _RecordingPumpService)
-        assert len(worker_service.pump_times) >= 5
+        assert len(_wait_for_pumps(worker_service, 5)) >= 5
     finally:
         runtime.close()
         simulation.close()
