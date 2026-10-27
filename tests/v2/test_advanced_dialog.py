@@ -406,6 +406,7 @@ def test_udp_output_timing_continues_while_qt_event_loop_is_blocked(tmp_path):
     receiver_port = receiver.getsockname()[1]
     received_at = []
     receiver_stop = Event()
+    received_enough = Event()
 
     def receive_packets():
         while not receiver_stop.is_set():
@@ -416,6 +417,8 @@ def test_udp_output_timing_continues_while_qt_event_loop_is_blocked(tmp_path):
             except OSError:
                 return
             received_at.append(time.monotonic())
+            if len(received_at) >= 9:
+                received_enough.set()
 
     receive_worker = Thread(target=receive_packets, name="udp-timing-receiver", daemon=True)
     receive_worker.start()
@@ -436,7 +439,7 @@ def test_udp_output_timing_continues_while_qt_event_loop_is_blocked(tmp_path):
     try:
         runtime.start()
         runtime.timer.stop()
-        time.sleep(0.60)
+        assert received_enough.wait(3.0), "UDP output stopped while Qt events were blocked"
         assert len(received_at) >= 9
         gaps = tuple(b - a for a, b in zip(received_at, received_at[1:]))
         assert gaps

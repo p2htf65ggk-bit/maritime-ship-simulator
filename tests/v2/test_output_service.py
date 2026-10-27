@@ -47,6 +47,31 @@ def test_output_service_schedules_protocols_independently_and_reports_actual_sen
     assert manager.closed
 
 
+def test_twenty_hertz_output_schedule_is_exact_independently_of_os_wakeup_jitter():
+    manager = RecordingOutputManager()
+    service = ProtocolOutputService(output_manager=manager)
+    simulation = SimulatorService()
+    try:
+        service.register(
+            RegisteredOutput(
+                ProtocolSchedule("heading", "HDT", 20.0, "udp"),
+                UdpEndpoint("127.0.0.1", 4096),
+            ),
+            now_s=0.0,
+        )
+        snapshot = simulation.snapshot()
+        assert service.pump(snapshot, now_s=0.0) == 1
+        assert abs(service.next_delay_s(now_s=0.025) - 0.025) < 1e-9
+        assert service.pump(snapshot, now_s=0.049) == 0
+        assert service.pump(snapshot, now_s=0.05) == 1
+        assert service.pump(snapshot, now_s=0.099) == 0
+        assert service.pump(snapshot, now_s=0.10) == 1
+        assert len(manager.sent) == 3
+    finally:
+        service.close()
+        simulation.close()
+
+
 def test_output_service_emits_relative_and_theoretical_mwv_at_one_configured_rate():
     manager = RecordingOutputManager()
     service = ProtocolOutputService(

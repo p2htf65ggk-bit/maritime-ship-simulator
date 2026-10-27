@@ -48,9 +48,10 @@ def test_debian_prerelease_versions_sort_before_the_final_version(version, expec
     assignments = re.findall(r"^\s*(DEB_VERSION=.+)$", script, re.MULTILINE)
     assert len(assignments) == 1
     assert assignments[0] == r'DEB_VERSION=${VERSION/-/\~}'
-    if shutil.which("bash"):
+    bash = shutil.which("bash")
+    if bash:
         result = subprocess.run(
-            ["bash", "-c", assignments[0] + '\nprintf "%s" "$DEB_VERSION"'],
+            [bash, "-c", assignments[0] + '\nprintf "%s" "$DEB_VERSION"'],
             env={**os.environ, "VERSION": version, "HOME": "/tmp/build user"},
             capture_output=True, text=True, check=True,
         )
@@ -211,7 +212,7 @@ def test_ubuntu_release_script_rejects_a_physically_trashed_source(tmp_path):
     uname.write_text("#!/bin/sh\nprintf 'Linux\\n'\n", encoding="utf-8")
     uname.chmod(uname.stat().st_mode | stat.S_IXUSR)
     environment = os.environ.copy()
-    environment["PATH"] = f"{fake_bin}:{environment.get('PATH', '')}"
+    environment["PATH"] = f"{fake_bin}{os.pathsep}{environment.get('PATH', '')}"
     result = subprocess.run(
         (shutil.which("bash"), str(scripts / "build-v2-ubuntu.sh")),
         cwd=root,
