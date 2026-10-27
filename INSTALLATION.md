@@ -11,16 +11,19 @@ the developer build scripts.
 | --- | --- | --- |
 | Windows x64 (tested on Windows 11) | Setup EXE | ZIP, fully extracted before starting |
 | Ubuntu 26.04.1 LTS amd64 | DEB | AppImage or tar.gz |
+| Ubuntu 22.04 compatibility, amd64 | DEB labelled `ubuntu-22.04-amd64` | AppImage or tar.gz with the same label |
 | macOS Apple silicon | DMG | Application ZIP |
 
 Only assets actually attached to a release are available. Check the release
 notes and RELEASE_INFO.txt for the Ubuntu version and architecture actually
 built and tested. The current macOS downloads do not imply Intel-native support.
-Version 2.3.1 has no prebuilt Ubuntu 22.04 package; 22.04 remains a self-build
-option, not a tested binary target for this release.
+Additional 22.04 compatibility packages were built and automatically checked on
+an Ubuntu 22.04 GitHub runner, including the GLIBC 2.35 gate. The author tested
+that build on Ubuntu 26.04. No manual 22.04 desktop test is claimed.
 The [build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the source revision
-for each platform. The Ubuntu label is the author's confirmed build/test host,
-not a promise of binary compatibility with earlier Ubuntu releases.
+for each platform. The original Ubuntu downloads target the author's 26.04.1
+build/test host; only the separately labelled compatibility downloads use the
+22.04 build baseline. This is not a promise of compatibility with every desktop.
 Windows versions other than Windows 11, Intel Macs and older macOS versions
 have not been qualified for these packages. A source build on another platform
 is separate from the compatibility of the supplied binaries.
@@ -57,10 +60,22 @@ The portable ZIP is not a guaranteed workaround if its application EXE is flagge
 
 ## Ubuntu
 
+For Ubuntu 22.04, use a filename containing **`ubuntu-22.04-amd64`**. These
+compatibility packages can also be used on newer amd64 Ubuntu systems; the
+author tested them on 26.04. The original files labelled only `ubuntu` were
+built on 26.04.1 and are not a 22.04 option. All three compatibility formats
+contain the same application, and none removes the need for system libraries.
+
 Install the DEB using APT so its declared dependencies can be resolved:
 
 ```bash
 sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-installer.deb
+```
+
+For the 22.04 compatibility DEB instead:
+
+```bash
+sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-22.04-amd64-installer.deb
 ```
 
 `GLIBC_2.38 not found` or a similar GLIBC version error indicates a platform
@@ -76,8 +91,8 @@ simulator as root as a workaround.
 
 ### Ubuntu 22.04 self-build
 
-No Ubuntu 22.04 installer is provided for 2.3.1. On Ubuntu 22.04 itself (including
-a 22.04 VM), extract the full source archive and run:
+To build instead of using the supplied compatibility downloads, use Ubuntu
+22.04 itself (including a 22.04 VM), extract the source and run:
 
 ```bash
 bash scripts/build-v2-ubuntu-22.04.sh
@@ -86,8 +101,9 @@ bash scripts/build-v2-ubuntu-22.04.sh
 The wrapper requires Python 3.12+ and offers a toolchain setup when needed;
 review any prompts to add repositories or install packages. It uses an isolated
 environment and checks bundled ELF libraries against GLIBC 2.35. Full tests and
-native installation checks must pass locally. The script is retained, but a
-successful 22.04 build is not claimed for this release. See the
+native installation checks must pass locally. The published compatibility
+packages were built from the exact revision linked in the
+[build record](docs/NATIVE_BUILD_PROVENANCE.md). See the
 [build instructions](docs/v2_release_scripts.md#ubuntu-2204-self-build).
 
 ## macOS

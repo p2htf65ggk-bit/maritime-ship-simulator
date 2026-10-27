@@ -66,7 +66,12 @@ native-provenance records for completed checks and qualification limits.
 Existing settings remain supported. Back up configuration before upgrading. Packages
 are unsigned; Gatekeeper or SmartScreen can require explicit approval. macOS packages
 target Apple silicon; Windows x64 and Ubuntu amd64 must be built and checked natively.
-No Ubuntu 22.04 binary is planned; its source-build wrapper remains available.
+Additional Ubuntu 22.04 compatibility downloads were added on 27 October 2026,
+without replacing the original packages or moving the release tag. They were
+built and automatically checked on a 22.04 runner, including GLIBC 2.35, then
+desktop-tested by the author on Ubuntu 26.04. No manual 22.04 desktop test is
+claimed. The source-build wrapper remains available. See the
+[exact build/source record](NATIVE_BUILD_PROVENANCE.md).
 
 For simulation, demonstrations and testing, not real navigation. S57 portrayal remains
 experimental. GEBCO is coarse global bathymetry, not detailed harbour survey data;

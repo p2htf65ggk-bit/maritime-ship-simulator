@@ -33,6 +33,24 @@ This record distinguishes automated checks from operator reports.
 
 ## Build corrections
 
+### Ubuntu 22.04 compatibility addition
+
+27 October 2026: the author approved the additional Ubuntu 22.04 amd64 packages
+after testing the 22.04-built application on Ubuntu 26.04. No manual 22.04
+desktop test is claimed. The existing release version/tag and native downloads
+remain unchanged.
+
+The Ubuntu 22.04 runner job passed 1,165 tests in 142.03 seconds, 60 Track
+comparisons, performance/retained-memory checks, packaged startup/dialog and
+relocated portable startup checks, credential audits and the GLIBC 2.35 gate.
+Its exact source revision and successful job are linked in
+[native provenance](NATIVE_BUILD_PROVENANCE.md#additional-ubuntu-2204-build).
+The downloaded artifact, inner package checksums and bundled notice/source
+manifests were verified before publication. The refreshed 51-page Word/PDF
+guide distinguishes build baseline from the reported desktop test.
+
+### Original release build corrections
+
 The Windows offscreen plugin uses a FreeType font database instead of the
 normal Windows font backend. It was searching an absent PySide6 font directory,
 making two Environment layout tests report artificial horizontal overflow.

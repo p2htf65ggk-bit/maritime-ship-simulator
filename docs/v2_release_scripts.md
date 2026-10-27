@@ -69,8 +69,10 @@ requirements; application users do not need curl, pip or Python venv tooling.
 
 The 2.3.1 Linux packages were built on the author-confirmed Ubuntu 26.04.1 LTS
 amd64 computer. That identifies the build/test host, not older-GLIBC compatibility.
-The manual GitHub build workflow also includes a separate, initially experimental
-22.04 compatibility build. This does not replace the published 2.3.1 downloads.
+The manual GitHub build workflow also produced the additional 22.04 compatibility
+downloads published on 27 October. They do not replace the original packages.
+Their full automated checks ran on 22.04; the author desktop-tested them on
+Ubuntu 26.04, not a 22.04 desktop. See [provenance](NATIVE_BUILD_PROVENANCE.md).
 Debian prerelease versions preserve a
 literal `~` separator across Bash versions; do not work around failed tests.
 
@@ -83,7 +85,7 @@ itself, including a 22.04 VM:
 bash scripts/build-v2-ubuntu-22.04.sh
 ```
 
-This path is not natively qualified for the 2.3.1 release. It requires Python
+This path is also used by the 22.04 GitHub runner. It requires Python
 3.12+ (the system Python 3.10 is insufficient for pinned dependencies), binutils
 and matching build/runtime dependencies. Review repository/package-install
 prompts rather than replacing system Python or GLIBC. Internet or preinstalled

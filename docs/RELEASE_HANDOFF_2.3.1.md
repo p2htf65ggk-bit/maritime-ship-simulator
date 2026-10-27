@@ -5,7 +5,10 @@ The author approved 2.3.1 as the latest unsigned production release on
 manifests are versioned together. Earlier releases remain accessible unchanged.
 
 Windows 11 x64 and Ubuntu 26.04.1 LTS amd64 are author-confirmed build hosts.
-macOS packages target Apple silicon. Ubuntu 22.04 remains self-build only.
+macOS packages target Apple silicon. Additional Ubuntu 22.04 compatibility
+packages were approved on 27 October: built/automatically checked on 22.04,
+then desktop-tested by the author on Ubuntu 26.04. No manual 22.04 desktop
+acceptance is claimed. Existing binaries and the original release tag remain unchanged.
 
 Application code matches the qualified native-build source. Final build/test
 and documentation corrections do not require new native packages. See

@@ -35,6 +35,7 @@ not GitHub's green Code button. End users do not need Python or build tools.
 | --- | --- | --- |
 | Windows x64 | Setup EXE or portable ZIP | Author-tested on Windows 11 |
 | Ubuntu 26.04.1 LTS amd64 | DEB, AppImage or portable tar.gz | Built/tested on the named release, not an older-Ubuntu compatibility package |
+| Ubuntu 22.04 compatibility, amd64 | DEB, AppImage or portable tar.gz, labelled `ubuntu-22.04-amd64` | Built and automatically checked on 22.04; desktop-tested by the author on Ubuntu 26.04, not on a 22.04 desktop |
 | macOS Apple silicon | DMG or application ZIP | Native arm64; Intel Macs are not qualified |
 
 Packages are **unsigned**. Read the [installation notes](INSTALLATION.md) and
@@ -113,9 +114,12 @@ and online environmental sources.
 Installers and portable packages are attached to
 [release 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1).
 The binary downloads cover Windows x64, macOS Apple silicon and
-**Ubuntu 26.04.1 LTS amd64**. No prebuilt Ubuntu 22.04
-package is planned for 2.3.1; its [self-build path](INSTALLATION.md#ubuntu-2204-self-build)
-remains in the source, without native 22.04 qualification for this release.
+**Ubuntu 26.04.1 LTS amd64**. Additional **Ubuntu 22.04 compatibility packages**
+were added on 27 October 2026. They passed the full automated build gates and
+GLIBC 2.35 check on a 22.04 GitHub runner. The author tested this build on Ubuntu
+26.04; a manual 22.04 desktop test is not claimed. See
+[package selection](INSTALLATION.md#ubuntu) and the
+[self-build path](INSTALLATION.md#ubuntu-2204-self-build).
 
 For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
