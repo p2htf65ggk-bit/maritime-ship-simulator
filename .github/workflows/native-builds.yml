@@ -1,0 +1,169 @@
+# SPDX-License-Identifier: MPL-2.0
+name: Unsigned native builds
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-builds-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: windows-x64
+            runner: windows-2025
+            architecture: x64
+            release_dir: release-v2/windows
+          - target: ubuntu-26.04-amd64
+            runner: ubuntu-26.04
+            architecture: x64
+            ubuntu_version: '26.04'
+            release_dir: release-v2/ubuntu-26.04-amd64
+            script: scripts/build-v2-ubuntu.sh
+          - target: ubuntu-22.04-amd64
+            runner: ubuntu-22.04
+            architecture: x64
+            ubuntu_version: '22.04'
+            release_dir: release-v2/ubuntu-22.04-amd64
+            script: scripts/build-v2-ubuntu-22.04.sh
+          - target: macos-arm64
+            runner: macos-15
+            architecture: arm64
+            release_dir: release-v2/macos
+            script: scripts/build-v2-macos.sh
+    env:
+      CI: 'true'
+      NONINTERACTIVE: '1'
+      PRODUCTION_RELEASE: '1'
+      RELEASE_SIGNING: unsigned
+      AUTO_INSTALL_TOOLS: '0'
+      PYTHONUNBUFFERED: '1'
+      PYTHONFAULTHANDLER: '1'
+      V2_VENV_DIR: venv-ci
+
+    steps:
+      - name: Check out the selected source revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.13.15
+        id: python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.13.15'
+          architecture: ${{ matrix.architecture }}
+
+      - name: Install Ubuntu build and Qt runtime prerequisites
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          audio_package=libasound2
+          if [[ '${{ matrix.ubuntu_version }}' != '22.04' ]]; then
+            audio_package=libasound2t64
+          fi
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            binutils ca-certificates curl dpkg file patchelf \
+            libgl1 libegl1 libnss3 libnspr4 libdbus-1-3 libfontconfig1 \
+            libxkbcommon0 libxkbcommon-x11-0 libxcb-cursor0 libxcb-icccm4 \
+            libxcb-keysyms1 libxcb-image0 libxcb-render-util0 libxcb-randr0 \
+            libxcb-shape0 libxcb-xfixes0 libxcb-xinerama0 \
+            fonts-dejavu-core "${audio_package}"
+
+      - name: Download and verify the pinned AppImage tool
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tool="${RUNNER_TEMP}/appimagetool-x86_64.AppImage"
+          gh api repos/AppImage/appimagetool/releases/assets/610035789 \
+            --header 'Accept: application/octet-stream' > "${tool}"
+          printf '%s  %s\n' \
+            '95cbe7cce9717fce90c484e34052ee7c7f1d7635b33c12525b4776826a7d29b6' \
+            "${tool}" | sha256sum --check --strict
+          chmod +x "${tool}"
+          printf 'APPIMAGETOOL_BIN=%s\n' "${tool}" >> "${GITHUB_ENV}"
+
+      - name: Locate the Windows installer compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $compiler)) {
+            throw 'The Windows runner is missing Inno Setup 6.'
+          }
+          $version = (Get-Item -LiteralPath $compiler).VersionInfo.FileVersion
+          if (-not $version.StartsWith('6.')) {
+            throw "Unsupported Inno Setup compiler: $version"
+          }
+          Write-Host "Inno Setup: $version"
+          "INNO_ISCC=$compiler" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build and verify the Windows packages
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          PYTHON_BIN: ${{ steps.python.outputs.python-path }}
+        run: ./scripts/build-v2-windows.ps1
+
+      - name: Build and verify the Unix packages
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          PYTHON_BIN: ${{ steps.python.outputs.python-path }}
+          UBUNTU_RELEASE_TAG: ${{ matrix.target }}
+          UBUNTU_RELEASE_DIR: ${{ matrix.release_dir }}
+          UBUNTU_COMPAT_LABEL: Ubuntu ${{ matrix.ubuntu_version }} amd64
+          REQUIRED_UBUNTU_VERSION: ${{ matrix.ubuntu_version }}
+        run: bash '${{ matrix.script }}'
+
+      - name: Record build provenance
+        if: always() && steps.python.outcome == 'success'
+        shell: bash
+        env:
+          BUILD_RESULT: ${{ job.status }}
+        run: |
+          report_python=python
+          if [[ -x venv-ci/bin/python ]]; then
+            report_python=venv-ci/bin/python
+          elif [[ -f venv-ci/Scripts/python.exe ]]; then
+            report_python=venv-ci/Scripts/python.exe
+          fi
+          "${report_python}" scripts/ci_build_metadata.py \
+            --target '${{ matrix.target }}' \
+            --output artifacts/ci/build-info.json
+
+      - name: Upload verified test packages
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-test-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ matrix.release_dir }}/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+      - name: Upload diagnostic logs even after failure
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: build-diagnostics-${{ matrix.target }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            artifacts/build-logs/
+            artifacts/performance-v2-build.log
+            artifacts/ci/
+            docs/performance_v2_last_run.json
+          if-no-files-found: warn
+          retention-days: 14

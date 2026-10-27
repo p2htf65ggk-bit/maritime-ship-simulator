@@ -75,7 +75,11 @@ elevated_add_repository() {
   fi
 }
 
-PYTHON_BIN="$(find_python || true)"
+PYTHON_BIN="${PYTHON_BIN:-$(find_python || true)}"
+if [[ -n "${PYTHON_BIN}" ]] && ! python_supported "${PYTHON_BIN}"; then
+  echo "ERROR: PYTHON_BIN must identify a working Python 3.12-3.14 interpreter: ${PYTHON_BIN}" >&2
+  exit 1
+fi
 if [[ -z "${PYTHON_BIN}" ]]; then
   confirm_operation "Python 3.12+ is missing. Add the deadsnakes PPA and install Python 3.12 build support now?" || {
     echo "ERROR: Ubuntu 22.04 ships Python 3.10, but pinned V2 dependencies (including NumPy) require Python 3.12+." >&2

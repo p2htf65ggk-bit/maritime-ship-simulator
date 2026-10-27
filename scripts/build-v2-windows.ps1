@@ -119,6 +119,13 @@ function Test-Python([string]$Command, [string[]]$PrefixArgs) {
 }
 
 function Select-Python {
+  if ($env:PYTHON_BIN) {
+    $configured = Get-Command $env:PYTHON_BIN -ErrorAction SilentlyContinue
+    if (-not $configured -or -not (Test-Python -Command $configured.Source -PrefixArgs @())) {
+      throw "PYTHON_BIN does not identify a working Python 3.12+ interpreter: $env:PYTHON_BIN"
+    }
+    return @{ Command = $configured.Source; PrefixArgs = @(); Label = $configured.Source }
+  }
   if (Get-Command py -ErrorAction SilentlyContinue) {
     foreach ($selector in @("-3.13", "-3.14", "-3.12")) {
       if (Test-Python -Command "py" -PrefixArgs @($selector)) {

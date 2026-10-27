@@ -27,6 +27,7 @@ ROOT_FILES = (
     "ship-simulator-v2.spec",
 )
 SOURCE_DIRS = (
+    ".github",
     "LICENSES",
     "assets",
     "docs",

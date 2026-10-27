@@ -69,7 +69,9 @@ requirements; application users do not need curl, pip or Python venv tooling.
 
 The 2.3.1 Linux packages were built on the author-confirmed Ubuntu 26.04.1 LTS
 amd64 computer. That identifies the build/test host, not older-GLIBC compatibility.
-No separate 22.04 binary is planned. Debian prerelease versions preserve a
+The manual GitHub build workflow also includes a separate, initially experimental
+22.04 compatibility build. This does not replace the published 2.3.1 downloads.
+Debian prerelease versions preserve a
 literal `~` separator across Bash versions; do not work around failed tests.
 
 ### Ubuntu 22.04 self-build
@@ -95,6 +97,33 @@ distribution's default is too old; review the package/repository prompts.
 A 22.04 amd64 build can serve newer Ubuntu machines when tested there as well;
 two separate Ubuntu builds are not automatically required. CPU architectures
 still need separate packages. Validate every intended target system locally.
+
+## GitHub Actions test builds
+
+Open **Actions > Unsigned native builds > Run workflow** on GitHub. The selected
+branch is built on Windows x64, Ubuntu 26.04 amd64, Ubuntu 22.04 amd64 and macOS
+Apple Silicon. The workflow uses Python 3.13.15 and the existing full release
+gates. Ubuntu 22.04 must additionally pass the GLIBC 2.35 ABI check. A successful
+cloud build is not a hardware or desktop-compatibility certification.
+
+The jobs use read-only repository permissions and require no provider API keys
+or signing certificates. GitHub supplies its short-lived token for the public
+AppImage-tool download; no personal token needs to be added. Actions are pinned
+to commit IDs and the downloaded AppImage tool is verified by SHA-256. Windows
+uses the runner's Inno Setup 6 compiler and records its version in the log.
+
+Download `unsigned-test-<target>-...` from the completed workflow run. These
+artifacts contain the normal platform packages and SHA-256 manifests, and expire
+after seven days. Diagnostic artifacts are uploaded even after a failed build,
+include an allowlisted provenance report, and expire after fourteen days. Build
+logs remain available in the workflow view subject to repository retention.
+
+The workflow does not publish releases, move release tags, replace existing
+downloads, or install the generated application on a user's computer. Test a
+downloaded package on each intended desktop before manually publishing it.
+macOS bundles retain ad-hoc signatures; none of these builds has a verified
+publisher signature. GitHub-hosted builds do not prevent antivirus false
+positives or Smart App Control/Gatekeeper trust warnings.
 
 ## Gates and signatures
 
