@@ -90,6 +90,8 @@ def resource_check() -> None:
         ROOT / "ui" / "web" / "forward_view" / "google_maps_3d.html",
         ROOT / "ui" / "web" / "forward_view" / "google_maps_3d.css",
         ROOT / "ui" / "web" / "forward_view" / "google_maps_3d.js",
+        ROOT / "ui" / "web" / "forward_view" / "hud_beta.css",
+        ROOT / "ui" / "web" / "forward_view" / "hud_beta.js",
         ROOT / "routes" / "default_route.rtz",
         SRC / "maritime_simulator" / "resources" / "factory_vessel_profiles.json",
         ROOT / "tests" / "fixtures" / "v1_track_golden_master.json",

@@ -64,6 +64,8 @@ REQUIRED_RESOURCES = (
     "ui/web/forward_view/google_maps_3d.html",
     "ui/web/forward_view/google_maps_3d.css",
     "ui/web/forward_view/google_maps_3d.js",
+    "ui/web/forward_view/hud_beta.css",
+    "ui/web/forward_view/hud_beta.js",
     "routes/default_route.rtz",
     "scenarios/test_scenario.json",
     "maritime_simulator/resources/factory_vessel_profiles.json",

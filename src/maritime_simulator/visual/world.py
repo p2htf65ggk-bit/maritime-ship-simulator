@@ -199,6 +199,7 @@ class VisualWorldManager:
                 "stw": snapshot.stw_kn,
                 "rot": snapshot.rate_of_turn_deg_min,
                 "depth_m": snapshot.depth_m,
+                "max_speed_kn": float(getattr(vessel_profile, "max_speed_kn", 30.0)),
                 "lat": snapshot.latitude_deg,
                 "lon": snapshot.longitude_deg,
             },
@@ -209,6 +210,10 @@ class VisualWorldManager:
                 "cloud_cover_percent": settings.cloud_cover_percent,
                 "wind_from_deg": snapshot.true_wind_from_deg,
                 "wind_speed_kn": snapshot.true_wind_speed_kn,
+                "apparent_wind_from_bow_deg": snapshot.relative_wind_from_bow_deg,
+                "apparent_wind_speed_kn": snapshot.relative_wind_speed_kn,
+                "current_from_deg": snapshot.current_from_deg,
+                "current_speed_kn": snapshot.current_speed_kn,
             },
             "camera": {
                 "height_m": settings.camera_height_m,

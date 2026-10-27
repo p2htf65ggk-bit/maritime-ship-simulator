@@ -5,9 +5,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>Maritime Ship Simulator V2.1 - Google 3D Maps</title>
-  <link rel="stylesheet" href="forward_view.css">
   <link rel="stylesheet" href="cesium_simple_view.css">
   <link rel="stylesheet" href="google_maps_3d.css">
+  <link rel="stylesheet" href="hud_beta.css">
 </head>
 <body>
   <div id="skyBackdrop" aria-hidden="true"></div>
@@ -21,7 +21,7 @@
     <span class="bar-separator"></span>
     <button id="hudButton" class="active" title="Show or hide navigation data">HUD</button>
     <button id="namesButton" class="active" title="Show or hide AIS names on the map">NAMES</button>
-    <button id="controlsButton" class="active" title="Show or hide camera sliders">CAM</button>
+    <button id="controlsButton" aria-pressed="false" aria-controls="cameraControls" title="Show or hide camera sliders">CAM</button>
   </nav>
 
   <section id="hud" class="glass-panel">
@@ -45,12 +45,12 @@
     <div id="targetRows"></div>
   </section>
 
-  <section id="cameraControls" class="glass-panel" aria-label="Camera sliders">
+  <section id="cameraControls" class="glass-panel hidden" aria-label="Camera sliders">
     <label><span>BEARING</span><output id="bearingValue">+000°</output>
       <input id="bearingControl" type="range" min="-180" max="180" step="1" value="0">
     </label>
-    <label><span>ELEVATION</span><output id="elevationValue">12°</output>
-      <input id="elevationControl" type="range" min="5" max="88" step="1" value="12">
+    <label><span>ELEVATION</span><output id="elevationValue">9°</output>
+      <input id="elevationControl" type="range" min="5" max="88" step="1" value="9">
     </label>
     <label><span>RANGE</span><output id="rangeValue">--</output>
       <input id="rangeControl" type="range" min="0" max="1000" step="1" value="350">
@@ -68,6 +68,7 @@
   <div id="fatalError" class="hidden"></div>
 
   <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+  <script src="hud_beta.js"></script>
   <script src="google_maps_3d.js"></script>
 </body>
 </html>

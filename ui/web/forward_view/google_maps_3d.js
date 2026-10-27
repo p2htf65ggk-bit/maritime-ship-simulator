@@ -38,8 +38,8 @@ let worldState = null;
 let configured = false;
 let viewMode = "forward";
 let viewBearingDeg = 0;
-let viewElevationDeg = 12;
-let viewRangeM = 560;
+let viewElevationDeg = 9;
+let viewRangeM = cameraPreset("forward").range;
 let panRightM = 0;
 let panForwardM = 0;
 let cameraUpdateInternal = false;
@@ -47,26 +47,32 @@ let cameraUpdateTimer = null;
 let cameraEventsSuppressedUntil = 0;
 let hudVisible = true;
 let namesVisible = true;
-let controlsVisible = true;
+let controlsVisible = false;
+let navigationStateRestored = false;
 window.exportNavigationState = () => ({
   viewMode, viewBearingDeg, viewElevationDeg, viewRangeM,
   panRightM, panForwardM, hudVisible, namesVisible, controlsVisible,
+  hudBeta: window.navigationHUDBeta?.exportState(),
 });
 window.restoreNavigationState = state => {
   if (!state || typeof state !== "object") return;
+  navigationStateRestored = true;
   viewMode = ["forward", "orbit", "top"].includes(state.viewMode) ? state.viewMode : "forward";
-  viewBearingDeg = signedBearing(safeNumber(state.viewBearingDeg));
-  viewElevationDeg = clamp(safeNumber(state.viewElevationDeg, 12), 5, 90);
-  viewRangeM = clamp(safeNumber(state.viewRangeM, 560), MIN_CAMERA_RANGE_M, MAX_CAMERA_RANGE_M);
+  const preset = cameraPreset(viewMode);
+  viewBearingDeg = signedBearing(safeNumber(state.viewBearingDeg, preset.bearing));
+  viewElevationDeg = clamp(safeNumber(state.viewElevationDeg, preset.elevation), 5, 90);
+  viewRangeM = clamp(safeNumber(state.viewRangeM, preset.range), MIN_CAMERA_RANGE_M, MAX_CAMERA_RANGE_M);
   panRightM = safeNumber(state.panRightM);
   panForwardM = safeNumber(state.panForwardM);
   hudVisible = state.hudVisible !== false;
   namesVisible = state.namesVisible !== false;
-  controlsVisible = state.controlsVisible !== false;
+  controlsVisible = state.controlsVisible === true;
+  window.navigationHUDBeta?.restoreState(state.hudBeta);
   for (const id of ["hud", "targets", "compass"]) {
     document.getElementById(id)?.classList.toggle("hidden", !hudVisible);
   }
   document.getElementById("cameraControls")?.classList.toggle("hidden", !controlsVisible);
+  document.getElementById("controlsButton")?.setAttribute("aria-pressed", String(controlsVisible));
   for (const [id, active] of [["hudButton", hudVisible], ["namesButton", namesVisible], ["controlsButton", controlsVisible]]) {
     document.getElementById(id)?.classList.toggle("active", active);
   }
@@ -646,6 +652,7 @@ function overlayScreenPositionAtAltitude(data, altitude) {
 }
 
 function overlayScreenPosition(data) {
+  if (!data) return null;
   return overlayScreenPositionAtAltitude(
     data,
     WATERLINE_HEIGHT_M + vesselVisualHeightM(data) * 0.5,
@@ -724,6 +731,10 @@ function updateCompass(heading) {
 }
 
 function updateHUD() {
+  if (window.navigationHUDBeta) {
+    window.navigationHUDBeta.update(worldState);
+    return;
+  }
   const own = worldState?.own_ship;
   if (!own) return;
   setText("hdgValue", `${normalizeHeading(own.heading).toFixed(1).padStart(5, "0")}°`);
@@ -840,23 +851,21 @@ function cameraEventsSuppressed() {
     || inputPointers.size > 0;
 }
 
+function cameraPreset(mode) {
+  const forwardRange = Math.max(420, safeNumber(worldState?.own_ship?.length, 90) * 4.4) * 0.8;
+  if (mode === "orbit") return { bearing: -40, elevation: 15, range: forwardRange * 1.4 };
+  if (mode === "top") return { bearing: 0, elevation: 88, range: 2500 };
+  return { bearing: 0, elevation: 9, range: forwardRange };
+}
+
 function applyViewPreset(mode) {
   viewMode = mode;
   panRightM = 0;
   panForwardM = 0;
-  if (mode === "forward") {
-    viewBearingDeg = 0;
-    viewElevationDeg = 12;
-    viewRangeM = Math.max(420, safeNumber(worldState?.own_ship?.length, 90) * 4.4);
-  } else if (mode === "orbit") {
-    viewBearingDeg = -35;
-    viewElevationDeg = 42;
-    viewRangeM = 1200;
-  } else {
-    viewBearingDeg = 0;
-    viewElevationDeg = 88;
-    viewRangeM = 2500;
-  }
+  const preset = cameraPreset(mode);
+  viewBearingDeg = preset.bearing;
+  viewElevationDeg = preset.elevation;
+  viewRangeM = preset.range;
   updateModeButtons();
   syncCameraControls();
   updateCamera(true);
@@ -1126,6 +1135,7 @@ function bindControls() {
     document.getElementById("hud").classList.toggle("hidden", !hudVisible);
     document.getElementById("targets").classList.toggle("hidden", !hudVisible);
     document.getElementById("compass").classList.toggle("hidden", !hudVisible);
+    if (hudVisible) window.navigationHUDBeta?.refresh();
   });
   document.getElementById("namesButton").addEventListener("click", (event) => {
     namesVisible = !namesVisible;
@@ -1135,6 +1145,7 @@ function bindControls() {
   document.getElementById("controlsButton").addEventListener("click", (event) => {
     controlsVisible = !controlsVisible;
     event.currentTarget.classList.toggle("active", controlsVisible);
+    event.currentTarget.setAttribute("aria-pressed", String(controlsVisible));
     document.getElementById("cameraControls").classList.toggle("hidden", !controlsVisible);
   });
   document.getElementById("apiSettingsButton").addEventListener("click", () => {
@@ -1146,9 +1157,10 @@ function bindControls() {
     control.addEventListener("dblclick", (event) => {
       event.preventDefault();
       event.stopPropagation();
+      const preset = cameraPreset(viewMode);
       control.value = id === "rangeControl"
-        ? cameraRangeToSlider(Math.max(420, safeNumber(worldState?.own_ship?.length, 90) * 4.4))
-        : id === "elevationControl" ? 12 : 0;
+        ? cameraRangeToSlider(preset.range)
+        : id === "elevationControl" ? preset.elevation : preset.bearing;
       updateFromControls();
     });
   }
@@ -1244,6 +1256,10 @@ async function initializeGoogleMaps(configuration) {
 
 function applyWorldState() {
   if (!map3d || !worldState) return;
+  if (!ownVisual && !navigationStateRestored && viewMode === "forward") {
+    viewRangeM = cameraPreset("forward").range;
+    syncCameraControls();
+  }
   updateOwnShip();
   updateAISTargets();
   updateHUD();

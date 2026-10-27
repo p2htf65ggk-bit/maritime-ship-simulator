@@ -35,6 +35,15 @@ from ui.webengine_profile import configure_webengine_profile
 from ui.web_input import NativePinchZoom, mouse_wheel_delta, scroll_kind, trackpad_pan_pixels
 from ui.windows_scroll import WindowsScrollSource
 
+
+def _renderer_page_url(page_name: str) -> QUrl:
+    url = QUrl.fromLocalFile(str(bundled_resource_path("ui", "web", "forward_view", page_name)))
+    if os.environ.get("MARITIME_SIMULATOR_3D_HUD_BETA", "1") == "1":
+        query = QUrlQuery()
+        query.addQueryItem("hud", "beta")
+        url.setQuery(query)
+    return url
+
 from .dialogs import OpaqueDialog
 
 
@@ -616,9 +625,7 @@ class ForwardViewDialog(OpaqueDialog):
             else "cesium.html"
         )
         self._renderer_page_pending = True
-        self.view.setUrl(QUrl.fromLocalFile(str(
-            bundled_resource_path("ui", "web", "forward_view", page_name)
-        )))
+        self.view.setUrl(_renderer_page_url(page_name))
 
     def showEvent(self, event) -> None:
         super().showEvent(event)

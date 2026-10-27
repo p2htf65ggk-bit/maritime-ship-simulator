@@ -103,6 +103,7 @@ async function verifyNativePinchScale(page) {
 }
 
 async function verifyMouseChordAndSliderReset(page, selector) {
+  if (!await page.locator("#cameraControls").isVisible()) await page.locator("#controlsButton").click();
   const surface = page.locator(selector);
   const box = await surface.boundingBox();
   const results = [];
@@ -138,7 +139,8 @@ async function verifyMouseChordAndSliderReset(page, selector) {
     await page.locator(`#${id}`).dblclick();
   }
   const reset = await page.evaluate(() => window.getVisualDiagnostics());
-  if (reset.viewBearingDeg !== 0 || reset.viewElevationDeg !== 12) throw new Error("camera slider double-click did not reset bearing/elevation");
+  const expectedPreset = { forward: [0, 9], orbit: [-40, 15], top: [0, 88] }[reset.viewMode];
+  if (reset.viewBearingDeg !== expectedPreset[0] || reset.viewElevationDeg !== expectedPreset[1]) throw new Error("camera slider double-click did not reset to the active preset");
   return { chords: results, smallWheel, reset };
 }
 
@@ -1810,7 +1812,7 @@ async function verifySimpleCesiumOverlay(browser, server) {
     if (Math.abs(initial.ownShipRenderedLengthM - 135) > 0.01) failures.push("own-ship length is not preserved");
     if (Math.abs(initial.ownShipRenderedBeamM - 22) > 0.01) failures.push("own-ship beam is not preserved");
     if (top.viewMode !== "top" || top.viewElevationDeg !== 88) failures.push("TOP preset is incorrect");
-    if (orbit.viewMode !== "orbit" || orbit.viewElevationDeg !== 42) failures.push("3D preset is incorrect");
+    if (orbit.viewMode !== "orbit" || orbit.viewElevationDeg !== 15 || orbit.viewBearingDeg !== -40) failures.push("3D preset is incorrect");
     if (dragged.viewBearingDeg <= orbit.viewBearingDeg) failures.push("mouse bearing direction is not inverted");
     if (dragged.viewElevationDeg >= orbit.viewElevationDeg) failures.push("mouse elevation direction is not inverted");
     if (!dragged.cullRequestsWhileMoving || dragged.foveatedTimeDelay <= 0) {
@@ -2320,7 +2322,7 @@ async function verifyGoogleMaps3DOverlay(browser, server) {
     }
     if (top.viewMode !== "top") failures.push("TOP preset failed");
     if (reset.viewMode !== "forward") failures.push("FWD preset failed");
-    if (Math.abs(dragged.viewBearingDeg) < 20 || Math.abs(dragged.viewElevationDeg - 12) < 5) {
+    if (Math.abs(dragged.viewBearingDeg) < 20 || Math.abs(dragged.viewElevationDeg - 9) < 5) {
       failures.push("continuous left-drag camera rotation failed");
     }
     if (dragged.activePointers !== 0) failures.push("pointer capture was not released after drag");
