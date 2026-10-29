@@ -2,6 +2,12 @@
 
 ## 2.3.1
 
+- Refreshed on 29 October 2026 after author testing of all four native builds.
+  New translucent 3D instrument HUD, compact heading tape, SOG/STW selection,
+  red reverse speed, true/apparent wind, current SET/drift and rolling DBK history.
+  Bottom-docked actions, CAM off by default and updated FWD/3D presets.
+- Fresh live-Google screenshots and an updated illustrated guide, including
+  Windows SmartScreen and macOS first-start instructions. Packages remain unsigned.
 - Chart-based depth from installed S57 cells, then GEBCO online, then the held
   manual value. Vessel Draft is subtracted once with the transducer at keel level.
 - Independent Manual/Online - Open-Meteo wind, surface-current and atmospheric

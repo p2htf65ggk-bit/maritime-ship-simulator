@@ -1,5 +1,9 @@
 # Release handoff 2.3.1
 
+**Historical 26/27 October handoff.** The 29 October HUD refresh supersedes the
+package/source mapping below. Use [current provenance](NATIVE_BUILD_PROVENANCE.md)
+and [validation](VALIDATION.md) for the published refresh.
+
 The author approved 2.3.1 as the latest unsigned production release on
 26 October 2026. Source, native downloads, English User Guide and SHA-256
 manifests are versioned together. Earlier releases remain accessible unchanged.

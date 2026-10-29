@@ -1,7 +1,8 @@
 # Native builds - 2.3.1
 
-The 29 October HUD refresh is being built for final acceptance using the four
-unsigned Actions targets. These run artifacts are not published release assets.
+The 29 October HUD refresh uses four unsigned Actions targets. The author has
+tested and approved the selected builds; published packages and exact source
+revisions are identified in [native provenance](NATIVE_BUILD_PROVENANCE.md).
 The final application uses normal V2 operator settings rather than the beta's
 isolated profile. Review startup/output settings and back up configuration.
 
@@ -72,12 +73,10 @@ network/DNS problem. Noninteractive builds fail early with manual instructions
 unless package installation was explicitly approved. These are build-time
 requirements; application users do not need curl, pip or Python venv tooling.
 
-The 2.3.1 Linux packages were built on the author-confirmed Ubuntu 26.04.1 LTS
-amd64 computer. That identifies the build/test host, not older-GLIBC compatibility.
-The manual GitHub build workflow also produced the additional 22.04 compatibility
-downloads published on 27 October. They do not replace the original packages.
-Their full automated checks ran on 22.04; the author desktop-tested them on
-Ubuntu 26.04, not a 22.04 desktop. See [provenance](NATIVE_BUILD_PROVENANCE.md).
+The refreshed 2.3.1 Linux packages were built on Ubuntu 26.04 and 22.04 GitHub
+runners and retain baseline labels in their filenames. The author uses Ubuntu
+26.04.1 for desktop testing; no 22.04 desktop acceptance is claimed. These
+packages replace the earlier 2.3.1 downloads. See [provenance](NATIVE_BUILD_PROVENANCE.md).
 Debian prerelease versions preserve a
 literal `~` separator across Bash versions; do not work around failed tests.
 

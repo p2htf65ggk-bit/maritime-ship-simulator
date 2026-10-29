@@ -35,6 +35,10 @@ def test_in_app_guide_matches_final_hud_and_api_location():
             "ASTERN is red and enlarged", "relative to the bow", "SET in degrees true",
             "CAM starts off", "9 degrees elevation", "bearing -40 degrees",
             "lower-left corner", "Error 4551", "portable ZIP does not avoid",
+            "Windows protected your PC", "More info", "Run anyway",
+            "Weitere Informationen", "Trotzdem ausf\u00fchren", "If Run anyway is still absent",
+            "macOS first start", "System Settings > Privacy & Security", "Open Anyway",
+            "Dennoch \u00f6ffnen", "after the initial blocked launch", "Never disable Gatekeeper globally",
         ):
             assert marker in text
         assert "HUD list visible" not in text

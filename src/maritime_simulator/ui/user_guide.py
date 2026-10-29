@@ -443,6 +443,40 @@ class UserGuideDialog(OpaqueDialog):
             starting and provide Retry/Close guidance instead of an unexplained loader error. Use the Ubuntu
             <code>.deb</code> installer for a registered application-menu entry and icon; AppImage and tar.gz are
             portable alternatives.</p>
+            <h3>Windows installer: unrecognized-app warning</h3>
+            <p>The current packages are unsigned. Before opening the setup EXE, obtain it from the
+            project's official release or an author-provided test artifact, verify its SHA-256 against
+            that package's manifest and decide whether you trust the download. A matching hash alone
+            is not a malware verdict.</p>
+            <ol>
+            <li>If the blue <b>Windows protected your PC</b> SmartScreen window appears, click
+            <b>More info</b> (German Windows: <b>Weitere Informationen</b>).</li>
+            <li>Check the displayed application filename. Only for the expected, trusted download,
+            click <b>Run anyway</b> (German Windows: <b>Trotzdem ausführen</b>) to start setup.</li>
+            </ol>
+            <p>The Run anyway button normally appears only after More info is expanded. An unknown
+            publisher is expected for these unsigned packages, but is not evidence that a file is safe.
+            If Run anyway is still absent or Windows reports a policy block, stop and report the exact
+            message or consult your administrator. Do not change global protection settings to force
+            installation. These steps apply only to the unrecognized-app SmartScreen prompt, not a
+            Defender malware detection or a Smart App Control block such as error 4551.</p>
+            <h3>macOS first start: allow the application</h3>
+            <p>These packages have no Apple Developer ID signature or notarization. Verify the source
+            and package hash before deciding whether to trust the application.</p>
+            <ol>
+            <li>Copy the app from the DMG to Applications, or fully extract the application ZIP.</li>
+            <li>Try opening the app once. If macOS blocks it because the developer cannot be verified,
+            close the warning.</li>
+            <li>Open <b>System Settings &gt; Privacy &amp; Security</b> (German macOS:
+            <b>Systemeinstellungen &gt; Datenschutz &amp; Sicherheit</b>) and scroll to Security.
+            For this application, choose <b>Open Anyway</b> (<b>Dennoch öffnen</b>);
+            some versions show an <b>Open</b> action first.</li>
+            <li>Confirm the app name and authenticate when macOS asks, then open the app again if needed.</li>
+            </ol>
+            <p>The app-specific approval normally becomes available after the initial blocked launch;
+            if it has expired, try opening the app again first. Do not use these steps for a malware
+            or damaged-app alert; stop and report that message. Never disable Gatekeeper globally.
+            See <a href="https://support.apple.com/en-gb/guide/mac-help/mh40617/mac">Apple's guidance</a>.</p>
             <p><b>Unsigned application security:</b> SmartScreen's unrecognized-app warning, the User Account
             Control publisher prompt and a Defender malware detection are different checks. Windows
             <b>Smart App Control</b> can block the installer, its temporary executable or the installed app

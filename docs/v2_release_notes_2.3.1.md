@@ -1,9 +1,10 @@
 # Maritime Ship Simulator V2 2.3.1
 
-## Final-Validation Rebuild, 29 October
+## HUD Refresh, 29 October
 
-This branch prepares a refreshed 2.3.1 for the author's final test. It has not
-replaced the existing published files or tag. See the
+The author tested and approved all four refreshed 2.3.1 native builds for
+publication on 29 October 2026. These replace the earlier 2.3.1 downloads.
+Use the refreshed SHA256SUMS; the version string alone cannot identify the build. See the
 [rebuild record](v2_3d_hud_final_validation_2026-10-29.md).
 
 - New default 3D HUD: compact tape, Speed/Depth and true/apparent Wind/Current.
@@ -18,8 +19,13 @@ replaced the existing published files or tag. See the
   No credentials are included. Windows packages remain unsigned; Smart App
   Control compatibility is not claimed and its policy is not bypassed.
 
-The original published-release record below is historical context, not native
-acceptance of this refreshed source. Publication awaits the author's approval.
+The updated English Word/PDF guide contains fresh real-Google HUD screenshots
+and precise Windows/macOS first-start instructions. These final security-text
+expansions postdate the tested binaries; their embedded guide may be shorter.
+No new untested application package was substituted for an approved build.
+
+The original feature record below also applies to the refresh. Historical
+build details are superseded by the current native-provenance record.
 
 Unsigned production release, 26 October 2026. Windows 11 x64, Ubuntu 26.04.1 LTS
 amd64 and macOS Apple-silicon packages are provided. See the validation and
@@ -87,9 +93,9 @@ native-provenance records for completed checks and qualification limits.
 Existing settings remain supported. Back up configuration before upgrading. Packages
 are unsigned; Gatekeeper or SmartScreen can require explicit approval. macOS packages
 target Apple silicon; Windows x64 and Ubuntu amd64 must be built and checked natively.
-Additional Ubuntu 22.04 compatibility downloads were added on 27 October 2026,
-without replacing the original packages or moving the release tag. They were
-built and automatically checked on a 22.04 runner, including GLIBC 2.35, then
+The refreshed downloads include Ubuntu 26.04 and Ubuntu 22.04 packages with
+explicit baseline labels. The 22.04 packages were built and automatically
+checked on a 22.04 runner, including GLIBC 2.35, then
 desktop-tested by the author on Ubuntu 26.04. No manual 22.04 desktop test is
 claimed. The source-build wrapper remains available. See the
 [exact build/source record](NATIVE_BUILD_PROVENANCE.md).

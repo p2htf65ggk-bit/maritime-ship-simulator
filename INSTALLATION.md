@@ -1,9 +1,7 @@
 # Installation
 
-This branch is the 29 October final-validation rebuild of 2.3.1, not the
-previously published package snapshot. Its unsigned packages are available only
-as artifacts of the selected Actions run until the author approves publication.
-They use the normal V2 settings folder, not the HUD beta's separate profile;
+The refreshed 2.3.1 packages were tested and approved by the author on
+29 October 2026. They use the normal V2 settings folder, not the HUD beta's separate profile;
 back up your current configuration and review output endpoints before starting.
 
 Use the version-specific assets on the project's GitHub Releases page. Do not
@@ -16,7 +14,7 @@ the developer build scripts.
 | System | Installer | Portable alternative |
 | --- | --- | --- |
 | Windows x64 (tested on Windows 11) | Setup EXE | ZIP, fully extracted before starting |
-| Ubuntu 26.04.1 LTS amd64 | DEB | AppImage or tar.gz |
+| Ubuntu 26.04 LTS amd64 | DEB labelled `ubuntu-26.04-amd64` | AppImage or tar.gz with the same label |
 | Ubuntu 22.04 compatibility, amd64 | DEB labelled `ubuntu-22.04-amd64` | AppImage or tar.gz with the same label |
 | macOS Apple silicon | DMG | Application ZIP |
 
@@ -27,9 +25,9 @@ Additional 22.04 compatibility packages were built and automatically checked on
 an Ubuntu 22.04 GitHub runner, including the GLIBC 2.35 gate. The author tested
 that build on Ubuntu 26.04. No manual 22.04 desktop test is claimed.
 The [build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the source revision
-for each platform. The original Ubuntu downloads target the author's 26.04.1
-build/test host; only the separately labelled compatibility downloads use the
-22.04 build baseline. This is not a promise of compatibility with every desktop.
+for each platform. The current packages are built on 26.04 and 22.04 runners;
+the author uses Ubuntu 26.04.1 for desktop testing. This is not a promise of
+compatibility with every desktop.
 Windows versions other than Windows 11, Intel Macs and older macOS versions
 have not been qualified for these packages. A source build on another platform
 is separate from the compatibility of the supplied binaries.
@@ -46,16 +44,36 @@ Get-FileHash .\Maritime-Ship-Simulator-V2-2.3.1-windows-setup.exe -Algorithm SHA
 
 ```bash
 shasum -a 256 Maritime-Ship-Simulator-V2-2.3.1-macos.dmg
-sha256sum Maritime-Ship-Simulator-V2-2.3.1-ubuntu-installer.deb
+sha256sum Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-installer.deb
 ```
 
 ## Windows
 
 Close existing instances, run the setup EXE or extract the portable ZIP to a
 writable directory, then start the application and check About. The packages
-are unsigned. Where policy permits, SmartScreen can offer More info > Run anyway
-for a verified, trusted download. Do not disable Windows security globally.
+are unsigned. Download only from the official release or an author-provided
+Actions test artifact, verify SHA-256 against that exact package's manifest and
+proceed only if you trust the source. A matching hash is not a malware verdict.
+
+### Blue "Windows protected your PC" window
+
+For the expected, trusted installer download:
+
+1. Click **More info** (German Windows: **Weitere Informationen**).
+2. Check the application filename, then click **Run anyway** (German Windows:
+   **Trotzdem ausführen**). This button normally appears only after expanding
+   More info; the initial window shows only **Don't run**.
+3. Continue with the setup wizard. An **Unknown publisher** indication is
+   expected for the unsigned installer, but does not prove that a file is safe.
+
+If **Run anyway** is still unavailable after expanding the details, or a policy
+error appears, stop and record the exact message or consult your administrator.
+These steps apply to SmartScreen's unrecognized-app warning only, not a Defender
+malware alert or a Smart App Control block. Do not disable Windows security globally.
 Allow only the required traffic on the intended trusted network profile.
+
+[Microsoft's SmartScreen guidance for unsigned apps](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+explains why a new unsigned download can show this warning.
 
 SmartScreen's unknown-publisher warning and a Defender threat detection are
 different. If Defender quarantines a file, record its detection name and check
@@ -77,14 +95,14 @@ create blanket exclusions as an installation requirement.
 
 For Ubuntu 22.04, use a filename containing **`ubuntu-22.04-amd64`**. These
 compatibility packages can also be used on newer amd64 Ubuntu systems; the
-author tested them on 26.04. The original files labelled only `ubuntu` were
-built on 26.04.1 and are not a 22.04 option. All three compatibility formats
+author tested them on 26.04. The `ubuntu-26.04-amd64` files require the newer
+baseline and are not a 22.04 option. All three compatibility formats
 contain the same application, and none removes the need for system libraries.
 
 Install the DEB using APT so its declared dependencies can be resolved:
 
 ```bash
-sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-installer.deb
+sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-installer.deb
 ```
 
 For the 22.04 compatibility DEB instead:
@@ -123,13 +141,25 @@ packages were built from the exact revision linked in the
 
 ## macOS
 
-Copy the application from the DMG into Applications, or extract the application
-ZIP completely. The original packages have no Developer ID signature/notarization.
-If macOS blocks the verified application, attempt to open it and then use System
-Settings > Privacy & Security > Open Anyway where offered. Confirm only this
-application; never disable Gatekeeper globally. See
-[Apple's instructions](https://support.apple.com/en-us/102445). Grant local-network
-access when needed for configured network inputs/outputs.
+The packages have no Apple Developer ID signature or notarization. Verify the
+download source and the package hash before deciding whether to trust the app.
+
+1. Copy the application from the DMG into **Applications**, or extract the
+   application ZIP completely.
+2. Try opening the app once. If macOS blocks it because the developer cannot be
+   verified, close the warning.
+3. Open **System Settings > Privacy & Security** (German macOS:
+   **Systemeinstellungen > Datenschutz & Sicherheit**) and scroll to **Security**.
+4. For the simulator, choose **Open Anyway** (**Dennoch öffnen**). Some macOS
+   versions first show an **Open** action. Confirm the app name and authenticate
+   when asked, then launch the application again if necessary.
+
+The app-specific approval normally appears only after the first blocked launch.
+If it has expired, try opening the app again before returning to these settings.
+Do not apply these steps to a malware or damaged-app warning; stop and report
+that exact message instead. Never disable Gatekeeper globally. See
+[Apple's instructions](https://support.apple.com/en-gb/guide/mac-help/mh40617/mac).
+Grant local-network access when needed for configured network inputs/outputs.
 
 ## Existing settings and first start
 

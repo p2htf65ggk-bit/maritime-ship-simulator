@@ -31,6 +31,13 @@ provider, and supply your own appropriately enabled/restricted key. Provider
 terms, billing and quotas are separate from this free application. Do not share
 exported configurations publicly if they contain credentials.
 
+The 3D HUD shows Speed/Depth on the left, Wind/Current on the right and the
+heading tape above. Select SOG/STW or true/apparent wind directly on the widgets.
+Current SET is a toward direction; Environment uses Current From. Depth is
+below keel. **CAM** starts off and reveals the three camera sliders when needed.
+**FWD**, **3D**, **TOP**, **HUD** and **NAMES** sit along the bottom. The latest
+[3D screenshots](../README.md#google-3d-harbour-view) show these controls.
+
 ## Choose environmental sources
 
 Under **Environment**, choose **Manual** to set values yourself. **Depth >

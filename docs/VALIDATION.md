@@ -1,8 +1,44 @@
 # Release validation 2.3.1
 
-**Historical record:** the new 29 October final-validation rebuild is tracked
-[separately](v2_3d_hud_final_validation_2026-10-29.md). Its native packages still
-require the author's final test; the checks below do not qualify them.
+## Current Refresh 29 October 2026
+
+The author confirmed successful testing of all four final builds and approved
+publication. Automated runner checks and desktop acceptance are distinguished below.
+
+| Target | Selected run | V2 test result |
+| --- | --- | --- |
+| Windows x64 | `40854925666` | 1,150 passed, 28 skipped, no failures |
+| Ubuntu 26.04 amd64 | `40854925666` | 1,178 passed, no failures |
+| Ubuntu 22.04 amd64 | `40854925666` | 1,178 passed, no failures |
+| macOS arm64 | `40857875675` | 1,179 passed, no failures |
+
+The selected jobs passed the existing native gates, including protected Track
+comparisons, performance/retained-memory checks, packaged startup, dependency
+notices and credentials. Ubuntu 22.04 passed the GLIBC 2.35 ABI gate. The macOS
+retry changed only a timer test and its record, not application or packaging code.
+The failed first macOS job does not invalidate the other successful jobs.
+
+Before native dispatch the final branch passed 1,175 tests locally, with three
+PowerShell execution tests skipped. A browser fixture passed six viewport sizes
+and 72 SOG/STW sign/state cases. New Google 3D/FWD screenshots use real provider
+scenery, retained attribution and synthetic targets; the map reported a steady
+loaded view before capture. They are not live traffic observations.
+
+The updated Word/PDF guide has new HUD screenshots and first-start instructions.
+Contents, captions, page bounds and rendered pages are checked before upload.
+Selected package bytes are compared with their runner manifests; final release
+checksums and source credentials are audited before publication. The later
+security-text expansion is external; tested binaries remain unchanged.
+
+The author desktop-tested the 22.04 build on Ubuntu 26.04, not a 22.04 desktop.
+Tests are not exhaustive GPU, DPI, peripheral, serial, network-equipment or
+multi-hour/8-GB-with-VM qualification. Packages are unsigned and Smart App Control
+compatibility is not claimed. Stable is the author's distribution choice, not
+certified navigation or complete S52 portrayal. See [current provenance](NATIVE_BUILD_PROVENANCE.md).
+
+## Historical 26 And 27 October Record
+
+The checks below identify the superseded downloads, not the current refresh.
 
 26 October 2026. The author approved this unsigned production release and
 confirmed the same Windows 11 and Ubuntu 26.04.1 LTS build computers used for 2.3.0.

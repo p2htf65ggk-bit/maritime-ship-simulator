@@ -1,9 +1,9 @@
 # Maritime Ship Simulator
 
-> **Final 2.3.1 validation rebuild, 29 October 2026.** The updated HUD is enabled
-> by default. Native builds are for the author's final acceptance test, not a new
-> publication. Existing release downloads and tags have not been replaced.
-> See [validation rebuild notes](docs/v2_3d_hud_final_validation_2026-10-29.md).
+**2.3.1 refreshed on 29 October 2026.** The new 3D instrument HUD is enabled
+by default. All four native builds were tested and approved by the author.
+See the [build and validation record](docs/NATIVE_BUILD_PROVENANCE.md) for exact
+package revisions, checks and qualification limits.
 
 [Download 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1) |
 [User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf) |
@@ -39,7 +39,7 @@ not GitHub's green Code button. End users do not need Python or build tools.
 | Platform | Application packages | Compatibility notes |
 | --- | --- | --- |
 | Windows x64 | Setup EXE or portable ZIP | Author-tested on Windows 11 |
-| Ubuntu 26.04.1 LTS amd64 | DEB, AppImage or portable tar.gz | Built/tested on the named release, not an older-Ubuntu compatibility package |
+| Ubuntu 26.04 LTS amd64 | DEB, AppImage or portable tar.gz, labelled `ubuntu-26.04-amd64` | Built on a 26.04 runner; author-tested on 26.04.1 |
 | Ubuntu 22.04 compatibility, amd64 | DEB, AppImage or portable tar.gz, labelled `ubuntu-22.04-amd64` | Built and automatically checked on 22.04; desktop-tested by the author on Ubuntu 26.04, not on a 22.04 desktop |
 | macOS Apple silicon | DMG or application ZIP | Native arm64; Intel Macs are not qualified |
 
@@ -49,6 +49,12 @@ No Google/AIS keys or personal operator configuration are included.
 
 ### New in 2.3.1
 
+- A compact translucent 3D HUD combines the heading tape with Speed, Depth,
+  true/apparent Wind and Current instruments. AIS hulls, names and vectors stay
+  on the map. Negative speed and ASTERN are red; CAM starts hidden.
+- FWD uses 9 degrees elevation; the 3D preset uses -40 degrees bearing,
+  15 degrees elevation and 1.4 times the FWD range. API and view controls sit
+  along the bottom, clear of the map attribution.
 - Chart-based depth prefers installed S57 cells, then GEBCO online, then the
   last effective manual depth. Vessel Draft is subtracted once; manual depth
   already means depth below keel/transducer. The transducer is at keel level.
@@ -90,7 +96,11 @@ API key. Download/import detailed charts before going offline. See the
 
 ### Google 3D harbour view
 
-![Manhattan harbour in Google 3D with own ship, synthetic AIS and navigation overlays](docs/images/google-3d-harbour.png)
+![Google 3D harbour view with the new heading, speed, depth, wind and current HUD and synthetic AIS](docs/images/google-3d-harbour.png)
+
+### Forward view with navigation instruments
+
+![Forward Google 3D view with the horizon, own ship and compact instrument HUD](docs/images/google-3d-forward.png)
 
 ### Track Control with OpenSeaMap
 
@@ -119,8 +129,8 @@ and online environmental sources.
 Installers and portable packages are attached to
 [release 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1).
 The binary downloads cover Windows x64, macOS Apple silicon and
-**Ubuntu 26.04.1 LTS amd64**. Additional **Ubuntu 22.04 compatibility packages**
-were added on 27 October 2026. They passed the full automated build gates and
+**Ubuntu 26.04 LTS amd64**. The refreshed **Ubuntu 22.04 compatibility packages**
+passed the full automated build gates and
 GLIBC 2.35 check on a 22.04 GitHub runner. The author tested this build on Ubuntu
 26.04; a manual 22.04 desktop test is not claimed. See
 [package selection](INSTALLATION.md#ubuntu) and the
@@ -130,10 +140,11 @@ For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
 [release licensing](docs/RELEASE_LICENSING.md). The
 [native build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the sources
-for each package. All three platforms contain the 2.3.1 application; the final
-source also includes build/test/documentation-only corrections added after
-some native builds. Application code remains equivalent. Native checks are
-described with their limits;
+for each package. Windows and both Ubuntu builds share one source revision;
+the macOS retry adds only a timer-test correction and its validation record.
+The published source also contains later documentation-only changes; the tested
+native packages were not rebuilt just to expand their embedded help text.
+Native checks are described with their limits;
 older private packages are not substitutes for these identified builds.
 
 Maintenance is on a best-effort basis. Issues and pull requests are welcome,

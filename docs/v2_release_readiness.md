@@ -1,8 +1,13 @@
 # Release qualification 2.3.1
 
-**29 October HUD rebuild:** final native acceptance and publication are pending.
-The record below describes the previous published snapshot, not this branch's
-new packages. See [rebuild status](v2_3d_hud_final_validation_2026-10-29.md).
+**29 October HUD refresh:** all four selected builds were author-tested and
+approved for publication. Windows and both Ubuntu builds use `103693e`; macOS
+uses `d5a25d6`, which adds only a timer-test correction and its validation record.
+The publication adds documentation-only updates and fresh 3D screenshots.
+Tested native packages are unchanged. See [current validation](VALIDATION.md)
+and [exact provenance](NATIVE_BUILD_PROVENANCE.md).
+
+The following is the historical qualification summary of the earlier snapshot.
 
 Version 2.3.1 is the author-approved unsigned production release. Windows 11 x64,
 Ubuntu 26.04.1 LTS amd64 and macOS Apple-silicon packages are the identified

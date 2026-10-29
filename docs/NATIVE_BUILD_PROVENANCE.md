@@ -1,9 +1,63 @@
 # Native build provenance 2.3.1
 
-This is the provenance of the previously published downloads. For the new
-29 October HUD rebuild, use the selected Actions run's source SHA, build-info
-report and checksums until [final acceptance](v2_3d_hud_final_validation_2026-10-29.md).
-No tag or previously published file has been replaced by this validation branch.
+## Current Refresh 29 October 2026
+
+The author tested all four selected native builds and approved publication.
+These are the exact runner packages, not locally repacked applications. Compare
+the current SHA256SUMS: the earlier downloads also used version 2.3.1, so the
+version alone is not a build identifier.
+
+| Packages | Build and test baseline | Source commit | Actions run |
+| --- | --- | --- | --- |
+| Windows setup EXE and portable ZIP | Windows x64 runner; author-tested on Windows 11 | `103693e9762563956c46b1322e565219984ead36` | [40854925666 Windows](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666/job/123383480330) |
+| Ubuntu 26.04 amd64 DEB, AppImage and tar.gz | Ubuntu 26.04 runner; author-tested on 26.04.1 | same as Windows | [40854925666 Ubuntu 26.04](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666/job/123383480273) |
+| Ubuntu 22.04 amd64 DEB, AppImage and tar.gz | Ubuntu 22.04 runner, GLIBC 2.35 limit; desktop-tested on 26.04 | same as Windows | [40854925666 Ubuntu 22.04](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666/job/123383480311) |
+| macOS DMG and application ZIP | macOS 15 arm64 runner; Apple silicon | `d5a25d6edd7568418fb71e6fea735fea7f8e6fb8` | [40857875675 macOS](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40857875675/job/123393406425) |
+
+All four build reports identify Python 3.13.15, PyInstaller 6.17.0 and PySide6 /
+Qt 6.11.0. Each package contains its own native dependency inventory; attached
+inventories are extracted from those packages, not copied from another OS.
+NATIVE_BUILD_RECORD.json records the exact runs, artifact IDs and checksums.
+
+The first macOS job failed a source test before packaging: a fixed 200 ms wait
+did not reliably observe a Qt timer. The retry changed only that test and its
+validation record. It waits for the actual signal with a deadline, checks
+150/450 ms intervals and requires exactly one target and no later duplicate.
+Application, renderer and packaging code are identical between the two selected
+build revisions. Successful Windows/Ubuntu packages were retained and all four
+packages were subsequently author-tested.
+
+### Publication Source And Documentation
+
+The publication source adds documentation-only updates after the accepted builds:
+fresh 3D screenshots, expanded first-start instructions and help-text tests.
+The last Windows/macOS security-click-path paragraphs are in the external
+Word/PDF guide and INSTALLATION.md; embedded help in the tested apps may be
+shorter. No untested native rebuild was substituted just to expand that text.
+
+The refreshed tag and developer archives identify the publication revision.
+RELEASE_SNAPSHOT.json records its full commit ID, and SOURCE_SHA256SUMS covers
+archive files. Use the exact build commits above to reproduce native artifacts;
+do not assume the publication tag was their input.
+
+The earlier v2.3.1 tag pointed to `828df491133e6030a9bc0cbf7512af24c4eb72e3`.
+The author explicitly retained version 2.3.1 for this refresh. The earlier source
+is preserved as `v2.3.1-before-hud`; the release notes disclose the replacement.
+The former Ubuntu 22.04 addition used `6ae10a0b616bd80d5d86d4f7bc0a70e88cca1da9`,
+not the refreshed compatibility build. Version 2.3.0 remains separate.
+
+All packages remain unsigned. macOS ad-hoc signatures are not Developer ID
+signing/notarization. SmartScreen/Gatekeeper approval may be required and Smart
+App Control can still block unsigned components with error 4551. No manual
+Ubuntu 22.04 desktop test, universal hardware compatibility or multi-hour GPU
+soak is claimed. Hashes prove integrity, not malware-free software.
+
+No provider credentials, operator profiles, chart databases or equipment-specific
+integration guide are included. See [current validation](VALIDATION.md).
+
+## Historical 26 And 27 October Record
+
+The remaining sections describe the superseded downloads, not the current refresh.
 
 This release contains independently built unsigned applications. Version 2.3.0
 remains available separately; no 2.3.0 application is renamed as 2.3.1.

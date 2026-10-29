@@ -1,8 +1,8 @@
 # Final 2.3.1 Validation Rebuild
 
 Prepared 29 October 2026 at the author's request. Application/package version is
-2.3.1, not a beta or RC. This is a new source revision for final acceptance,
-not approval to replace the existing published 2.3.1 downloads or tag.
+2.3.1, not a beta or RC. The author subsequently confirmed successful testing
+of all four final builds and approved publication on 29 October 2026.
 
 ## What Is Included
 
@@ -31,9 +31,9 @@ this rebuild from older 2.3.1 binaries. The version string alone is not sufficie
 
 The successful HUD-beta run on 27 October is historical evidence, not native
 qualification of these new final packages. The author reports the beta HUD
-working on all four targets. Final native acceptance of this rebuild is pending.
-Historical release records in VALIDATION.md and NATIVE_BUILD_PROVENANCE.md still
-describe previously published downloads unless explicitly marked otherwise.
+working on all four targets. Final native acceptance is now complete. Current
+VALIDATION.md and NATIVE_BUILD_PROVENANCE.md identify the selected refresh builds;
+the earlier release records remain available as historical sections.
 
 The initial final-validation run `40854925666` completed Windows and both Ubuntu
 jobs successfully. Its macOS source gate stopped at a timer-dependent synthetic
@@ -69,4 +69,5 @@ the same as Defender malware detection. The unsigned application and installer
 temporary components may still be blocked by Smart App Control (error 4551).
 No trusted-signing integration or security-policy bypass was added. Passing the
 build gates is not a claim of Smart App Control compatibility or real navigation
-certification. Publication remains on hold until the author explicitly approves it.
+certification. The author has approved publication. The external guide includes
+later security-instruction expansions without changing the tested binaries.

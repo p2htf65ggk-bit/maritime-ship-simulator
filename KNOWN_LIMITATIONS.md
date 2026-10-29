@@ -54,10 +54,16 @@
 
 ## Publication and platform tests
 
-The release designation is not a claim that every device and
-scenario was tested. New Windows/Ubuntu packages
-have been supplied by the author, but static file checks on macOS cannot replace
-native startup, graphics, serial or extended-running checks on those systems.
+The refreshed 2.3.1 packages passed their selected native runner jobs and the
+author confirmed successful testing of all four builds. This is not a claim
+that every device and scenario was tested. Static file checks on macOS cannot
+replace target-specific graphics, serial or extended-running checks.
 Read the actual release's validation results and per-platform source mapping.
 Windows 11, the named Ubuntu release and macOS Apple-silicon packages are the
 identified targets, not a claim of compatibility with every older OS release.
+
+Packages remain unsigned. SmartScreen or Gatekeeper may require app-specific
+approval. Smart App Control can block an unsigned executable or installer
+component with error 4551 even without a Defender malware detection. This
+refresh does not solve that trust-policy limitation. Do not globally disable
+protection; follow the distinction and reporting guidance in [Installation](INSTALLATION.md).

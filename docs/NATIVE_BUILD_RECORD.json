@@ -1,0 +1,203 @@
+{
+  "version": "2.3.1",
+  "refresh_date": "2026-10-29",
+  "author_acceptance": "Author confirmed successful testing of all four final builds and approved publication.",
+  "ubuntu_2204_desktop_test": "22.04-built application tested on Ubuntu 26.04, not a 22.04 desktop.",
+  "signing": "unsigned; macOS ad-hoc only",
+  "builds": [
+    {
+      "target": "windows-x64",
+      "source_commit": "103693e9762563956c46b1322e565219984ead36",
+      "source_ref": "refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "workflow_ref": "p2htf65ggk-bit/maritime-ship-simulator/.github/workflows/native-builds.yml@refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "run_id": "40854925666",
+      "run_attempt": "1",
+      "build_result": "success",
+      "runner_image": "win25-vs2026",
+      "runner_image_version": "20261021.278.1",
+      "system": "Windows",
+      "machine": "AMD64",
+      "platform": "Windows-2025Server-10.0.26100-SP0",
+      "python": "3.13.15",
+      "packages": {
+        "PyInstaller": "6.17.0",
+        "PySide6": "6.11.0",
+        "numpy": "2.5.3",
+        "pyogrio": "0.13.0",
+        "shapely": "2.2.0"
+      },
+      "signing": "unsigned (macOS bundles use ad-hoc signatures)",
+      "release_published": false,
+      "qualification": "Automated build checks only; hardware acceptance remains required.",
+      "artifact_id": 12890040007,
+      "artifact_name": "unsigned-test-windows-x64-40854925666-1",
+      "run_url": "https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666",
+      "v2_tests": {
+        "tests": 1178,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 28
+      },
+      "assets": [
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-windows-portable.zip",
+          "size_bytes": 262500638,
+          "sha256": "0db0e9bf2f13b2ec16feae17585df8a4bc919499fc29797958531bcf7331d99e"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-windows-setup.exe",
+          "size_bytes": 179938263,
+          "sha256": "eb5f90a995e53ccd0b08b1a291c1d5fff112b30ec016360f380424c01ded0073"
+        }
+      ]
+    },
+    {
+      "target": "ubuntu-26.04-amd64",
+      "source_commit": "103693e9762563956c46b1322e565219984ead36",
+      "source_ref": "refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "workflow_ref": "p2htf65ggk-bit/maritime-ship-simulator/.github/workflows/native-builds.yml@refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "run_id": "40854925666",
+      "run_attempt": "1",
+      "build_result": "success",
+      "runner_image": "ubuntu26",
+      "runner_image_version": "20261026.180.1",
+      "system": "Linux",
+      "machine": "x86_64",
+      "platform": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.43",
+      "python": "3.13.15",
+      "packages": {
+        "PyInstaller": "6.17.0",
+        "PySide6": "6.11.0",
+        "numpy": "2.5.3",
+        "pyogrio": "0.13.0",
+        "shapely": "2.2.0"
+      },
+      "signing": "unsigned (macOS bundles use ad-hoc signatures)",
+      "release_published": false,
+      "qualification": "Automated build checks only; hardware acceptance remains required.",
+      "artifact_id": 12889351978,
+      "artifact_name": "unsigned-test-ubuntu-26.04-amd64-40854925666-1",
+      "run_url": "https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666",
+      "v2_tests": {
+        "tests": 1178,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "assets": [
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-installer.deb",
+          "size_bytes": 234540278,
+          "sha256": "1fd410a6f0811eceb058657111b9a8d59a7807172e6767847578d4af995e8304"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-portable.tar.gz",
+          "size_bytes": 297664557,
+          "sha256": "b61bbd8404dce77b53de8c9611e62571ce42482f7d9cc58b525e2fb24ac97dcc"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64.AppImage",
+          "size_bytes": 274909688,
+          "sha256": "836005dc4d8ad2a56907c8d5e9cd528f0019fd6e3bb9f91f97c6df8ca870e533"
+        }
+      ]
+    },
+    {
+      "target": "ubuntu-22.04-amd64",
+      "source_commit": "103693e9762563956c46b1322e565219984ead36",
+      "source_ref": "refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "workflow_ref": "p2htf65ggk-bit/maritime-ship-simulator/.github/workflows/native-builds.yml@refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "run_id": "40854925666",
+      "run_attempt": "1",
+      "build_result": "success",
+      "runner_image": "ubuntu22",
+      "runner_image_version": "20261026.341.1",
+      "system": "Linux",
+      "machine": "x86_64",
+      "platform": "Linux-6.8.0-1070-azure-x86_64-with-glibc2.35",
+      "python": "3.13.15",
+      "packages": {
+        "PyInstaller": "6.17.0",
+        "PySide6": "6.11.0",
+        "numpy": "2.5.3",
+        "pyogrio": "0.13.0",
+        "shapely": "2.2.0"
+      },
+      "signing": "unsigned (macOS bundles use ad-hoc signatures)",
+      "release_published": false,
+      "qualification": "Automated build checks only; hardware acceptance remains required.",
+      "artifact_id": 12888829330,
+      "artifact_name": "unsigned-test-ubuntu-22.04-amd64-40854925666-1",
+      "run_url": "https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40854925666",
+      "v2_tests": {
+        "tests": 1178,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "assets": [
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-22.04-amd64-installer.deb",
+          "size_bytes": 234913522,
+          "sha256": "d717cb4576d92e299184301a783293e4d2272ff4fffdcbebf95603407177a6f1"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-22.04-amd64-portable.tar.gz",
+          "size_bytes": 294776232,
+          "sha256": "d69715470069c28607d6229e56b4b0bf38318d09b16534440cbf2c907557888d"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-ubuntu-22.04-amd64.AppImage",
+          "size_bytes": 272394744,
+          "sha256": "855c70e4f96abb00a0f88dfe19804f7781d220a7d551340ddf24ebab1eb9d90c"
+        }
+      ]
+    },
+    {
+      "target": "macos-arm64",
+      "source_commit": "d5a25d6edd7568418fb71e6fea735fea7f8e6fb8",
+      "source_ref": "refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "workflow_ref": "p2htf65ggk-bit/maritime-ship-simulator/.github/workflows/native-builds.yml@refs/heads/codex/v2.3.1-hud-final-validation-2026-10-29",
+      "run_id": "40857875675",
+      "run_attempt": "1",
+      "build_result": "success",
+      "runner_image": "macos15",
+      "runner_image_version": "20260907.0337.1",
+      "system": "Darwin",
+      "machine": "arm64",
+      "platform": "macOS-15.7.9-arm64-arm-64bit-Mach-O",
+      "python": "3.13.15",
+      "packages": {
+        "PyInstaller": "6.17.0",
+        "PySide6": "6.11.0",
+        "numpy": "2.5.3",
+        "pyogrio": "0.13.0",
+        "shapely": "2.2.0"
+      },
+      "signing": "unsigned (macOS bundles use ad-hoc signatures)",
+      "release_published": false,
+      "qualification": "Automated build checks only; hardware acceptance remains required.",
+      "artifact_id": 12890617128,
+      "artifact_name": "unsigned-test-macos-arm64-40857875675-1",
+      "run_url": "https://github.com/p2htf65ggk-bit/maritime-ship-simulator/actions/runs/40857875675",
+      "v2_tests": {
+        "tests": 1179,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "assets": [
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-macos.dmg",
+          "size_bytes": 240711703,
+          "sha256": "39ad7625649eed772213ca4fc329cfc69c8888c27996a0e41f5725cd1be0d530"
+        },
+        {
+          "filename": "Maritime-Ship-Simulator-V2-2.3.1-macos.zip",
+          "size_bytes": 217492735,
+          "sha256": "0b09e7e07b4c65be518df0d76c9a65f6948c4c0b59d1b35cabccbc07b6a55430"
+        }
+      ]
+    }
+  ]
+}
