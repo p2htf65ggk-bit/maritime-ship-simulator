@@ -1,5 +1,9 @@
 # Release validation 2.3.1
 
+**Historical record:** the new 29 October final-validation rebuild is tracked
+[separately](v2_3d_hud_final_validation_2026-10-29.md). Its native packages still
+require the author's final test; the checks below do not qualify them.
+
 26 October 2026. The author approved this unsigned production release and
 confirmed the same Windows 11 and Ubuntu 26.04.1 LTS build computers used for 2.3.0.
 This record distinguishes automated checks from operator reports.

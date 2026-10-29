@@ -1,5 +1,10 @@
 # Native builds - 2.3.1
 
+The 29 October HUD refresh is being built for final acceptance using the four
+unsigned Actions targets. These run artifacts are not published release assets.
+The final application uses normal V2 operator settings rather than the beta's
+isolated profile. Review startup/output settings and back up configuration.
+
 Use `run_v2.py`, `build_v2.py` and the scripts containing `build-v2-`.
 This snapshot contains no earlier application or release archive. Python 3.12+
 and the pinned `requirements-v2-release.txt` are required; internet or a matching

@@ -671,7 +671,9 @@ if ($SignedRelease) {
     "Maritime Ship Simulator V2 $version",
     "Release type: unsigned production",
     "Embedded credentials: none; provider credentials are supplied by the operator at runtime.",
-    "Platform trust warning: Windows SmartScreen may require explicit user approval."
+    "Platform trust warning: Windows SmartScreen may require explicit user approval.",
+    "Smart App Control can block unsigned setup components or the app (error 4551).",
+    "A clean antivirus scan or the portable ZIP does not override App Control policy."
   ) | Set-Content -Encoding ascii $releaseInfo
 } else {
   @(

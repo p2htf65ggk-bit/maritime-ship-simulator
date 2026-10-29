@@ -9,7 +9,7 @@ from maritime_simulator.visual.geodata import OverpassGeodataProvider
 from maritime_simulator.visual.world import VisualWorldManager
 
 
-def test_hud_test_build_defaults_on_and_allows_original_hud(monkeypatch):
+def test_final_hud_defaults_on_and_allows_original_hud(monkeypatch):
     for page in ("google_maps_3d.html", "cesium.html"):
         monkeypatch.delenv("MARITIME_SIMULATOR_3D_HUD_BETA", raising=False)
         assert QUrlQuery(_renderer_page_url(page)).queryItemValue("hud") == "beta"
@@ -22,9 +22,9 @@ def test_hud_test_build_defaults_on_and_allows_original_hud(monkeypatch):
         assert QUrlQuery(beta).queryItemValue("hud") == "beta"
 
 
-def test_hud_test_build_isolates_operator_settings(monkeypatch, tmp_path):
+def test_final_hud_uses_standard_operator_settings_and_respects_override(monkeypatch, tmp_path):
     monkeypatch.delenv("MARITIME_SIMULATOR_V2_CONFIG_DIR", raising=False)
-    assert user_config_dir().parts[-3:] == ("Ship Simulator", "v2", "hud-beta-1")
+    assert user_config_dir().parts[-2:] == ("Ship Simulator", "v2")
     monkeypatch.setenv("MARITIME_SIMULATOR_V2_CONFIG_DIR", str(tmp_path))
     assert user_config_dir() == tmp_path.resolve()
 

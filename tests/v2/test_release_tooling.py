@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_v2_production_version_and_documentation_are_consistent():
-    assert __version__ == "2.3.1-beta.hud.1"
+    assert __version__ == "2.3.1"
     base_version = __version__.split("-", 1)[0]
     for relative in (
         "README.md",
@@ -36,7 +36,7 @@ def test_v2_production_version_and_documentation_are_consistent():
         assert base_version in (ROOT / relative).read_text(encoding="utf-8"), relative
     about = (ROOT / "src/maritime_simulator/ui/about_dialog.py").read_text(encoding="utf-8")
     assert 'release_label = "Production release"' in about
-    assert "26 October 2026" in about
+    assert "29 October 2026" in about
     release_notes = ROOT / f"docs/v2_release_notes_{__version__}.md"
     assert release_notes.is_file()
     assert __version__ in release_notes.read_text(encoding="utf-8")

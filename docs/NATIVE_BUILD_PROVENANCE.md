@@ -1,5 +1,10 @@
 # Native build provenance 2.3.1
 
+This is the provenance of the previously published downloads. For the new
+29 October HUD rebuild, use the selected Actions run's source SHA, build-info
+report and checksums until [final acceptance](v2_3d_hud_final_validation_2026-10-29.md).
+No tag or previously published file has been replaced by this validation branch.
+
 This release contains independently built unsigned applications. Version 2.3.0
 remains available separately; no 2.3.0 application is renamed as 2.3.1.
 

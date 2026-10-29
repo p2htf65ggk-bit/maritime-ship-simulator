@@ -232,7 +232,10 @@
     const speed = number(own[speedMode]), otherSpeed = number(own[speedMode === "sog" ? "stw" : "sog"]);
     text("betaSpeedValue", decimal(speed === null ? null : Math.abs(speed)));
     text("betaSpeedReference", `${speedMode === "sog" ? "STW" : "SOG"} ${decimal(otherSpeed)} kn`);
-    text("betaSpeedMotion", speed === null ? "--" : Math.abs(speed) < .05 ? "STOP" : speed < 0 ? "ASTERN" : "AHEAD");
+    const motion = speed === null ? "--" : Math.abs(speed) < .05 ? "STOP" : speed < 0 ? "ASTERN" : "AHEAD";
+    text("betaSpeedMotion", motion);
+    document.getElementById("betaSpeedValue").classList.toggle("is-astern", speed !== null && speed < 0);
+    document.getElementById("betaSpeedMotion").classList.toggle("is-astern", motion === "ASTERN");
     speedGauge(speed, number(own.max_speed_kn));
     text("betaDepthValue", decimal(depth)); depthTrace();
     const windSpeed = number(env[windMode === "true" ? "wind_speed_kn" : "apparent_wind_speed_kn"]);

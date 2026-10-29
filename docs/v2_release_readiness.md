@@ -1,5 +1,9 @@
 # Release qualification 2.3.1
 
+**29 October HUD rebuild:** final native acceptance and publication are pending.
+The record below describes the previous published snapshot, not this branch's
+new packages. See [rebuild status](v2_3d_hud_final_validation_2026-10-29.md).
+
 Version 2.3.1 is the author-approved unsigned production release. Windows 11 x64,
 Ubuntu 26.04.1 LTS amd64 and macOS Apple-silicon packages are the identified
 targets. Additional amd64 compatibility packages were built on Ubuntu 22.04,

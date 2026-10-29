@@ -1,5 +1,26 @@
 # Maritime Ship Simulator V2 2.3.1
 
+## Final-Validation Rebuild, 29 October
+
+This branch prepares a refreshed 2.3.1 for the author's final test. It has not
+replaced the existing published files or tag. See the
+[rebuild record](v2_3d_hud_final_validation_2026-10-29.md).
+
+- New default 3D HUD: compact tape, Speed/Depth and true/apparent Wind/Current.
+  AIS hulls, names and vectors remain on-map overlays.
+- Negative selected speed and ASTERN are red; ASTERN and the secondary speed
+  reference have larger bold readouts. AHEAD retains the existing style.
+- FWD elevation is 9 degrees with reduced range. 3D uses -40 degrees bearing,
+  15 degrees elevation and 1.4 times FWD range. CAM starts hidden.
+- HUD elements sit at the top; API/view actions sit at the bottom clear of
+  attribution. About and the in-app guide describe the new layout and controls.
+- Standard V2 configuration storage is restored after the isolated HUD beta.
+  No credentials are included. Windows packages remain unsigned; Smart App
+  Control compatibility is not claimed and its policy is not bypassed.
+
+The original published-release record below is historical context, not native
+acceptance of this refreshed source. Publication awaits the author's approval.
+
 Unsigned production release, 26 October 2026. Windows 11 x64, Ubuntu 26.04.1 LTS
 amd64 and macOS Apple-silicon packages are provided. See the validation and
 native-provenance records for completed checks and qualification limits.

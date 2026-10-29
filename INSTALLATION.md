@@ -1,5 +1,11 @@
 # Installation
 
+This branch is the 29 October final-validation rebuild of 2.3.1, not the
+previously published package snapshot. Its unsigned packages are available only
+as artifacts of the selected Actions run until the author approves publication.
+They use the normal V2 settings folder, not the HUD beta's separate profile;
+back up your current configuration and review output endpoints before starting.
+
 Use the version-specific assets on the project's GitHub Releases page. Do not
 download a build-source archive to install the application. Existing application
 packages include Python and Qt; end users do not need Git, Python, Inno Setup or
@@ -57,6 +63,15 @@ the exact download hash. Do not disable protection or restore it solely because
 this release is unsigned. Report the detection through GitHub and, where
 appropriate, [Microsoft's file-submission portal](https://www.microsoft.com/en-us/wdsi/filesubmission).
 The portable ZIP is not a guaranteed workaround if its application EXE is flagged.
+
+Smart App Control is another, separate Windows check. It can block unsigned
+files with insufficient reputation, including Inno Setup's temporary executable
+and the installed application, even with current Defender definitions and no
+malware detection. Error 4551 means an application-control policy blocked the
+file. A portable ZIP does not establish publisher trust for its executable.
+Record the exact blocked filename and error. These unsigned packages are not
+qualified for use with Smart App Control enabled; do not disable protection or
+create blanket exclusions as an installation requirement.
 
 ## Ubuntu
 

@@ -86,6 +86,44 @@ try {
     await page.locator('[data-speed-mode="stw"]').click();
     if (await page.locator("#betaSpeedValue").textContent() !== "11.8") throw new Error("STW switch failed");
     await page.locator('[data-speed-mode="sog"]').click();
+    const speedStates = await page.evaluate(state => {
+      const results = [];
+      for (const values of [
+        {sog:-12.6,stw:-11.8}, {sog:12.6,stw:-11.8}, {sog:-12.6,stw:11.8},
+        {sog:0,stw:0}, {sog:null,stw:null}, {sog:-.01,stw:0},
+      ]) {
+        window.updateVisualState({...state,own_ship:{...state.own_ship,...values}});
+        for (const mode of ["sog","stw"]) {
+          document.querySelector(`[data-speed-mode="${mode}"]`).click();
+          const value = document.getElementById("betaSpeedValue");
+          const motion = document.getElementById("betaSpeedMotion");
+          const reference = document.getElementById("betaSpeedReference");
+          const directionStyle = getComputedStyle(document.getElementById("betaWindDirection"));
+          const motionStyle = getComputedStyle(motion);
+          const referenceStyle = getComputedStyle(reference);
+          const astern = values[mode] !== null && values[mode] < 0;
+          const underwayAstern = astern && Math.abs(values[mode]) >= .05;
+          const red = "rgb(255, 119, 119)";
+          if ((getComputedStyle(value).color === red) !== astern
+            || (motionStyle.color === red) !== underwayAstern) throw new Error("Speed astern colour or reset failed");
+          if (referenceStyle.fontSize !== directionStyle.fontSize
+            || referenceStyle.fontWeight !== directionStyle.fontWeight) throw new Error("Secondary speed is not as prominent as wind direction");
+          const expectedSize = underwayAstern ? directionStyle.fontSize : getComputedStyle(motion.parentElement).fontSize;
+          if (motionStyle.fontSize !== expectedSize) throw new Error("Only ASTERN should use the larger motion caption");
+          const left = reference.getBoundingClientRect(), right = motion.getBoundingClientRect();
+          const footer = reference.parentElement.getBoundingClientRect();
+          if (left.right + 3 > right.left && Math.min(left.bottom,right.bottom) > Math.max(left.top,right.top)
+            || Math.max(left.right,right.right) > footer.right + .5
+            || footer.bottom > reference.closest("article").getBoundingClientRect().bottom) {
+            throw new Error(`Speed footer clips for ${mode}: ${JSON.stringify(values)}`);
+          }
+          results.push({mode,...values,caption:motion.textContent,reference:reference.textContent});
+        }
+      }
+      window.updateVisualState(state);
+      document.querySelector('[data-speed-mode="sog"]').click();
+      return results;
+    },state);
     await page.locator('[data-wind-mode="apparent"]').click();
     if (await page.locator("#betaWindSpeed").textContent() !== "19.2") throw new Error("Apparent wind switch failed");
     for (const mode of ["true", "apparent"]) {
@@ -166,6 +204,10 @@ try {
     }, remembered);
     if (await page.locator("#cameraControls").isVisible()) throw new Error("Missing CAM preference must default off");
     await page.screenshot({path:path.join(OUTPUT,`hud-beta-${viewport.width}x${viewport.height}.png`)});
+    await page.evaluate(state => {
+      window.updateVisualState({...state,own_ship:{...state.own_ship,sog:-12.6,stw:-11.8}});
+    },state);
+    await page.screenshot({path:path.join(OUTPUT,`hud-beta-astern-${viewport.width}x${viewport.height}.png`)});
     const edgeCases = await page.evaluate(state => {
       window.updateVisualState({...state, simulation_time_s: 0, own_ship: {...state.own_ship, heading:359.96,sog:-4.2,depth_m:12000}});
       const result = {heading:document.getElementById("betaHeadingValue").textContent, motion:document.getElementById("betaSpeedMotion").textContent};
@@ -181,7 +223,7 @@ try {
     if (edgeCases.heading !== "000.0" || edgeCases.motion !== "ASTERN" || edgeCases.missing !== "--") throw new Error(`Invalid values: ${JSON.stringify(edgeCases)}`);
     if (edgeCases.emptyAIS !== null || edgeCases.unchangedDraws !== 0) throw new Error(`Idle HUD or empty AIS failed: ${JSON.stringify(edgeCases)}`);
     if (errors.length) throw new Error(errors.join("; "));
-    results.push({viewport,diagnostics,edgeCases,presets});
+    results.push({viewport,diagnostics,edgeCases,presets,speedStates});
     await page.goto(url);
     if (await page.evaluate(() => Boolean(window.navigationHUDBeta))) throw new Error("Beta leaked into legacy HUD");
     await page.close();

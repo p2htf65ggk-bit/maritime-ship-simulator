@@ -5,6 +5,7 @@
   --hud-ink: #f3f9fc;
   --hud-muted: #c2cdd2;
   --hud-amber: #ffc875;
+  --hud-astern: #ff7777;
   letter-spacing: 0;
 }
 .hud-beta .glass-panel, .hud-beta .beta-instrument {
@@ -90,7 +91,9 @@
 .beta-instrument { position: relative; height: 174px; padding: 11px 12px 8px; overflow: hidden; contain: layout paint; }
 .beta-instrument header { height: 23px; display: flex; align-items: center; justify-content: space-between; gap: 5px; font-size: 10px; font-weight: 700; }
 .beta-instrument footer { display: flex; justify-content: space-between; gap: 4px; font-size: 8px; color: var(--hud-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.hud-beta #betaWindDirection, .hud-beta #betaCurrentDirection { font-size: 11px; font-weight: 700; }
+.hud-beta #betaWindDirection, .hud-beta #betaCurrentDirection,
+.hud-beta #betaSpeedReference, .hud-beta #betaSpeedMotion.is-astern { font-size: 11px; font-weight: 700; }
+.hud-beta #betaSpeedValue.is-astern, .hud-beta #betaSpeedMotion.is-astern { color: var(--hud-astern); }
 .beta-reference { font-size: 8px; color: var(--hud-muted); font-weight: 500; }
 .beta-segmented { display: flex; gap: 2px; pointer-events: auto; }
 .hud-beta .beta-segmented button { min-width: 22px; height: 20px; padding: 0 4px; font-size: 8px; font-weight: 700; }
@@ -134,7 +137,8 @@
   .beta-vector-face .beta-numeric { top: 33px; }
   .beta-vector-face .beta-numeric strong { font-size: 22px; }
   .beta-instrument footer { font-size: 8px; }
-  .hud-beta #betaWindDirection, .hud-beta #betaCurrentDirection { font-size: 10px; }
+  .hud-beta #betaWindDirection, .hud-beta #betaCurrentDirection,
+  .hud-beta #betaSpeedReference, .hud-beta #betaSpeedMotion.is-astern { font-size: 10px; }
   .beta-depth-number { margin-top: 10px; }
   .beta-depth-number strong { font-size: 32px; }
   #betaDepthTrace { height: 39px; margin-bottom: 7px; }
@@ -146,6 +150,9 @@
   .hud-beta #compass { left: 50%; top: 8px; transform: translateX(-50%); width: min(420px, calc(100vw - 16px)); }
   .hud-beta #hud, .hud-beta #targets { top: 90px; width: 126px; gap: 7px; }
   .beta-instrument { height: 94px; padding: 6px 8px; }
+  .beta-speed, .beta-wind { height: 106px; }
+  .beta-speed footer { flex-wrap: wrap; row-gap: 2px; align-items: baseline; }
+  .beta-speed footer #betaSpeedMotion { margin-left: auto; }
   .beta-instrument header { height: 20px; }
   .beta-speed-face, .beta-vector-face { height: 47px; }
   .beta-speed-face canvas, .beta-vector-face canvas { opacity: 0; }

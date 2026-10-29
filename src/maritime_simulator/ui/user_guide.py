@@ -21,6 +21,7 @@ class UserGuideDialog(OpaqueDialog):
         guide.setHtml(
             """
             <h1>Maritime Ship Simulator V2</h1>
+            <p><b>Guide version:</b> 2.3.1, updated 29 October 2026.</p>
             <h2>Bow thruster and external control</h2>
             <p>The horizontal <b>Bow Thruster</b> slider below the telegraph orders port (-) or starboard (+)
             RPM. Double-click for zero. The Bow Thruster instrument uses one horizontal actual-RPM
@@ -374,20 +375,39 @@ class UserGuideDialog(OpaqueDialog):
             a dedicated second monitor.
             It cannot steer or modify the simulation. Own ship and AIS targets are clear, visually extruded
             simulator overlays sized from their physical length and beam. Own ship is cyan; output-active AIS hulls
-            are green and excluded AIS hulls are grey. Heading, a three-minute prediction and nearby-target
-            details remain visible independently of Google's static scenery. Drag to orbit through 360 degrees;
+            are green and excluded AIS hulls are grey. Heading, a three-minute prediction and AIS
+            overlays remain visible independently of Google's static scenery.</p>
+            <h3>3D instruments and controls</h3>
+            <p>The semitransparent heading tape at the top shows HDG, COG and ROT. The left instruments show
+            Speed and Depth; the right instruments show Wind and Current instead of an AIS list.
+            Select <b>SOG</b> or <b>STW</b> for the large speed value; the other reference remains below it.
+            A negative selected speed is red. <b>ASTERN</b> is red and enlarged, while AHEAD and STOP retain
+            their normal style. Depth is below keel (<b>DBK</b>), with a rolling history of received values.
+            Wind <b>T</b> shows true wind FROM in degrees true; <b>A</b> shows apparent wind AWA relative to
+            the bow. Current shows drift speed and SET in degrees true, pointing toward the current's
+            destination. Both direction dials are bow-up. Direction readouts and the secondary speed
+            reference use larger bold text. Compact views simplify the dials and can wrap speed captions
+            without hiding a value.</p>
+            <p><b>HUD</b> toggles the instruments and heading tape. <b>NAMES</b> toggles AIS names only;
+            target hulls and vectors remain visible. View controls and <b>API KEY</b> sit at the bottom,
+            above the map provider's attribution. <b>CAM</b> starts off in a new view and reveals three
+            side-by-side sliders for bearing, elevation and range. Explicitly enabled controls and HUD
+            reference choices survive a renderer reload.</p>
+            <p>Drag to orbit through 360 degrees;
             right-drag, Shift-drag or use a two-finger trackpad scroll to pan without zooming.
             Mouse wheel, pinch or holding both mouse buttons and dragging vertically zooms.
             Browser page zoom is locked to 100 percent so gestures over HUD text still control only the map. Double-click or FWD restores the defined
-            forward view. 3D and TOP provide oblique and near-vertical presets. Bearing, elevation and range
+            forward view. FWD uses 9 degrees elevation and a vessel-dependent range 20 percent closer than
+            the earlier preset. <b>3D</b> uses bearing -40 degrees relative to heading, elevation 15 degrees
+            and 40 percent more range than FWD. <b>TOP</b> provides a near-vertical preset. Bearing, elevation and range
             sliders provide bearing, elevation and zoom without a multitouch device. Simulator symbols are drawn
             in an always-visible overlay above Google geometry, and a network-free sky layer adds subtle static clouds
-            without forcing continuous rendering. NAMES toggles AIS labels while leaving symbols and the HUD list visible.
+            without forcing continuous rendering.
             Loading appears only briefly during initialization or a large relocation.
             The opaque WebGL surface and bounded 30 FPS visual updates reduce Windows compositor flicker and leave
             protocol scheduling on its independent worker.
             A valid Google API key and network connection are required. Use the small API KEY action
-            in the upper-left corner to store the key and choose Auto, Google 3D Maps or Photorealistic Tiles / Cesium.
+            in the lower-left corner to store the key and choose Auto, Google 3D Maps or Photorealistic Tiles / Cesium.
             Auto selects the direct renderer where available and the Maps JavaScript 3D renderer after a confirmed
             regional restriction. Enable Maps JavaScript API for Google 3D Maps and Map Tiles API for Cesium; the
             dialog links to both official setup pages. The key is never bundled or shown in diagnostics. A complete configuration
@@ -423,6 +443,17 @@ class UserGuideDialog(OpaqueDialog):
             starting and provide Retry/Close guidance instead of an unexplained loader error. Use the Ubuntu
             <code>.deb</code> installer for a registered application-menu entry and icon; AppImage and tar.gz are
             portable alternatives.</p>
+            <p><b>Unsigned application security:</b> SmartScreen's unrecognized-app warning, the User Account
+            Control publisher prompt and a Defender malware detection are different checks. Windows
+            <b>Smart App Control</b> can block the installer, its temporary executable or the installed app
+            when publisher trust is insufficient, even after a clean antivirus scan. Error 4551 means
+            an application-control policy blocked execution. The portable ZIP does not avoid that policy
+            for its executable. Do not disable protection or create blanket antivirus exclusions as an
+            installation requirement. Record the blocked filename and exact error; for a malware detection,
+            also record the detection name and verify the download hash before reporting it. Public
+            packages currently remain unsigned and are not guaranteed to run under active Smart App Control.
+            On macOS, follow the operating system's guidance for trusted unsigned apps instead of disabling
+            Gatekeeper globally.</p>
             <h2>Saving and closing</h2>
             <p>Settings can export or load a complete JSON configuration. Complete exports contain configured AIS
             credentials and the Google Map Tiles API key and must be transferred securely. Interactive closing always asks for

@@ -1,8 +1,9 @@
 # Maritime Ship Simulator
 
-> **HUD test branch: 2.3.1-beta.hud.1.** Not a new production release. See
-> [HUD beta test notes](docs/v2_release_notes_2.3.1-beta.hud.1.md) for the preview,
-> separate settings profile and unsigned test-package downloads.
+> **Final 2.3.1 validation rebuild, 29 October 2026.** The updated HUD is enabled
+> by default. Native builds are for the author's final acceptance test, not a new
+> publication. Existing release downloads and tags have not been replaced.
+> See [validation rebuild notes](docs/v2_3d_hud_final_validation_2026-10-29.md).
 
 [Download 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1) |
 [User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf) |
@@ -12,7 +13,7 @@
 [Releases](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases) |
 [Report a bug](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/issues/new/choose)
 
-Current source snapshot: **2.3.1-beta.hud.1**, licensed under the **Mozilla Public License 2.0** for the
+Current source snapshot: **2.3.1**, licensed under the **Mozilla Public License 2.0** for the
 project's original code. Third-party software and chart data retain their own
 licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 

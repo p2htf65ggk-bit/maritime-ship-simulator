@@ -30,5 +30,4 @@ def user_config_dir() -> Path:
         base = Path.home() / "Library" / "Application Support"
     else:
         base = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config"))
-    # This test branch must not overwrite the installed stable operator profile.
-    return base / "Ship Simulator" / "v2" / "hud-beta-1"
+    return base / "Ship Simulator" / "v2"
