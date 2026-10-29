@@ -268,14 +268,17 @@ def test_encounter_dialog_suggests_semantically_valid_overtaking_speeds():
     dialog.deleteLater()
 
 
-def test_synthetic_creation_waits_nonmodally_for_water_then_adds_exactly_once(monkeypatch):
-    from PySide6.QtTest import QTest
+@pytest.mark.parametrize("retry_interval_ms", [150, 450])
+def test_synthetic_creation_waits_nonmodally_for_water_then_adds_exactly_once(monkeypatch, retry_interval_ms):
+    from PySide6.QtTest import QSignalSpy, QTest
     app()
     service = SimulatorService()
     readiness = [None]
     repository = AISRepository(water_checker=lambda *_args: readiness[0])
     repository.use_synthetic(service.snapshot())
     panel = SyntheticTrafficPanel(repository, service.snapshot)
+    panel.creation_timer.setInterval(retry_interval_ms)
+    timer_events = QSignalSpy(panel.creation_timer.timeout)
     warnings = []
     monkeypatch.setattr(live_ais_ui, 'show_warning', lambda *args: warnings.append(args))
     try:
@@ -285,12 +288,14 @@ def test_synthetic_creation_waits_nonmodally_for_water_then_adds_exactly_once(mo
         assert panel.creation_timer.isActive()
         assert not warnings
         readiness[0] = True
-        QTest.qWait(200)
+        # Wait for the real retry event, including a delay beyond the old 200 ms sleep.
+        assert timer_events.wait(2000), "Pending target retry timer did not fire"
         assert len(repository.synthetic_targets()) == 1
         assert not panel._pending_creations
         assert not panel.creation_timer.isActive()
-        QTest.qWait(200)
+        QTest.qWait(retry_interval_ms * 2)
         assert len(repository.synthetic_targets()) == 1
+        assert timer_events.count() == 1
         assert not warnings
     finally:
         panel.creation_timer.stop()

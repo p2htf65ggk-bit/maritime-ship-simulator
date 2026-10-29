@@ -35,6 +35,17 @@ working on all four targets. Final native acceptance of this rebuild is pending.
 Historical release records in VALIDATION.md and NATIVE_BUILD_PROVENANCE.md still
 describe previously published downloads unless explicitly marked otherwise.
 
+The initial final-validation run `40854925666` completed Windows and both Ubuntu
+jobs successfully. Its macOS source gate stopped at a timer-dependent synthetic
+AIS UI test: a fixed 200 ms sleep did not observe the pending retry in time.
+The follow-up changes only that test and this record, not application code or
+packaging scripts. The test now observes the real Qt timer signal with a bounded
+deadline, tests 150/450 ms intervals and still requires exactly one target,
+an empty pending queue, a stopped timer and no later duplicate timer event.
+macOS is rebuilt separately; the already successful Windows/Ubuntu packages
+remain the final acceptance packages for those platforms. Use each run's exact
+source SHA and checksums rather than assuming all packages share one commit.
+
 ## Final Operator Check
 
 Before dispatch, the final branch passed 1,175 V2 tests locally on macOS in
