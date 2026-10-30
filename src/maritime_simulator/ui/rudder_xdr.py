@@ -33,7 +33,8 @@ class RudderXdrEditor(QWidget):
         form.addRow("PORT ID (optional)", self.port_id)
         root.addLayout(form)
         hint = QLabel("Positive = starboard; negative = port. D uses degrees; P uses -100 to +100% of the "
-                      "selected vessel's maximum rudder angle. For dual rudders, both IDs must be in the same sentence.")
+                      "selected vessel's maximum rudder angle. G with a null (empty) Unit uses the same percent range. "
+                      "For dual rudders, both IDs must be in the same sentence.")
         hint.setWordWrap(True)
         hint.setObjectName("secondaryText")
         root.addWidget(hint)
@@ -48,7 +49,8 @@ class RudderXdrEditor(QWidget):
         with QSignalBlocker(self.unit):
             self.unit.clear()
             for value in XDR_RUDDER_UNITS[self.type.currentData()]:
-                self.unit.addItem("D - Degrees" if value == "D" else "P - Percent of full range", value)
+                labels = {"D": "D - Degrees", "P": "P - Percent of full range", "": "(null field) - Percent of full range"}
+                self.unit.addItem(labels[value], value)
             self.unit.setCurrentIndex(max(0, self.unit.findData(previous)))
 
     def _type_changed(self):

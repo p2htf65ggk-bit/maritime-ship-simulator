@@ -4,7 +4,7 @@ Start with local simulation, then add external equipment or online services.
 No Google API key or Internet connection is needed for the first five steps.
 
 1. Install the matching [unsigned package](../INSTALLATION.md). Start the
-   application and check **About** for version **2.3.1**. Existing installations
+   application and check **About** for version **2.3.2** in the new test packages. Existing installations
    retain their user settings; review these before connecting a receiver.
 2. Open **Settings > Start-up** and review the saved defaults. Do not enable
    automatic output to a real equipment network until its destination is known.
@@ -82,7 +82,7 @@ To stop sending data, disable the output endpoint or stop the simulation.
 - **Configuration export:** keep a reproducible test setup, but treat the file
   as sensitive when it contains provider credentials.
 
-The [illustrated User Guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf)
+The [illustrated User Guide](manual/Maritime_Ship_Simulator_User_Guide_2.3.2.pdf)
 covers modes, menus, context actions, offline maps and troubleshooting.
 Support is best effort. For a problem report, include OS/version, application
 version, steps to reproduce and a redacted diagnostic log. Never include keys,

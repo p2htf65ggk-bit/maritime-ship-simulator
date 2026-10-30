@@ -1,5 +1,18 @@
 # Releases
 
+## 2.3.2 Preparation
+
+- Generic XDR control input accepts an explicitly selected empty Unit field,
+  in addition to G/P and A/P. The range is -100 to +100 percent inclusive.
+- Bow Thruster, Engine Telegraph and Rudder XDR Order/Response use consistent
+  dropdowns, validation, percentage conversion and configuration/Start-up storage.
+- Empty measurements, malformed groups, duplicate IDs, non-finite values and
+  out-of-range commands remain rejected. Existing default/saved filters are retained.
+- Regression coverage includes real local UDP/TCP input and settings round trips.
+
+Unsigned native builds and operator acceptance are pending. No 2.3.2 release has
+been published. See [changes and checks](docs/v2_release_notes_2.3.2.md).
+
 ## 2.3.1
 
 - Refreshed on 29 October 2026 after author testing of all four native builds.

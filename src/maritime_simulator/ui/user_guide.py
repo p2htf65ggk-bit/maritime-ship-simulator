@@ -21,7 +21,7 @@ class UserGuideDialog(OpaqueDialog):
         guide.setHtml(
             """
             <h1>Maritime Ship Simulator V2</h1>
-            <p><b>Guide version:</b> 2.3.1, updated 29 October 2026.</p>
+            <p><b>Guide version:</b> 2.3.2, updated 30 October 2026.</p>
             <h2>Bow thruster and external control</h2>
             <p>The horizontal <b>Bow Thruster</b> slider below the telegraph orders port (-) or starboard (+)
             RPM. Double-click for zero. The Bow Thruster instrument uses one horizontal actual-RPM
@@ -39,8 +39,10 @@ class UserGuideDialog(OpaqueDialog):
             Main can be Manual; external main and fallback must differ. Each protocol has UDP/TCP/Serial
             settings. TRC uses thruster 1 RPM demand (P = percent, R = RPM); PRC uses engine 1
             lever demand with valid status A. XDR matches Type/Unit/ID exactly: A/P by default, with
-            G/P available for legacy inputs; IDs are BowThrust#0 or EngTele#0. Type and Unit use
+            G/P and G with a null (empty) Unit available for compatibility; IDs are BowThrust#0 or EngTele#0. Type and Unit use
             restricted dropdowns. Commands are -100 to +100%; positive means starboard/ahead.
+            Select Unit <b>(null field)</b> for a payload such as <code>G,40,,BowThrust#0</code>.
+            The empty unit is not the text null; an empty measurement is not a zero command.
             External commands visibly move disabled controls. After 2.5 seconds without valid main input,
             fallback takes over. If neither is current, Manual unlocks control (rudder/bow start at zero,
             engine holds its last order); Freeze holds the last command or measured response; Zero orders
@@ -199,7 +201,7 @@ class UserGuideDialog(OpaqueDialog):
             <i>Inbound Straight</i> and <i>Planned Turn</i>.</p>
             <p><b>External Rudder</b> accepts ROR or XDR Order before the steering gear, and RSA or
             XDR Response as measured rudder response. Rudder XDR defaults to A/D for degrees; A/P and legacy
-            G/P map -100 to +100% to the vessel's maximum rudder angle. IDs default to RudderOrder#0 and
+            G/P, or G with a null (empty) Unit, map -100 to +100% to the vessel's maximum rudder angle. IDs default to RudderOrder#0 and
             Rudder#0. An optional PORT ID requires both values in the same valid sentence. Main/fallback and
             Manual/Freeze/Zero apply as described above. PORT and STBD always come from one complete source.
             UDP, TCP or Serial listeners start automatically. Input indications are green through five seconds,

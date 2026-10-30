@@ -1,4 +1,11 @@
-# Release qualification 2.3.1
+# Release qualification 2.3.2
+
+**30 October XDR correction:** source preparation for 2.3.2. The empty Unit
+selection for G is covered by parser, transport, UI and persistence regressions.
+New unsigned native builds and final operator acceptance are pending. The public
+2.3.1 release is not changed by this preparation. See [current notes](v2_release_notes_2.3.2.md).
+
+## Published 2.3.1 Baseline
 
 **29 October HUD refresh:** all four selected builds were author-tested and
 approved for publication. Windows and both Ubuntu builds use `103693e`; macOS

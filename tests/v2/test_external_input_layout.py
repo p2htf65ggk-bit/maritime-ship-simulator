@@ -100,3 +100,23 @@ def test_endpoint_tabs_fit_visible_page_without_empty_space():
         page.close()
         page.deleteLater()
         app.processEvents()
+
+
+def test_rudder_xdr_null_unit_roundtrips_and_is_available_only_for_generic():
+    app = QApplication.instance() or QApplication([])
+    editor = RudderXdrEditor()
+    try:
+        settings = RudderXdrSettings(xdr_type="G", xdr_unit="", port_id="Port#0")
+        editor.load(settings)
+        assert editor.type.currentData() == "G"
+        assert [editor.unit.itemData(i) for i in range(editor.unit.count())] == ["P", ""]
+        assert editor.unit.currentData() == ""
+        assert "null field" in editor.unit.currentText()
+        assert editor.values()["xdr_unit"] == ""
+        assert editor.values()["port_id"] == "Port#0"
+        editor.type.setCurrentIndex(editor.type.findData("A"))
+        assert [editor.unit.itemData(i) for i in range(editor.unit.count())] == ["D", "P"]
+        assert editor.values()["xdr_unit"] == "D"
+    finally:
+        editor.deleteLater()
+        app.processEvents()

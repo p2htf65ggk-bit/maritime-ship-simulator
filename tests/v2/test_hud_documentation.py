@@ -16,9 +16,9 @@ def test_about_identifies_final_hud_and_unsigned_limits():
     dialog = AboutV2Dialog(lambda: None)
     try:
         labels = [label.text() for label in dialog.findChildren(QLabel)]
-        assert "Production release 2.3.1" in labels
+        assert "Production release 2.3.2" in labels
         text = dialog.findChild(QTextBrowser).toPlainText()
-        for marker in ("29 October 2026", "heading tape", "set/drift", "Smart App Control"):
+        for marker in ("30 October 2026", "heading tape", "set/drift", "Smart App Control", "Generic XDR input"):
             assert marker in text
     finally:
         dialog.close()
@@ -31,7 +31,8 @@ def test_in_app_guide_matches_final_hud_and_api_location():
     try:
         text = " ".join(dialog.findChild(QTextBrowser).toPlainText().split())
         for marker in (
-            "2.3.1, updated 29 October 2026", "3D instruments and controls",
+            "2.3.2, updated 30 October 2026", "3D instruments and controls",
+            "G,40,,BowThrust#0", "empty measurement is not a zero command",
             "ASTERN is red and enlarged", "relative to the bow", "SET in degrees true",
             "CAM starts off", "9 degrees elevation", "bearing -40 degrees",
             "lower-left corner", "Error 4551", "portable ZIP does not avoid",

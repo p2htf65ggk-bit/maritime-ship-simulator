@@ -118,10 +118,10 @@ def test_external_input_tabs_units_and_configuration_startup_roundtrip(tmp_path)
         window.input_runtime.stop()
         window.input_runtime.update(
             input_type="PRIO_XDR_ORDER_RSA", on_loss="FREEZE",
-            xdr_order={"xdr_type": "G", "xdr_unit": "P", "xdr_id": "Steering#7", "port_id": "Steering#8"},
-            xdr_response={"xdr_type": "G", "xdr_unit": "P", "xdr_id": "Actual#7", "port_id": "Actual#8"},
-            bow_thruster={"policy": "PRIO_TRC_XDR", "on_loss": "FREEZE", "xdr_id": "Bow#7", "xdr_type": "G"},
-            engine={"policy": "XDR", "on_loss": "ZERO"},
+            xdr_order={"xdr_type": "G", "xdr_unit": "", "xdr_id": "Steering#7", "port_id": "Steering#8"},
+            xdr_response={"xdr_type": "G", "xdr_unit": "", "xdr_id": "Actual#7", "port_id": "Actual#8"},
+            bow_thruster={"policy": "PRIO_TRC_XDR", "on_loss": "FREEZE", "xdr_id": "Bow#7", "xdr_type": "G", "xdr_unit": ""},
+            engine={"policy": "XDR", "on_loss": "ZERO", "xdr_type": "G", "xdr_unit": ""},
         )
         window.service.submit(SetControlMode(ControlMode.SHIP))
         window.service.submit(ExternalActuatorOrder("bow_thruster", "TRC", 27, window.service._monotonic()))
@@ -137,6 +137,9 @@ def test_external_input_tabs_units_and_configuration_startup_roundtrip(tmp_path)
             assert saved_profile[key] == fixed_profile[key] == value
         assert fixed["bow_thruster"]["xdr_id"] == "Bow#7"
         assert fixed["bow_thruster"]["xdr_type"] == "G"
+        assert all(fixed[axis]["xdr_unit"] == "" for axis in ("xdr_order", "xdr_response", "bow_thruster", "engine"))
+        restored = window.input_runtime._load()
+        assert all(getattr(restored, axis).xdr_unit == "" for axis in ("xdr_order", "xdr_response", "bow_thruster", "engine"))
         assert fixed["bow_thruster"]["on_loss"] == "FREEZE"
         assert fixed["on_loss"] == "FREEZE"
         assert fixed["xdr_order"]["port_id"] == "Steering#8"
@@ -147,7 +150,7 @@ def test_external_input_tabs_units_and_configuration_startup_roundtrip(tmp_path)
         assert window.input_runtime.settings.engine.policy == "XDR"
         assert window.input_runtime.settings.bow_thruster.xdr_type == "G"
         assert window.input_runtime.settings.input_type == "PRIO_XDR_ORDER_RSA"
-        assert window.input_runtime.settings.xdr_order.xdr_unit == "P"
+        assert all(getattr(window.input_runtime.settings, axis).xdr_unit == "" for axis in ("xdr_order", "xdr_response", "bow_thruster", "engine"))
         assert window.input_runtime.settings.xdr_order.xdr_id == "Steering#7"
         assert window.input_runtime.settings.on_loss == "FREEZE"
         assert window.input_runtime.settings.xdr_response.xdr_id == "Actual#7"
@@ -156,6 +159,11 @@ def test_external_input_tabs_units_and_configuration_startup_roundtrip(tmp_path)
         dialog._load_input_fields()
         bow_panel = dialog.actuator_input_panels["bow_thruster"]
         assert bow_panel.xdr_fields["xdr_type"].currentData() == "G"
+        for actuator in ("bow_thruster", "engine"):
+            units = dialog.actuator_input_panels[actuator].xdr_fields["xdr_unit"]
+            assert [units.itemData(i) for i in range(units.count())] == ["P", ""]
+            assert units.currentData() == ""
+            assert "null field" in units.currentText()
         bow_panel.xdr_fields["xdr_type"].setCurrentIndex(0)
         assert window.input_runtime.settings.bow_thruster.xdr_type == "A"
         bow_panel.xdr_fields["xdr_type"].setCurrentIndex(1)

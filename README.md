@@ -1,19 +1,20 @@
 # Maritime Ship Simulator
 
-**2.3.1 refreshed on 29 October 2026.** The new 3D instrument HUD is enabled
-by default. All four native builds were tested and approved by the author.
-See the [build and validation record](docs/NATIVE_BUILD_PROVENANCE.md) for exact
-package revisions, checks and qualification limits.
+**2.3.2 is being prepared.** This source adds Generic XDR input with an empty
+Unit field for rudder order/response, bow thruster and engine telegraph.
+The signed range remains -100 to +100 percent. Native acceptance is pending;
+the latest published stable downloads remain 2.3.1.
+See the [2.3.2 preparation record](docs/v2_release_notes_2.3.2.md).
 
 [Download 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1) |
-[User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.pdf) |
-[User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.1.docx) |
+[User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.2.pdf) |
+[User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.2.docx) |
 [Installation](INSTALLATION.md) |
 [First start](docs/FIRST_START.md) |
 [Releases](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases) |
 [Report a bug](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/issues/new/choose)
 
-Current source snapshot: **2.3.1**, licensed under the **Mozilla Public License 2.0** for the
+Current source snapshot: **2.3.2**, licensed under the **Mozilla Public License 2.0** for the
 project's original code. Third-party software and chart data retain their own
 licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
@@ -47,7 +48,17 @@ Packages are **unsigned**. Read the [installation notes](INSTALLATION.md) and
 verify `SHA256SUMS` from the release. The User Guide is available as PDF and Word.
 No Google/AIS keys or personal operator configuration are included.
 
-### New in 2.3.1
+### New in 2.3.2
+
+- External XDR input now accepts Type G with Unit `(null field)`, interpreted
+  as signed percent from -100 to +100 inclusive. Choose that Unit explicitly;
+  Type, Unit and ID matching stays exact.
+- Applies to bow thruster, engine telegraph and rudder order/response. Rudder
+  percentages use the selected vessel's maximum angle. A/D, A/P and G/P are unchanged.
+- Empty units survive configuration and Start-up round trips. Empty measurements,
+  non-finite numbers and values outside the signed range are not control commands.
+
+### Included From 2.3.1
 
 - A compact translucent 3D HUD combines the heading tape with Speed, Depth,
   true/apparent Wind and Current instruments. AIS hulls, names and vectors stay
@@ -124,8 +135,8 @@ Provider attribution is retained in the images. S57 portrayal is experimental.
 The public project is maintained by **Pascal Göllnitz**. Version labels are not
 a claim of exhaustive platform/hardware qualification; see
 [validation](docs/VALIDATION.md) and the release notes.
-This source tree is **2.3.1**, extending the public baseline with chart-based depth
-and online environmental sources.
+This source tree is **2.3.2**, extending 2.3.1 with Generic XDR null-unit control
+input. The published 2.3.1 source and packages remain separately identified.
 Installers and portable packages are attached to
 [release 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1).
 The binary downloads cover Windows x64, macOS Apple silicon and

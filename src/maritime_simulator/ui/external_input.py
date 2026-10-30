@@ -72,7 +72,7 @@ class ActuatorInputPanel(QWidget):
                     self.xdr_fields[key] = field
                     options.addRow(label, field)
                 self._update_xdr_units()
-                text = "Matches Type, Unit and ID exactly. A/P is the default; G/P remains supported for legacy inputs. Value must be -100 to +100%; positive = " + (
+                text = "Matches Type, Unit and ID exactly. A/P is the default; G/P and G with a null (empty) Unit are supported. Both use -100 to +100% of full range; positive = " + (
                     "bow to starboard." if actuator == "bow_thruster" else "ahead.")
             layout.addLayout(options)
             hint = QLabel(text)
@@ -149,7 +149,7 @@ class ActuatorInputPanel(QWidget):
         with QSignalBlocker(unit_field):
             unit_field.clear()
             for value in XDR_PERCENT_UNITS.get(self.xdr_fields["xdr_type"].currentData(), ()):
-                unit_field.addItem("P - Percent of full range", value)
+                unit_field.addItem("P - Percent of full range" if value == "P" else "(null field) - Percent of full range", value)
             unit_field.setCurrentIndex(max(0, unit_field.findData(previous)))
 
     def _xdr_type_changed(self, *_args):

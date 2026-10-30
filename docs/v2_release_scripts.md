@@ -1,4 +1,9 @@
-# Native builds - 2.3.1
+# Native builds - 2.3.2
+
+The 2.3.2 preparation uses the same four unsigned native targets. Build and
+acceptance status is tracked in [the current release notes](v2_release_notes_2.3.2.md).
+The 2.3.1 package/provenance paragraphs below describe the published baseline,
+not completed 2.3.2 builds. No release is published by the Actions workflow.
 
 The 29 October HUD refresh uses four unsigned Actions targets. The author has
 tested and approved the selected builds; published packages and exact source

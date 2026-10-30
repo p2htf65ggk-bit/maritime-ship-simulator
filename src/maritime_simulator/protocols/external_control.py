@@ -7,16 +7,15 @@ import re
 from .iec61162 import DecodedSentence, IEC61162Error
 
 
-XDR_PERCENT_UNITS = {"A": ("P",), "G": ("P",)}
-XDR_RUDDER_UNITS = {"A": ("D", "P"), "G": ("P",)}
+XDR_PERCENT_UNITS = {"A": ("P",), "G": ("P", "")}
+XDR_RUDDER_UNITS = {"A": ("D", "P"), "G": ("P", "")}
 
 
 def validate_xdr_filter(type_code: str, unit: str, identifier: str) -> None:
-    for label, value in (("Type", type_code), ("Unit", unit)):
-        if not isinstance(value, str) or re.fullmatch(r"[A-Z]", value) is None:
-            raise ValueError(f"XDR {label} must be one uppercase letter")
-    if unit not in XDR_PERCENT_UNITS.get(type_code, ()):
-        raise ValueError("External XDR controls support only A/P or G/P (-100 to +100 percent)")
+    if not isinstance(type_code, str) or re.fullmatch(r"[A-Z]", type_code) is None:
+        raise ValueError("XDR Type must be one uppercase letter")
+    if not isinstance(unit, str) or unit not in XDR_PERCENT_UNITS.get(type_code, ()):
+        raise ValueError("External XDR controls support only A/P, G/P or G/(null field) (-100 to +100 percent)")
     _validate_identifier(identifier)
 
 
@@ -27,7 +26,7 @@ def _validate_identifier(identifier: str) -> None:
 
 def validate_rudder_xdr_filter(type_code: str, unit: str, identifier: str, port_id: str = "") -> None:
     if not isinstance(type_code, str) or not isinstance(unit, str) or unit not in XDR_RUDDER_UNITS.get(type_code, ()):
-        raise ValueError("Rudder XDR supports A/D (degrees), A/P or G/P (percent)")
+        raise ValueError("Rudder XDR supports A/D (degrees), A/P, G/P or G/(null field) (percent)")
     _validate_identifier(identifier)
     if port_id:
         _validate_identifier(port_id)
@@ -62,7 +61,7 @@ def decode_xdr_rudder(sentence: DecodedSentence, *, type_code: str, unit: str,
         raise IEC61162Error("Rudder angle range must be finite and positive")
     if any(abs(value) > limit for value in matching.values()):
         raise IEC61162Error("XDR rudder value exceeds the configured angle/percent range")
-    scale = max_rudder_deg / 100.0 if unit == "P" else 1.0
+    scale = 1.0 if unit == "D" else max_rudder_deg / 100.0
     return matching[identifier] * scale, matching[port_id] * scale if port_id else None
 
 

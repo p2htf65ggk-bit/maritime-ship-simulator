@@ -1,6 +1,6 @@
 # Maritime Ship Simulator V2 User Guide
 
-This guide describes V2 `2.3.1`. It includes chart-based depth, online wind and current, tunnel bow-thruster control and independent external inputs, offline area downloads, the optional 3D Navigation View, Synthetic Traffic encounter setup and event-driven serial IEC input.
+This guide describes V2 `2.3.2`. It includes Generic XDR control inputs with an empty Unit, chart-based depth, online wind and current, tunnel bow-thruster control and independent external inputs, offline area downloads, the optional 3D Navigation View, Synthetic Traffic encounter setup and event-driven serial IEC input.
 
 ## Chart-Based Depth
 
@@ -114,11 +114,14 @@ freshness timeout. Inputs continue to be monitored when Manual is selected.
   positive is ahead. Intermediate orders remain continuous. The percentage maps
   to telegraph lever position through its existing detents, not maximum-speed percentage.
 - XDR: exact Type/Unit/ID match, default A/P and BowThrust#0 or EngTele#0;
-  legacy G/P remains selectable. Restricted Type/Unit dropdowns offer only
-  supported percent inputs (-100 to +100%). Saved G/P filters are preserved.
+  legacy G/P and G with a null (empty) Unit remain selectable. Restricted Type/Unit
+  dropdowns offer only supported percent inputs (-100 to +100%). A null Unit is
+  an empty field between commas, not the text `null`. It uses the same signed
+  percent mapping as P. Type/Unit/ID matching stays exact, so choose `(null field)`
+  explicitly for such a sender. Saved empty units and G/P filters are preserved.
   Other measurements in the same sentence are ignored. Advanced output can
-  generate both A/P and G/P test messages.
-- Rudder XDR Order/Response: A/D carries degrees by default; A/P or legacy G/P
+  generate A/P, G/P and G/null-unit test messages.
+- Rudder XDR Order/Response: A/D carries degrees by default; A/P, legacy G/P or G/null Unit
   carries signed percent, mapped to the selected vessel's maximum rudder angle.
   IDs default to RudderOrder#0 and Rudder#0. An optional PORT ID enables dual
   rudder input; both values must occur together in one valid sentence.

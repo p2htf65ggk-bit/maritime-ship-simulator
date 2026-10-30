@@ -46,12 +46,32 @@ def test_supported_xdr_percent_formats_and_boundaries(type_code, value):
     assert _decode(f"GPXDR,{other},{value},P,BowThrust#0", xdr_type=type_code) is None
 
 
-@pytest.mark.parametrize("type_code,unit", [("A", "D"), ("C", "C"), ("H", "P"), ("T", "R"), ("G", ""), ("G", "C")])
+@pytest.mark.parametrize("value", [-100, -45.5, 0, 100])
+@pytest.mark.parametrize("actuator,identifier", [("bow_thruster", "BowThrust#0"), ("engine", "EngTele#0")])
+def test_generic_xdr_null_unit_is_explicit_percent_input(value, actuator, identifier):
+    validate_xdr_filter("G", "", identifier)
+    assert _decode(f"GPXDR,G,{value},,{identifier}", actuator, xdr_type="G", xdr_unit="", xdr_id=identifier) == value
+    assert _decode(f"GPXDR,G,{value},P,{identifier}", actuator, xdr_type="G", xdr_unit="", xdr_id=identifier) is None
+    assert _decode(f"GPXDR,G,{value},,{identifier}", actuator, xdr_type="G", xdr_unit="P", xdr_id=identifier) is None
+
+
+@pytest.mark.parametrize("raw", ["", "nan", "inf", "-inf", "null", "-100.001", "100.001"])
+def test_generic_xdr_null_unit_rejects_invalid_numeric_values(raw):
+    with pytest.raises(IEC61162Error):
+        _decode(f"GPXDR,G,{raw},,BowThrust#0", xdr_type="G", xdr_unit="")
+
+
+def test_generic_xdr_null_unit_rejects_duplicate_or_incomplete_groups():
+    for payload in ("GPXDR,G,10,,BowThrust#0,G,20,,BowThrust#0", "GPXDR,G,10,,BowThrust#0,G,20"):
+        with pytest.raises(IEC61162Error):
+            _decode(payload, xdr_type="G", xdr_unit="")
+
+
+@pytest.mark.parametrize("type_code,unit", [("A", "D"), ("A", ""), ("C", "C"), ("H", "P"), ("T", "R"), ("G", "C"), ("G", "null"), ("G", None)])
 def test_external_xdr_filters_reject_units_without_percent_conversion(type_code, unit):
-    message = "only A/P or G/P" if unit else "Unit must be one uppercase letter"
-    with pytest.raises(ValueError, match=message):
+    with pytest.raises(ValueError):
         validate_xdr_filter(type_code, unit, "BowThrust#0")
-    with pytest.raises(IEC61162Error, match=message):
+    with pytest.raises(IEC61162Error):
         _decode(f"GPXDR,{type_code},12,{unit},BowThrust#0", xdr_type=type_code, xdr_unit=unit)
 
 
@@ -226,8 +246,8 @@ def test_runtime_settings_and_received_values_roundtrip(tmp_path):
 
 @pytest.mark.parametrize("transport,start_delay_s", [("UDP", 0), ("UDP", .15), ("TCP", 0)],
                          ids=["UDP", "UDP-delayed-start", "TCP"])
-@pytest.mark.parametrize("xdr_type", ["A", "G"])
-def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, transport, start_delay_s, xdr_type, monkeypatch):
+@pytest.mark.parametrize("xdr_type,xdr_unit", [("A", "P"), ("G", "P"), ("G", "")])
+def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, transport, start_delay_s, xdr_type, xdr_unit, monkeypatch):
     from PySide6.QtWidgets import QApplication
     from PySide6.QtTest import QTest
     from maritime_simulator.ui.input_runtime import InputRuntime
@@ -256,12 +276,12 @@ def test_shared_endpoint_receives_each_axis_and_matches_each_xdr_id(tmp_path, tr
     try:
         runtime.update(ror=endpoint, rsa=endpoint,
                        xdr_order={"endpoint": endpoint}, xdr_response={"endpoint": endpoint},
-                       bow_thruster={"policy": "XDR", "xdr_type": xdr_type, "primary": endpoint, "xdr": endpoint},
-                       engine={"policy": "XDR", "xdr_type": xdr_type, "primary": endpoint, "xdr": endpoint})
+                       bow_thruster={"policy": "XDR", "xdr_type": xdr_type, "xdr_unit": xdr_unit, "primary": endpoint, "xdr": endpoint},
+                       engine={"policy": "XDR", "xdr_type": xdr_type, "xdr_unit": xdr_unit, "primary": endpoint, "xdr": endpoint})
         runtime.start()
         assert len(runtime._manager._sources) == 1
         service.submit(SetControlMode(ControlMode.SHIP))
-        frame = IEC61162Codec.frame(f"GPXDR,{xdr_type},40,P,BowThrust#0,{xdr_type},-20,P,EngTele#0") + "\r\n"
+        frame = IEC61162Codec.frame(f"GPXDR,{xdr_type},40,{xdr_unit},BowThrust#0,{xdr_type},-20,{xdr_unit},EngTele#0") + "\r\n"
         if transport == "UDP":
             # Worker creation is not UDP readiness; send only after bind succeeds.
             deadline = time.monotonic() + 2
@@ -312,7 +332,8 @@ def test_engine_lever_mapping_matches_existing_detents_and_roundtrips():
     ("bow_thruster", "TRC", "HCTRC,1,50,P,0,P,,B,R", "HCTRC,1,,V,0,P,,B,R", "BowThrust#0"),
     ("engine", "PRC", "GPPRC,25,A,0,P,0,P,B,1", "GPPRC,,V,0,P,0,P,B,1", "EngTele#0"),
 ])
-def test_actuator_indications_use_same_age_and_empty_states_as_rudder(tmp_path, actuator, primary, valid, empty, identifier):
+@pytest.mark.parametrize("xdr_type,xdr_unit", [("A", "P"), ("G", "")])
+def test_actuator_indications_use_same_age_and_empty_states_as_rudder(tmp_path, actuator, primary, valid, empty, identifier, xdr_type, xdr_unit):
     from PySide6.QtWidgets import QApplication
     from maritime_simulator.ui.input_runtime import InputRuntime
     from maritime_simulator.ui.external_input import ActuatorInputPanel
@@ -323,6 +344,7 @@ def test_actuator_indications_use_same_age_and_empty_states_as_rudder(tmp_path, 
     runtime = InputRuntime(service, tmp_path / "input.json", monotonic=lambda: now[0])
     runtime._health_timer.stop()
     runtime.stop()
+    runtime.update(**{actuator: {"xdr_type": xdr_type, "xdr_unit": xdr_unit}})
     panel = ActuatorInputPanel(runtime, actuator, lambda: None, lambda: None)
     try:
         assert all(item.state == "alarm" for item in runtime.actuator_channel_statuses(actuator))
@@ -340,12 +362,12 @@ def test_actuator_indications_use_same_age_and_empty_states_as_rudder(tmp_path, 
         panel.refresh()
         assert panel.input_lamps[primary].property("signalState") == "empty"
         assert "field empty" in panel.input_lamps[primary].toolTip()
-        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame(f"GPXDR,A,12,P,{identifier}"))
+        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame(f"GPXDR,{xdr_type},12,{xdr_unit},{identifier}"))
         panel.refresh()
         assert panel.input_lamps["XDR"].property("signalState") == "ok"
-        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame("GPXDR,A,,P,Wrong#0"))
+        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame(f"GPXDR,{xdr_type},,{xdr_unit},Wrong#0"))
         assert runtime.actuator_channel_statuses(actuator)[1].state == "ok"
-        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame(f"GPXDR,A,,P,{identifier}"))
+        runtime._on_sentence(f"external-{actuator}-xdr", IEC61162Codec.frame(f"GPXDR,{xdr_type},,{xdr_unit},{identifier}"))
         panel.refresh()
         assert panel.input_lamps["XDR"].property("signalState") == "empty"
         now[0] = 136

@@ -120,7 +120,7 @@ def test_propulsion_loss_modes_and_manual_lock(actuator, protocol, loss):
         service.close()
 
 
-@pytest.mark.parametrize("type_code,unit,value,expected", [("A", "D", 10, 10), ("A", "P", -50, -17.5), ("G", "P", 100, 35)])
+@pytest.mark.parametrize("type_code,unit,value,expected", [("A", "D", 10, 10), ("A", "P", -50, -17.5), ("G", "P", 100, 35), ("G", "", 50, 17.5), ("G", "", -100, -35)])
 def test_rudder_xdr_uses_explicit_units_and_coherent_dual_groups(type_code, unit, value, expected):
     sentence = IEC61162Codec.decode(IEC61162Codec.frame(
         f"GPXDR,C,12,C,Air#0,{type_code},{value},{unit},Order#0,{type_code},{-value},{unit},Order#1"))
@@ -136,6 +136,16 @@ def test_bad_rudder_xdr_is_rejected(payload):
     with pytest.raises((ValueError, IEC61162Error)):
         decode_xdr_rudder(IEC61162Codec.decode(IEC61162Codec.frame(payload)),
                          type_code="A", unit="D", identifier="Rudder#0", max_rudder_deg=35)
+
+
+@pytest.mark.parametrize("payload", [
+    "GPXDR,G,nan,,Rudder#0", "GPXDR,G,inf,,Rudder#0", "GPXDR,G,-100.001,,Rudder#0", "GPXDR,G,100.001,,Rudder#0",
+    "GPXDR,G,10,,Rudder#0,G,20,,Rudder#0", "GPXDR,G,10,,Rudder#0,G,20", "GPXDR,G,,,Rudder#0",
+])
+def test_bad_generic_null_unit_rudder_input_is_rejected(payload):
+    with pytest.raises(IEC61162Error):
+        decode_xdr_rudder(IEC61162Codec.decode(IEC61162Codec.frame(payload)),
+                         type_code="G", unit="", identifier="Rudder#0", max_rudder_deg=35)
 
 
 def test_shared_rudder_xdr_runtime_and_settings_roundtrip(tmp_path):
@@ -213,8 +223,9 @@ def test_freeze_ignores_unselected_response_reports():
 
 
 @pytest.mark.parametrize("transport", ["UDP", "TCP"])
+@pytest.mark.parametrize("xdr_type,xdr_unit,value", [("A", "D", -12), ("G", "", -50)])
 @pytest.mark.parametrize("protocol,identifier", [("XDR_ORDER", "RudderOrder#0"), ("XDR_RESPONSE", "Rudder#0")])
-def test_rudder_xdr_over_real_transport(tmp_path, transport, protocol, identifier):
+def test_rudder_xdr_over_real_transport(tmp_path, transport, protocol, identifier, xdr_type, xdr_unit, value):
     from PySide6.QtTest import QTest
 
     app = QApplication.instance() or QApplication([])
@@ -229,12 +240,13 @@ def test_rudder_xdr_over_real_transport(tmp_path, transport, protocol, identifie
     endpoint = {"transport": transport, "host": "127.0.0.1", "port": port}
     try:
         runtime.update(input_type=protocol, ror=endpoint, rsa=endpoint,
-                       xdr_order={"endpoint": endpoint}, xdr_response={"endpoint": endpoint},
+                       xdr_order={"endpoint": endpoint, "xdr_type": xdr_type, "xdr_unit": xdr_unit},
+                       xdr_response={"endpoint": endpoint, "xdr_type": xdr_type, "xdr_unit": xdr_unit},
                        bow_thruster={"primary": endpoint, "xdr": endpoint},
                        engine={"primary": endpoint, "xdr": endpoint})
         runtime.start()
         service.submit(SetControlMode(ControlMode.EXTERNAL_RUDDER))
-        frame = (IEC61162Codec.frame(f"GPXDR,A,-12,D,{identifier}") + "\r\n").encode("ascii")
+        frame = (IEC61162Codec.frame(f"GPXDR,{xdr_type},{value},{xdr_unit},{identifier}") + "\r\n").encode("ascii")
         if transport == "UDP":
             deadline = time.monotonic() + 2
             while not any(status.connected for status in runtime.statuses()) and time.monotonic() < deadline:
@@ -261,8 +273,10 @@ def test_rudder_xdr_over_real_transport(tmp_path, transport, protocol, identifie
         service.advance_wall_time(.1)
         snapshot = service.snapshot()
         assert snapshot.external_rudder_active_source == protocol
+        profile = service.profiles.get(snapshot.vessel_profile_id)
+        expected = value if xdr_unit == "D" else value / 100 * profile.max_rudder_deg
         assert (snapshot.rudder_order_starboard_deg if protocol == "XDR_ORDER"
-                else snapshot.rudder_response_starboard_deg) == -12
+                else snapshot.rudder_response_starboard_deg) == expected
     finally:
         if connection is not None:
             connection.close()
