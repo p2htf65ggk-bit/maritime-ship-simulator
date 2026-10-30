@@ -52,6 +52,10 @@ No steering, propulsion dynamics, provider keys, network endpoint defaults,
 The expanded Windows/macOS first-start help from the 2.3.1 documentation refresh
 is also part of this source and will be embedded in new builds.
 
+Ubuntu CI now uses the official stable appimagetool 1.9.1 artifact, pinned by
+asset ID and SHA256, because the previous continuous artifact was deleted
+upstream. Failed tool verification still stops the build.
+
 All builds remain unsigned; Smart App Control can still block them. No credentials,
 operator settings, chart databases or equipment-specific integration documentation
 are included. Original project code remains MPL 2.0. For simulation, testing and

@@ -26,11 +26,16 @@ hardware serial, native GPU and long real-time acceptance remain separate.
 
 ## Native Targets
 
-The existing unsigned Actions workflow is used unchanged for Windows x64,
+The unsigned Actions workflow is used for Windows x64,
 macOS Apple silicon, Ubuntu 26.04 amd64 and Ubuntu 22.04 amd64. It runs native
 prebuild gates, packages and startup checks, then uploads test artifacts and logs.
 It does not publish a GitHub release. Exact run/revision records are kept with
 the local 2.3.2 handoff after dispatch.
+
+The first run exposed a deleted upstream continuous AppImage tool asset (HTTP
+404), before either Ubuntu application build started. The workflow now pins the
+official stable appimagetool 1.9.1 asset and its SHA256 instead. The strict hash
+check remains mandatory; application/runtime behavior is unaffected.
 
 Ubuntu 22.04 is a build/ABI baseline; a desktop test on another Ubuntu version
 does not count as a 22.04 desktop test. Packages remain unsigned and may be

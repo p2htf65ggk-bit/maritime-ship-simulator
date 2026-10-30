@@ -33,6 +33,10 @@ def test_native_workflow_has_four_explicit_unsigned_targets_and_no_publication()
     assert "gh release" not in workflow
     assert "VersionInfo.FileVersion" not in workflow
     assert "Compiler engine version 6" in workflow
+    assert "stable 1.9.1 asset" in workflow
+    assert "releases/assets/324406736" in workflow
+    assert "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0" in workflow
+    assert "sha256sum --check --strict" in workflow
     for action in re.findall(r"uses: (\S+)", workflow):
         assert re.fullmatch(r"actions/[a-z-]+@[0-9a-f]{40}", action)
 

@@ -9,6 +9,8 @@
 - Empty measurements, malformed groups, duplicate IDs, non-finite values and
   out-of-range commands remain rejected. Existing default/saved filters are retained.
 - Regression coverage includes real local UDP/TCP input and settings round trips.
+- Ubuntu CI pins stable appimagetool 1.9.1 with SHA256 verification instead of
+  a deleted continuous-release artifact.
 
 Unsigned native builds and operator acceptance are pending. No 2.3.2 release has
 been published. See [changes and checks](docs/v2_release_notes_2.3.2.md).
