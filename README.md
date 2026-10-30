@@ -1,12 +1,12 @@
 # Maritime Ship Simulator
 
-**2.3.2 is being prepared.** This source adds Generic XDR input with an empty
+**2.3.2 is the latest stable release.** This version adds Generic XDR input with an empty
 Unit field for rudder order/response, bow thruster and engine telegraph.
-The signed range remains -100 to +100 percent. Native acceptance is pending;
-the latest published stable downloads remain 2.3.1.
-See the [2.3.2 preparation record](docs/v2_release_notes_2.3.2.md).
+The signed range remains -100 to +100 percent. All four native runner builds passed;
+the author reports that the application works. See the
+[2.3.2 release notes](docs/v2_release_notes_2.3.2.md) and [validation limits](docs/VALIDATION.md).
 
-[Download 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1) |
+[Download 2.3.2](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.2) |
 [User Guide (PDF)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.2.pdf) |
 [User Guide (Word)](docs/manual/Maritime_Ship_Simulator_User_Guide_2.3.2.docx) |
 [Installation](INSTALLATION.md) |
@@ -33,8 +33,8 @@ a safety-critical source of vessel, traffic, chart or collision information.**
 
 ## Downloads
 
-Version **2.3.1** is the latest stable release. Get application installers from
-the [release page](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1),
+Version **2.3.2** is the latest stable release. Get application installers from
+the [release page](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.2),
 not GitHub's green Code button. End users do not need Python or build tools.
 
 | Platform | Application packages | Compatibility notes |
@@ -47,6 +47,11 @@ not GitHub's green Code button. End users do not need Python or build tools.
 Packages are **unsigned**. Read the [installation notes](INSTALLATION.md) and
 verify `SHA256SUMS` from the release. The User Guide is available as PDF and Word.
 No Google/AIS keys or personal operator configuration are included.
+
+Microsoft completed its review of the exact 2.3.2 Windows application EXE on
+30 October 2026 with final determination **Not malware** and reported that the
+detection was removed. This is not a code signature or a guarantee that SmartScreen
+or Smart App Control will accept unsigned files. See [Windows installation](INSTALLATION.md#windows).
 
 ### New in 2.3.2
 
@@ -138,7 +143,7 @@ a claim of exhaustive platform/hardware qualification; see
 This source tree is **2.3.2**, extending 2.3.1 with Generic XDR null-unit control
 input. The published 2.3.1 source and packages remain separately identified.
 Installers and portable packages are attached to
-[release 2.3.1](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.1).
+[release 2.3.2](https://github.com/p2htf65ggk-bit/maritime-ship-simulator/releases/tag/v2.3.2).
 The binary downloads cover Windows x64, macOS Apple silicon and
 **Ubuntu 26.04 LTS amd64**. The refreshed **Ubuntu 22.04 compatibility packages**
 passed the full automated build gates and
@@ -151,10 +156,10 @@ For application downloads rather than development, see
 [Installation](INSTALLATION.md), [known limitations](KNOWN_LIMITATIONS.md) and
 [release licensing](docs/RELEASE_LICENSING.md). The
 [native build record](docs/NATIVE_BUILD_PROVENANCE.md) identifies the sources
-for each package. Windows and both Ubuntu builds share one source revision;
-the macOS retry adds only a timer-test correction and its validation record.
-The published source also contains later documentation-only changes; the tested
-native packages were not rebuilt just to expand their embedded help text.
+for each package. All four 2.3.2 targets use the same source revision, `a66a1e6`.
+macOS passed on a retry with unchanged source and thresholds after one performance
+timing failure. The published source contains later documentation-only changes;
+the tested native packages remain unchanged.
 Native checks are described with their limits;
 older private packages are not substitutes for these identified builds.
 

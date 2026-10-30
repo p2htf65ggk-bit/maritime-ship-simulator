@@ -54,8 +54,8 @@
 
 ## Publication and platform tests
 
-The refreshed 2.3.1 packages passed their selected native runner jobs and the
-author confirmed successful testing of all four builds. This is not a claim
+The 2.3.2 packages passed all four native runner jobs and the author reports
+working native builds. This is not a claim
 that every device and scenario was tested. Static file checks on macOS cannot
 replace target-specific graphics, serial or extended-running checks.
 Read the actual release's validation results and per-platform source mapping.

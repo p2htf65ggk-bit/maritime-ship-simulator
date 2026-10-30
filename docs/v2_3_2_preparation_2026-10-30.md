@@ -1,8 +1,11 @@
 # 2.3.2 Source And Native Build Preparation
 
+Historical preparation record. The completed build, review and publication
+results are recorded in [validation](VALIDATION.md) and [provenance](NATIVE_BUILD_PROVENANCE.md).
+
 Prepared 30 October 2026 from the published 2.3.1 source at
 `726c69c20346962c300db802ea4328acb5aa7cd2`. No public release or tag is created by
-this preparation; 2.3.1 stays published and unchanged.
+this initial preparation; 2.3.1 stays published and unchanged alongside 2.3.2.
 
 The change is limited to Generic XDR null-unit control compatibility, its UI,
 documentation, regression tests and version metadata. Unit remains an explicit

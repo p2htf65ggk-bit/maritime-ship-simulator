@@ -1,7 +1,8 @@
 # Installation
 
-The refreshed 2.3.1 packages were tested and approved by the author on
-29 October 2026. They use the normal V2 settings folder, not the HUD beta's separate profile;
+The 2.3.2 packages passed all four native runner jobs; the author reports working
+native builds. See [validation](docs/VALIDATION.md) for the checks and limits.
+They use the normal V2 settings folder, not the HUD beta's separate profile;
 back up your current configuration and review output endpoints before starting.
 
 Use the version-specific assets on the project's GitHub Releases page. Do not
@@ -39,15 +40,24 @@ or incomplete file, not a trusted developer signature. Check the download source
 as well. Substitute the actual filename, including version and compatibility label.
 
 ```powershell
-Get-FileHash .\Maritime-Ship-Simulator-V2-2.3.1-windows-setup.exe -Algorithm SHA256
+Get-FileHash .\Maritime-Ship-Simulator-V2-2.3.2-windows-setup.exe -Algorithm SHA256
 ```
 
 ```bash
-shasum -a 256 Maritime-Ship-Simulator-V2-2.3.1-macos.dmg
-sha256sum Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-installer.deb
+shasum -a 256 Maritime-Ship-Simulator-V2-2.3.2-macos.dmg
+sha256sum Maritime-Ship-Simulator-V2-2.3.2-ubuntu-26.04-amd64-installer.deb
 ```
 
 ## Windows
+
+Microsoft Security Intelligence completed its final review on 30 October 2026:
+**Not malware**; the analyst reported the detection removed. The reviewed
+`Ship Simulator V2.exe` has SHA256
+`d1d87b7504268843224391d032434bd8ce6c7837defeeca6b9b8f5c9447e2cfe`.
+This exact executable is distributed unchanged. Update Defender's security
+intelligence before retrying a previously detected file. This finding applies
+to this file, not to every dependency, future build or application-control policy.
+It does not remove the unsigned-package limitations described below.
 
 Close existing instances, run the setup EXE or extract the portable ZIP to a
 writable directory, then start the application and check About. The packages
@@ -102,13 +112,13 @@ contain the same application, and none removes the need for system libraries.
 Install the DEB using APT so its declared dependencies can be resolved:
 
 ```bash
-sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-26.04-amd64-installer.deb
+sudo apt install ./Maritime-Ship-Simulator-V2-2.3.2-ubuntu-26.04-amd64-installer.deb
 ```
 
 For the 22.04 compatibility DEB instead:
 
 ```bash
-sudo apt install ./Maritime-Ship-Simulator-V2-2.3.1-ubuntu-22.04-amd64-installer.deb
+sudo apt install ./Maritime-Ship-Simulator-V2-2.3.2-ubuntu-22.04-amd64-installer.deb
 ```
 
 `GLIBC_2.38 not found` or a similar GLIBC version error indicates a platform
@@ -164,7 +174,7 @@ Grant local-network access when needed for configured network inputs/outputs.
 ## Existing settings and first start
 
 Close the previous version and back up user configuration before upgrading.
-Install/extract 2.3.1, check About, and review outputs before connecting equipment.
+Install/extract 2.3.2, check About, and review outputs before connecting equipment.
 The existing user-data location is retained. Older configurations without the
 new environment selectors remain Manual; online sources are opt-in. Configuration
 exports can contain provider keys, including an entered Open-Meteo customer key.

@@ -1,9 +1,11 @@
 # Release qualification 2.3.2
 
-**30 October XDR correction:** source preparation for 2.3.2. The empty Unit
-selection for G is covered by parser, transport, UI and persistence regressions.
-New unsigned native builds and final operator acceptance are pending. The public
-2.3.1 release is not changed by this preparation. See [current notes](v2_release_notes_2.3.2.md).
+**30 October XDR correction:** all four unsigned native builds passed. The empty
+Unit selection for G is covered by parser, transport, UI and persistence tests.
+The author reports working builds. Microsoft's completed final review found the
+exact Windows EXE Not malware and removed the detection. The 2.3.1 release is
+preserved. See [current notes](v2_release_notes_2.3.2.md),
+[validation](VALIDATION.md) and [provenance](NATIVE_BUILD_PROVENANCE.md).
 
 ## Published 2.3.1 Baseline
 
@@ -11,8 +13,8 @@ New unsigned native builds and final operator acceptance are pending. The public
 approved for publication. Windows and both Ubuntu builds use `103693e`; macOS
 uses `d5a25d6`, which adds only a timer-test correction and its validation record.
 The publication adds documentation-only updates and fresh 3D screenshots.
-Tested native packages are unchanged. See [current validation](VALIDATION.md)
-and [exact provenance](NATIVE_BUILD_PROVENANCE.md).
+Tested native packages are unchanged. See [2.3.1 validation](VALIDATION_2.3.1.md)
+and [2.3.1 provenance](NATIVE_BUILD_PROVENANCE_2.3.1.md).
 
 The following is the historical qualification summary of the earlier snapshot.
 
@@ -27,7 +29,7 @@ deterministic performance/retained-memory gate. Returned native packages passed
 hash, version, credential and dependency-notice checks. The author reports
 successful Windows/Ubuntu builds; macOS also passed native packaged smokes.
 
-See the [validation record](VALIDATION.md), [native build provenance](NATIVE_BUILD_PROVENANCE.md)
+See the [validation record](VALIDATION_2.3.1.md), [native build provenance](NATIVE_BUILD_PROVENANCE_2.3.1.md)
 and [2.3.1 changes](v2_release_notes_2.3.1.md). These results do not certify real
 navigation, every native GPU/input/serial configuration or multi-hour stability.
 S57 portrayal remains experimental. Provider/data terms apply separately.

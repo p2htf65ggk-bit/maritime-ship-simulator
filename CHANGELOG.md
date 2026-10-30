@@ -1,6 +1,6 @@
 # Releases
 
-## 2.3.2 Preparation
+## 2.3.2
 
 - Generic XDR control input accepts an explicitly selected empty Unit field,
   in addition to G/P and A/P. The range is -100 to +100 percent inclusive.
@@ -12,8 +12,9 @@
 - Ubuntu CI pins stable appimagetool 1.9.1 with SHA256 verification instead of
   a deleted continuous-release artifact.
 
-Unsigned native builds and operator acceptance are pending. No 2.3.2 release has
-been published. See [changes and checks](docs/v2_release_notes_2.3.2.md).
+All four unsigned native builds passed their runner gates. The author reports
+working builds. Microsoft completed the exact Windows EXE review as Not malware
+and removed the detection. See [changes and checks](docs/v2_release_notes_2.3.2.md).
 
 ## 2.3.1
 

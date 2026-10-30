@@ -4,7 +4,7 @@ Start with local simulation, then add external equipment or online services.
 No Google API key or Internet connection is needed for the first five steps.
 
 1. Install the matching [unsigned package](../INSTALLATION.md). Start the
-   application and check **About** for version **2.3.2** in the new test packages. Existing installations
+   application and check **About** for version **2.3.2**. Existing installations
    retain their user settings; review these before connecting a receiver.
 2. Open **Settings > Start-up** and review the saved defaults. Do not enable
    automatic output to a real equipment network until its destination is known.

@@ -1,13 +1,9 @@
 # Native builds - 2.3.2
 
-The 2.3.2 preparation uses the same four unsigned native targets. Build and
-acceptance status is tracked in [the current release notes](v2_release_notes_2.3.2.md).
-The 2.3.1 package/provenance paragraphs below describe the published baseline,
-not completed 2.3.2 builds. No release is published by the Actions workflow.
-
-The 29 October HUD refresh uses four unsigned Actions targets. The author has
-tested and approved the selected builds; published packages and exact source
-revisions are identified in [native provenance](NATIVE_BUILD_PROVENANCE.md).
+All four 2.3.2 unsigned Actions targets completed successfully. Packages and exact
+source revisions are identified in [native provenance](NATIVE_BUILD_PROVENANCE.md)
+and [validation](VALIDATION.md). No release is published by the Actions workflow;
+publication is a separate approval and verified-upload step.
 The final application uses normal V2 operator settings rather than the beta's
 isolated profile. Review startup/output settings and back up configuration.
 
@@ -78,10 +74,10 @@ network/DNS problem. Noninteractive builds fail early with manual instructions
 unless package installation was explicitly approved. These are build-time
 requirements; application users do not need curl, pip or Python venv tooling.
 
-The refreshed 2.3.1 Linux packages were built on Ubuntu 26.04 and 22.04 GitHub
+The 2.3.2 Linux packages were built on Ubuntu 26.04 and 22.04 GitHub
 runners and retain baseline labels in their filenames. The author uses Ubuntu
 26.04.1 for desktop testing; no 22.04 desktop acceptance is claimed. These
-packages replace the earlier 2.3.1 downloads. See [provenance](NATIVE_BUILD_PROVENANCE.md).
+packages are versioned separately from 2.3.1. See [provenance](NATIVE_BUILD_PROVENANCE.md).
 Debian prerelease versions preserve a
 literal `~` separator across Bash versions; do not work around failed tests.
 

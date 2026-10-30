@@ -34,7 +34,7 @@ completed compliance review. See
 `THIRD_PARTY_NOTICES.md` and the version-specific publication audit.
 
 The separate upstream-source downloads must remain available with the native
-downloads. 2.3.1 links the unchanged matching library-source assets retained in
+downloads. 2.3.1 and 2.3.2 link the unchanged matching library-source assets retained in
 release 2.3.0; `LICENSES/upstream-sources.json` intentionally identifies that shared
 source set. Verify each platform's inventory against these sources;
 one platform's notice collection is not evidence about another platform's wheels.
